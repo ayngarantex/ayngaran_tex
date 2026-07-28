@@ -1,4 +1,5 @@
 import ProductCatalog from '@/app/ui/products/ProductCatalog';
+import { getProducts } from '@/server/repositories/productRepositories';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,51 +8,12 @@ export const metadata = {
   description: 'Explore the premium collection of pure traditional borders, dhotis, and towel from Ayngaran Tex.',
 };
 
-async function getAllProducts() {
-  const url = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`;
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-          query GetProducts {
-            products(limit: 1000) {
-              Id
-              Name
-              HSNCode
-              Type
-              Image
-              Tags
-              Description
-              Details
-              Size
-              Composition
-              WashCare
-              AvailableStock
-              SoldCount
-            }
-          }
-        `
-      }),
-      next: { revalidate: 0 }
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch products: HTTP error', response.status);
-      return [];
-    }
-
-    const result = await response.json();
-
-    return result?.data?.products || [];
-  } catch (err) {
-    console.error('Error in getAllProducts fetch:', err);
-    return [];
-  }
-}
-
 export default async function Page() {
-  const allProducts = await getAllProducts();
+  let allProducts: any[] = [];
+  try {
+    allProducts = await getProducts(null, 1, 1000);
+  } catch (err) {
+    console.error('Error fetching products for homepage:', err);
+  }
   return <ProductCatalog initialProducts={allProducts} />;
 }
