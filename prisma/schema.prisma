@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model customers {
+  CustomerId            Int                     @id @default(autoincrement())
+  CustomerName          String?                 @db.VarChar(45)
+  GstNumber             String?                 @db.VarChar(45)
+  Address               String?                 @db.Text
+  Address2              String?                 @db.Text
+  State                 String?                 @db.VarChar(45)
+  Phone                 String?                 @db.VarChar(45)
+  Mobile                String?                 @db.VarChar(45)
+  Agent                 String?                 @db.VarChar(45)
+  customer_product_code customer_product_code[]
+  invoice               invoice[]
+}
+
+model invoice {
+  InvoiceId              Int                      @id @unique(map: "InvoiceId_UNIQUE") @default(autoincrement())
+  InvoiceNumber          String?                  @db.VarChar(45)
+  InvoiceDate            DateTime?                @db.Date
+  InvoiceType            String?                  @db.VarChar(45)
+  CustomerId             Int?
+  BeforeTax              Float?                   @db.Float
+  BillType               String?                  @db.VarChar(10)
+  TaxPercentage          Float?                   @db.Float
+  Cgst                   Float?                   @db.Float
+  Sgst                   Float?                   @db.Float
+  Igst                   Float?                   @db.Float
+  AfterTax               Float?                   @db.Float
+  RoundOff               String?                  @db.VarChar(10)
+  Discount               String?                  @db.VarChar(10)
+  InvoiceAmount          Float?                   @db.Float
+  ReceivedAmount         Int?
+  EwayBillNumber         String?                  @db.VarChar(45)
+  IsCancel               Int?
+  CancelReason           String?                  @db.VarChar(255)
+  customers              customers?               @relation(fields: [CustomerId], references: [CustomerId], onDelete: NoAction, onUpdate: NoAction, map: "CustomerId")
+  invoice_details        invoice_details[]
+  invoice_return_details invoice_return_details[]
+  payment_details        payment_details[]
+
+  @@index([CustomerId], map: "CustomerId_idx")
+}
+
+model invoice_details {
+  InvoiceDetailId Int      @id @default(autoincrement())
+  InvoiceId       Int
+  ItemId          Int
+  ProductName     String?  @db.VarChar(100)
+  Price           Float    @db.Float
+  Quantity        Int
+  Total           Float    @db.Float
+  Type            String?  @db.VarChar(15)
+  QuantityType    String?  @db.VarChar(45)
+  invoice         invoice  @relation(fields: [InvoiceId], references: [InvoiceId], onDelete: NoAction, onUpdate: NoAction, map: "InvoiceId")
+  products        products @relation(fields: [ItemId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "invoice_details_product_id")
+
+  @@index([InvoiceId], map: "InvoiceId_idx")
+  @@index([ItemId], map: "ItemId_idx")
+}
+
+model payment_details {
+  Id         Int       @id @default(autoincrement())
+  InvoiceId  Int?
+  Date       DateTime? @db.Date
+  Amount     String?   @db.VarChar(45)
+  Type       String?   @db.VarChar(45)
+  ReceivedBy String?   @db.VarChar(45)
+  invoice    invoice?  @relation(fields: [InvoiceId], references: [InvoiceId], onDelete: NoAction, onUpdate: NoAction, map: "PaymentInvoiceId")
+
+  @@index([InvoiceId], map: "InvoiceId_idx")
+}
+
+model products {
+  Id                    Int                     @id @default(autoincrement())
+  Name                  String?                 @db.VarChar(45)
+  Type                  String?                 @db.VarChar(45)
+  HSNCode               String?                 @db.VarChar(45)
+  Image                 String?                 @db.Text
+  Tags                  String?                 @db.VarChar(255)
+  Description           String?                 @db.Text
+  Details               String?                 @db.Text
+  Size                  String?                 @db.VarChar(255)
+  Composition           String?                 @db.VarChar(255)
+  WashCare              String?                 @db.VarChar(255)
+  customer_product_code customer_product_code[]
+  invoice_details       invoice_details[]
+  product_stocks        product_stocks[]
+}
+
+model yarns {
+  YarnId               Int                    @id @unique(map: "Id_UNIQUE") @default(autoincrement())
+  SupplierId           Int?
+  InvoiceNumber        String?                @db.VarChar(45)
+  InvoiceDate          DateTime?              @db.Date
+  BeforeTax            Float?                 @db.Float
+  BillType             String?                @db.VarChar(10)
+  TaxPercentage        Float?                 @db.Float
+  Cgst                 Float?                 @db.Float
+  Sgst                 Float?                 @db.Float
+  Igst                 Float?                 @db.Float
+  AfterTax             Float?                 @db.Float
+  RoundOff             String?                @db.VarChar(10)
+  InvoiceAmount        Float?                 @db.Float
+  PaidAmount           Float?                 @db.Float
+  yarn_details         yarn_details[]
+  yarn_payment_details yarn_payment_details[]
+  suppliers            suppliers?             @relation(fields: [SupplierId], references: [SupplierId], onDelete: NoAction, onUpdate: NoAction, map: "SupplierId")
+
+  @@index([SupplierId], map: "SupplierId_idx")
+}
+
+model suppliers {
+  SupplierId    Int      @id @unique(map: "SupplierId_UNIQUE") @default(autoincrement())
+  Name          String?  @db.VarChar(45)
+  GstNumber     String?  @db.VarChar(45)
+  Address       String?  @db.LongText
+  State         String?  @db.VarChar(45)
+  Phone         String?  @db.VarChar(45)
+  Mobile        String?  @db.VarChar(45)
+  Agent         String?  @db.VarChar(45)
+  AccountNumber String?  @db.VarChar(45)
+  Bank          String?  @db.VarChar(45)
+  IfscCode      String?  @db.VarChar(45)
+  Type          String?  @db.VarChar(45)
+  sizing        sizing[]
+  yarns         yarns[]
+}
+
+model yarn_details {
+  YarnDetailId Int     @id @unique(map: "YarnDetailId_UNIQUE") @default(autoincrement())
+  YarnId       Int?
+  Count        String? @db.VarChar(15)
+  Color        String? @db.VarChar(20)
+  Varient      String? @db.VarChar(20)
+  Bag          String? @db.VarChar(10)
+  Quantity     Int?
+  Price        Float?  @db.Float
+  Total        Float?  @db.Float
+  yarns        yarns?  @relation(fields: [YarnId], references: [YarnId], onDelete: NoAction, onUpdate: NoAction, map: "YarnProductId")
+
+  @@index([YarnId], map: "YarnProductId_idx")
+}
+
+model yarn_payment_details {
+  Id         Int       @id @default(autoincrement())
+  YarnId     Int?
+  Date       DateTime? @db.Date
+  Amount     String?   @db.VarChar(45)
+  Type       String?   @db.VarChar(45)
+  ReceivedBy String?   @db.VarChar(45)
+  yarns      yarns?    @relation(fields: [YarnId], references: [YarnId], onDelete: NoAction, onUpdate: NoAction, map: "YarnPaymentId")
+
+  @@index([YarnId], map: "YarnPaymentId_idx")
+}
+
+model sizing {
+  SizingId               Int                      @id @unique(map: "SizingId_UNIQUE") @default(autoincrement())
+  InvoiceNumber          String?                  @db.VarChar(45)
+  InvoiceDate            DateTime?                @db.Date
+  WarpType               String?                  @db.VarChar(45)
+  SupplierId             Int?
+  YarnId                 Int?
+  Color                  String?                  @db.VarChar(20)
+  YarnSent               Float?                   @db.Float
+  YarnUsed               Float?                   @db.Float
+  YarnBalance            Float?                   @db.Float
+  Meters                 Float?                   @db.Float
+  Price                  String?                  @db.VarChar(45)
+  BeforeTax              Float?                   @db.Float
+  BillType               String?                  @db.VarChar(15)
+  TaxPercentage          Float?                   @db.Float
+  Cgst                   Float?                   @db.Float
+  Sgst                   Float?                   @db.Float
+  Igst                   Float?                   @db.Float
+  AfterTax               Float?                   @db.Float
+  RoundOff               String?                  @db.VarChar(10)
+  InvoiceAmount          Float?                   @db.Float
+  ReceivedAmount         Int?
+  suppliers              suppliers?               @relation(fields: [SupplierId], references: [SupplierId], onDelete: NoAction, onUpdate: NoAction, map: "sizing_supplier_id")
+  sizing_payment_details sizing_payment_details[]
+  sizing_warp_details    sizing_warp_details[]
+  sizing_yarn_details    sizing_yarn_details[]
+
+  @@index([SupplierId], map: "sizing_supplier_id_idx")
+}
+
+model sizing_payment_details {
+  Id         Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement())
+  SizingId   Int?
+  Date       DateTime? @db.Date
+  Amount     String?   @db.VarChar(45)
+  Type       String?   @db.VarChar(45)
+  ReceivedBy String?   @db.VarChar(45)
+  sizing     sizing?   @relation(fields: [SizingId], references: [SizingId], onDelete: NoAction, onUpdate: NoAction, map: "sizingId")
+
+  @@index([SizingId], map: "sizingId_idx")
+}
+
+model sizing_warp_details {
+  WarpId          Int               @id @unique(map: "WarpId_UNIQUE") @default(autoincrement())
+  SizingId        Int?
+  Color           String?           @db.VarChar(45)
+  Meters          Int?
+  Weight          Float?            @db.Float
+  Price           Float?            @db.Float
+  LoomId          Int?
+  LoomName        String?           @db.VarChar(200)
+  LoomNumber      String?           @db.VarChar(5)
+  StartDate       DateTime?         @db.Date
+  CompletedDate   DateTime?         @db.Date
+  DeliveredDate   DateTime?         @db.Date
+  sizing          sizing?           @relation(fields: [SizingId], references: [SizingId], onDelete: NoAction, onUpdate: NoAction, map: "SizingIdKey")
+  warp_dc_details warp_dc_details[]
+
+  @@index([SizingId], map: "SizingIdKey_idx")
+}
+
+model sizing_yarn_details {
+  SizingyarnId Int     @id @unique(map: "SizingyarnId_UNIQUE") @default(autoincrement())
+  SizingId     Int?
+  Color        String? @db.VarChar(45)
+  YarnSent     Float?  @db.Float
+  YarnUsed     Float?  @db.Float
+  YarnBalance  Float?  @db.Float
+  sizing       sizing? @relation(fields: [SizingId], references: [SizingId], onDelete: NoAction, onUpdate: NoAction, map: "SizingYarn")
+
+  @@index([SizingId], map: "SizingYarn_idx")
+}
+
+model warp_dc_details {
+  DcId                Int                  @id @unique(map: "DcId_UNIQUE") @default(autoincrement())
+  WarpId              Int?
+  Dc                  Int?
+  Date                DateTime?            @db.Date
+  Piece               Int?
+  Count               Int?
+  Color               String?              @db.VarChar(45)
+  Weight              String?              @db.VarChar(45)
+  LoomId              Int?
+  sizing_warp_details sizing_warp_details? @relation(fields: [WarpId], references: [WarpId], onDelete: NoAction, onUpdate: NoAction, map: "warpId")
+
+  @@index([WarpId], map: "warpId_idx")
+}
+
+model expenses {
+  ExpenseId Int       @id @unique(map: "ExpenseId_UNIQUE") @default(autoincrement())
+  Reason    String?   @db.LongText
+  Date      DateTime? @db.Date
+  Type      String?   @db.VarChar(255)
+  Amount    Float?    @db.Float
+}
+
+model user {
+  UserId   Int     @id @unique(map: "UserId_UNIQUE") @default(autoincrement())
+  UserName String? @unique(map: "UserName_UNIQUE") @db.VarChar(45)
+  Password String? @db.VarChar(45)
+  role     String? @db.VarChar(45)
+}
+
+model invoice_return_details {
+  InvoiceReturnDetailId Int     @id @default(autoincrement())
+  InvoiceId             Int
+  ItemId                Int
+  ProductName           String? @db.VarChar(100)
+  Price                 Float   @db.Float
+  Quantity              Int
+  Total                 Float   @db.Float
+  Type                  String? @db.VarChar(15)
+  QuantityType          String? @db.VarChar(45)
+  invoice               invoice @relation(fields: [InvoiceId], references: [InvoiceId], onDelete: NoAction, onUpdate: NoAction, map: "invoice_id_return")
+
+  @@index([InvoiceId], map: "InvoiceId_idx")
+  @@index([ItemId], map: "item_id_return_idx")
+}
+
+model customer_product_code {
+  CustomerProductCodeId Int        @id @unique(map: "CustomerProductCode_UNIQUE") @default(autoincrement())
+  ProductId             Int?
+  CustomerId            Int?
+  ProductCode           String?    @db.VarChar(45)
+  customers             customers? @relation(fields: [CustomerId], references: [CustomerId], onDelete: NoAction, onUpdate: NoAction, map: "product_customer_id")
+  products              products?  @relation(fields: [ProductId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "product_id")
+
+  @@index([CustomerId], map: "product_customer_id_idx")
+  @@index([ProductId], map: "product_id_idx")
+}
+
+model beem_details {
+  BeemId       Int           @id @unique(map: "BeemId_UNIQUE") @default(autoincrement())
+  LoomId       Int?
+  Date         DateTime?     @db.Date
+  Type         String?       @db.VarChar(45)
+  Loaded       Int?
+  Running      Int?
+  Empty        Int?
+  Return       Int?
+  Count        Int?
+  loom_details loom_details? @relation(fields: [LoomId], references: [LoomId], onDelete: NoAction, onUpdate: NoAction, map: "LoomId")
+
+  @@index([LoomId], map: "LoomId_idx")
+}
+
+model loom_details {
+  LoomId        Int            @id @unique(map: "LoomId_UNIQUE") @default(autoincrement())
+  LoomName      String?        @db.VarChar(45)
+  Address       String?        @db.MediumText
+  ContactNumber String?        @db.VarChar(45)
+  Count         String?        @db.VarChar(45)
+  beem_details  beem_details[]
+}
+
+model loom_entries {
+  LoomEntryId Int       @id @unique(map: "LoomEntryId_UNIQUE") @default(autoincrement())
+  Date        DateTime? @db.Date
+  Type        String?   @db.VarChar(45)
+  LoomId      Int?
+  Details     String?   @db.MediumText
+  BabbinCount Int?
+  Weight      Float?    @db.Float
+}
+
+model login {
+  Id       Int     @id @unique(map: "Id_UNIQUE") @default(autoincrement())
+  UserName String? @db.VarChar(45)
+  Password String? @db.VarChar(255)
+  UserType String? @db.VarChar(45)
+  IsActive Int?
+  Address  String? @db.Text
+  State    String? @db.VarChar(50)
+  Mobile   String? @db.VarChar(20)
+}
+
+model product_stocks {
+  Id        Int      @id @default(autoincrement())
+  ProductId Int
+  Quantity  Int
+  EntryDate DateTime @db.Date
+  Notes     String?  @db.Text
+  products  products @relation(fields: [ProductId], references: [Id], onDelete: Cascade)
+}

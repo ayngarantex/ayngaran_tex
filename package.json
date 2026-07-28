@@ -1,0 +1,44 @@
+{
+    "name": "ayngaran_tex_merged",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@graphql-tools/schema": "^10.0.0",
+        "@heroicons/react": "^2.2.0",
+        "@prisma/client": "^6.13.0",
+        "@sparticuz/chromium": "^147.0.0",
+        "argon2": "^0.44.0",
+        "clsx": "^2.1.1",
+        "graphql": "^16.13.2",
+        "graphql-yoga": "^5.0.0",
+        "jsonwebtoken": "^9.0.2",
+        "mysql2": "^3.14.3",
+        "next": "^16.2.9",
+        "puppeteer": "^24.40.0",
+        "puppeteer-core": "^25.4.0",
+        "react": "^19.2.7",
+        "react-apexcharts": "^1.7.0",
+        "react-dom": "^19.2.7",
+        "react-to-print": "^3.1.1",
+        "use-debounce": "^10.0.5"
+    },
+    "devDependencies": {
+        "@eslint/eslintrc": "^3",
+        "@tailwindcss/postcss": "^4",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "15.4.5",
+        "prisma": "^6.13.0",
+        "tailwindcss": "^4",
+        "typescript": "^5"
+    }
+}

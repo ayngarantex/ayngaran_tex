@@ -1,0 +1,45 @@
+import Link from 'next/link';
+import NavLinks from '@/app/ui/dashboard/nav-links';
+import Image from "next/image"
+import AyngaranLogo from '@/app/ui/ayngaran-logo-black.jpeg';
+import { PowerIcon } from '@heroicons/react/24/outline';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+export default function SideNav() {
+  async function handleSignOut() {
+    'use server';
+    const cookieStore = await cookies();
+    cookieStore.delete('token');
+    redirect('/admin/login');
+  }
+
+  return (
+    <div className="flex h-full flex-col px-3 py-4 md:px-2">
+      <Link
+        className="mb-2 flex h-20 items-end justify-start rounded-md bg-black p-4 md:h-40"
+        href="/"
+      >
+        <div className="w-32 text-white md:w-40 text-3xl">
+          <Image
+            src={AyngaranLogo}
+            alt="Ayngaran Logo"
+            className="pl-3 w-[180px] h-[100px] object-contain"
+          />
+          Ayngaran&nbsp;Tex
+        </div>
+      </Link>
+      <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2 overflow-y-auto">
+        <NavLinks />
+        <div className="hidden h-auto w-full grow rounded-md bg-blue-50 md:block"></div>
+        <form action={handleSignOut}>
+          <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-blue-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3">
+            <PowerIcon className="w-6" />
+            <div className="hidden md:block">Sign Out</div>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+

@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap');
+
+@import "tailwindcss";
+
+.tamil-input {
+  font-family: 'Noto Sans Tamil', sans-serif;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  overflow-y: hidden !important;
+  height: auto !important;
+  min-height: 100% !important;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+@media print {
+
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+  }
+
+  /* ✅ repeat table header */
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* ✅ allow table to break */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* ✅ footer should not split */
+  .print-footer {
+    page-break-inside: avoid;
+    page-break-before: auto;
+  }
+
+  /* ✅ avoid weird spacing */
+  body {
+    margin: 0;
+  }
+
+  .print-container {
+    display: block !important;
+  }
+
+  .invoice {
+    width: 100%;
+    page-break-inside: avoid;
+  }
+
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
