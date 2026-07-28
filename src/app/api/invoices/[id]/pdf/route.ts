@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getInvoiceById } from '@/server/repositories/invoiceRepository';
+import chromium from '@sparticuz/chromium';
+import puppeteerCore from 'puppeteer-core';
 
 export const runtime = 'nodejs'; // Ensure Node runtime for Buffer support
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
@@ -26,9 +29,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
     if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
       // Production Vercel Serverless environment
-      const chromium = require('@sparticuz/chromium');
-      const puppeteerCore = require('puppeteer-core');
-
       browser = await puppeteerCore.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
@@ -37,8 +37,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       });
     } else {
       // Local Windows / Development environment
-      const puppeteer = require('puppeteer');
-      browser = await puppeteer.launch({
+      const puppeteer = await import('puppeteer');
+      browser = await puppeteer.default.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
