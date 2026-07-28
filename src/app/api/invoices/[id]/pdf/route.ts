@@ -31,9 +31,9 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       // Production Vercel Serverless environment
       browser = await puppeteerCore.launch({
         args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
+        defaultViewport: (chromium as any).defaultViewport,
         executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
+        headless: (chromium as any).headless,
       });
     } else {
       // Local Windows / Development environment
