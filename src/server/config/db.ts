@@ -1,5 +1,7 @@
 import mysql from 'mysql2/promise';
 
+const isCloudDb = process.env.DB_HOST && !process.env.DB_HOST.includes('localhost') && !process.env.DB_HOST.includes('127.0.0.1');
+
 const pool = mysql.createPool({
     host: process.env.DB_HOST ?? 'localhost',
     user: process.env.DB_USER ?? 'root',
@@ -8,6 +10,7 @@ const pool = mysql.createPool({
     port: Number(process.env.DB_PORT ?? 3306),
     waitForConnections: true,
     connectionLimit: 10,
+    ssl: isCloudDb ? { rejectUnauthorized: false, minVersion: 'TLSv1.2' } : undefined,
 });
 
 export default pool;
