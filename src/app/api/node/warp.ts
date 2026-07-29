@@ -1,5 +1,5 @@
 import { pageLimit } from "@/app/lib/utils";
-import { getWarps, getWarpsCount, getWarpById, updateWarpRepo, getWarpSummary, getWarpSummaryById, updateWarpSummaryRepo } from "@/server/repositories/warpRepositories";
+import { getWarps, getWarpCount, getWarpById, updateWarp as updateWarpRepo, getWarpSummary, getWarpSummaryById, updateWarpSummary as updateWarpSummaryRepo } from "@/server/repositories/warpRepositories";
 
 export const fetchWarps = async (
     query: string,
@@ -23,7 +23,7 @@ export const fetchWarpsCount = async (
     sizingId: string
 ) => {
     try {
-        return await getWarpsCount(query || null, loomId || null, loomStatus || null, sizingId || null);
+        return await getWarpCount(query || null, loomId || null, loomStatus || null, sizingId || null);
     } catch (err) {
         console.error("fetchWarpsCount Error:", err);
         return 0;

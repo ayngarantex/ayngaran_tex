@@ -1,5 +1,5 @@
 import { pageLimit } from "@/app/lib/utils";
-import { getYarns, getYarnsCount, getYarnsDetails, getYarnById, createYarnRepo, updateYarnRepo, deleteYarnRepo } from '@/server/repositories/yarnRepositories';
+import { getYarns, getYarnCount, getYarnTotal, getYarnById, createYarn as createYarnRepo, updateYarn as updateYarnRepo, deleteYarn as deleteYarnRepo } from '@/server/repositories/yarnRepositories';
 
 export const fetchYarns = async (
     query: string,
@@ -24,7 +24,7 @@ export const fetchYarnPages = async (
     billType: string
 ) => {
     try {
-        const count = await getYarnsCount(query || null, startDate || null, endDate || null, billType || null);
+        const count = await getYarnCount(query || null, startDate || null, endDate || null, billType || null);
         const totalPages = Math.ceil((count || 0) / pageLimit);
         return { count, totalPages };
     } catch (err) {
@@ -41,7 +41,12 @@ export const fetchYarnsDetails = async (
     orderBy: string
 ) => {
     try {
-        return await getYarnsDetails(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        const totals = await getYarnTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        return {
+            totalInvoiceAmount: totals?.totalInvoiceAmount || 0,
+            totalPaid: totals?.totalPaidAmount || 0,
+            balance: totals?.totalPendingAmount || 0
+        };
     } catch (err) {
         console.error("fetchYarnsDetails Error:", err);
         return { totalInvoiceAmount: 0, totalPaid: 0, balance: 0 };
@@ -64,17 +69,29 @@ export const deleteYarn = async (id: number) => {
 
 export const createYarn = async (payload: {
     invoiceData: any;
-    yarnDetailsList: any[];
-    paymentDetailsList: any[];
+    products?: any[];
+    yarnDetailsList?: any[];
+    payments?: any[];
+    paymentDetailsList?: any[];
 }) => {
-    return await createYarnRepo(payload.invoiceData, payload.yarnDetailsList, payload.paymentDetailsList);
+    const products = payload.products || payload.yarnDetailsList || [];
+    const payments = payload.payments || payload.paymentDetailsList || [];
+    return await createYarnRepo(payload.invoiceData, products, payments);
 };
 
 export const updateYarn = async (payload: {
-    id: number;
+    id?: number;
     invoiceData: any;
-    yarnDetailsList: any[];
-    paymentDetailsList: any[];
+    products?: any[];
+    yarnDetailsList?: any[];
+    payments?: any[];
+    paymentDetailsList?: any[];
 }) => {
-    return await updateYarnRepo(payload.id, payload.invoiceData, payload.yarnDetailsList, payload.paymentDetailsList);
+    const invoiceData = payload.invoiceData || {};
+    if (payload.id && !invoiceData.YarnId) {
+        invoiceData.YarnId = payload.id;
+    }
+    const products = payload.products || payload.yarnDetailsList || [];
+    const payments = payload.payments || payload.paymentDetailsList || [];
+    return await updateYarnRepo(invoiceData, products, payments);
 };

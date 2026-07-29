@@ -1,5 +1,5 @@
 import { pageLimit } from "@/app/lib/utils";
-import { getSizing, getSizingCount, getSizingTotals, getSizingById, createSizingRepo, updateSizingRepo, deleteSizingRepo } from "@/server/repositories/sizingRepositories";
+import { getSizings, getSizingCount, getSizingTotal, getSizingById, createSizing as createSizingRepo, updateSizing as updateSizingRepo, deleteSizing as deleteSizingRepo } from "@/server/repositories/sizingRepositories";
 
 export const fetchSizing = async (
     query: string,
@@ -10,7 +10,7 @@ export const fetchSizing = async (
     orderBy: string = ''
 ) => {
     try {
-        return await getSizing(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
+        return await getSizings(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
     } catch (err) {
         console.error("fetchSizing Error:", err);
         return [];
@@ -41,7 +41,7 @@ export const fetchSizingTotal = async (
     orderBy: string
 ) => {
     try {
-        return await getSizingTotals(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        return await getSizingTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
     } catch (err) {
         console.error("fetchSizingTotal Error:", err);
         return { totalInvoiceAmount: 0, totalReceived: 0, balance: 0 };
@@ -72,11 +72,15 @@ export const createSizing = async (payload: {
 };
 
 export const updateSizing = async (payload: {
-    id: number;
+    id?: number;
     invoiceData: any;
     products: any[];
     payments: any[];
     sizingYarn: any[];
 }) => {
-    return await updateSizingRepo(payload.id, payload.invoiceData, payload.products || [], payload.payments || [], payload.sizingYarn || []);
+    const invoiceData = payload.invoiceData || {};
+    if (payload.id && !invoiceData.SizingId) {
+        invoiceData.SizingId = payload.id;
+    }
+    return await updateSizingRepo(invoiceData, payload.products || [], payload.payments || [], payload.sizingYarn || []);
 };

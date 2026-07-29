@@ -63,7 +63,7 @@ export default function EditForm({
 
     const res = await updateWarp(warpData);
 
-    if (res?.data?.updateWarp) {
+    if (res) {
       redirect('/admin/warp');
     }
   };

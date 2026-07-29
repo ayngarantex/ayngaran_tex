@@ -177,6 +177,7 @@ export default function EditForm({
 
     try {
       const data = await updateSizing({
+        id: Number(sizing?.SizingId),
         invoiceData,
         products: filteredProduct,
         payments: filteredPayments,
