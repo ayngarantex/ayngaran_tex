@@ -62,8 +62,7 @@ export default function EditForm({
 
       const data = await updateSupplier(supplierData);
       if (data?.SupplierId) {
-        router.push('/admin/suppliers');
-        router.refresh();
+        window.location.href = '/admin/suppliers';
       } else {
         setIsSubmitting(false);
       }

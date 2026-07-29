@@ -6,8 +6,8 @@ import { getSuppliers, getSupplierCount, getSupplierById, createSupplier as crea
 export const fetchSuppliers = async (
     query: string,
     currentPage: number,
-    type: string = '',
-    orderBy: string = ''
+    orderBy: string = '',
+    type: string = ''
 ) => {
     try {
         const rows = await getSuppliers(query || null, type || null, currentPage || 1, pageLimit, orderBy || null);

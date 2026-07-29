@@ -42,9 +42,9 @@ export default function Form() {
       };
 
       const data = await createSupplier(supplierData);
-      if(data?.SupplierId) {
-        router.push('/admin/suppliers');
-        router.refresh();
+      console.log("data", data)
+      if (data?.SupplierId) {
+        window.location.href = '/admin/suppliers';
       } else {
         setIsSubmitting(false);
       }
@@ -193,7 +193,7 @@ export default function Form() {
               >
                 <option value="" disabled>
                   Select a State
-                </option>                
+                </option>
                 {statesList()?.map((row: any) => (
                   <option
                     key={row.label}
