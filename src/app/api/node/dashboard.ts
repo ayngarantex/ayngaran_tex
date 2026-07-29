@@ -1,46 +1,19 @@
+"use server";
+
+import { getSalseDetails, getYarnSalesDetails, getSalesChartDetails, getYarnChartDetails } from "@/server/repositories/dashboardRepositories";
+
 export const salseData = async (
     startDate: string,
     endDate: string,
     billType?: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetSalse(
-                        $startDate: String,
-                        $endDate: String,
-                        $billType: String
-                    ) {
-                        salse(
-                            startDate: $startDate,
-                            endDate: $endDate,
-                            billType: $billType
-                        ) {
-                            totalInvoiceAmount
-                            totalPaidAmount
-                            totalPendingAmount
-                        }
-                    }
-                `,
-                variables: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    billType: billType,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.salse;
+    try {
+        const res = await getSalseDetails(startDate || null, endDate || null, billType || null);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err) {
+        console.error("salseData Error:", err);
+        return { totalInvoiceAmount: 0, totalPaidAmount: 0, totalPendingAmount: 0 };
+    }
 };
 
 export const yarnSalesData = async (
@@ -48,44 +21,13 @@ export const yarnSalesData = async (
     endDate: string,
     billType?: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetYarnSales(
-                        $startDate: String,
-                        $endDate: String,
-                        $billType: String
-                    ) {
-                        yarnSales(
-                            startDate: $startDate,
-                            endDate: $endDate,
-                            billType: $billType
-                        ) {
-                            totalInvoiceAmount
-                            totalPaidAmount
-                            totalPendingAmount
-                        }
-                    }
-                `,
-                variables: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    billType: billType,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.yarnSales;
+    try {
+        const res = await getYarnSalesDetails(startDate || null, endDate || null, billType || null);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err) {
+        console.error("yarnSalesData Error:", err);
+        return { totalInvoiceAmount: 0, totalPaidAmount: 0, totalPendingAmount: 0 };
+    }
 };
 
 export const fetchSalesChartDetails = async (
@@ -93,45 +35,13 @@ export const fetchSalesChartDetails = async (
     endDate: string,
     billType?: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetSalesChart(
-                        $startDate: String,
-                        $endDate: String,
-                        $billType: String
-                    ) {
-                        salesChart(
-                            startDate: $startDate,
-                            endDate: $endDate,
-                            billType: $billType
-                        ) {
-                            totalCount
-                            totalSales
-                            totalReceived
-                            month
-                        }
-                    }
-                `,
-                variables: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    billType: billType,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.salesChart;
+    try {
+        const res = await getSalesChartDetails(startDate || null, endDate || null, billType || null);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err) {
+        console.error("fetchSalesChartDetails Error:", err);
+        return [];
+    }
 };
 
 export const fetchYarnPurchaseDetails = async (
@@ -139,43 +49,11 @@ export const fetchYarnPurchaseDetails = async (
     endDate: string,
     billType?: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetYarnChart(
-                        $startDate: String,
-                        $endDate: String,
-                        $billType: String
-                    ) {
-                        yarnChart(
-                            startDate: $startDate,
-                            endDate: $endDate,
-                            billType: $billType
-                        ) {
-                            totalCount
-                            totalPurchase
-                            totalPaid
-                            month
-                        }
-                    }
-                `,
-                variables: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    billType: billType,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.yarnChart;
+    try {
+        const res = await getYarnChartDetails(startDate || null, endDate || null, billType || null);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err) {
+        console.error("fetchYarnPurchaseDetails Error:", err);
+        return [];
+    }
 };

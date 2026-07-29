@@ -17,9 +17,12 @@ export default function CardWrapper() {
     const fetchData = async () => {
       try {
         const res = await fetch('/api/dashboard/cards');
-        const result = await res.json();
-        if (!res.ok) throw new Error('Failed to fetch dashboard data');
-        setData(result);
+        if (!res.ok) return;
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const result = await res.json();
+          setData(result);
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
@@ -51,12 +54,15 @@ export function Card({
   const Icon = iconMap[type];
 
   return (
-    <div className="rounded-xl bg-blue-50 p-2 shadow-sm">
+    <div className="rounded-xl bg-white p-2 shadow-xs border border-slate-200">
       <div className="flex p-4">
-        {Icon ? <Icon className="h-5 w-5 text-gray-700" /> : null}
-        <h3 className="ml-2 text-sm font-medium">{title}</h3>
+        {Icon ? <Icon className="h-5 w-5 text-slate-700" /> : null}
+        <h3 className="ml-2 text-sm font-medium text-slate-800">{title}</h3>
       </div>
-      <p className={`truncate rounded-xl bg-white px-4 py-8 text-center text-2xl ${type === "pending" ? 'text-red-600' : ''}`}>
+      <p
+        className={`
+          truncate rounded-xl bg-slate-50 px-4 py-8 text-center text-2xl font-bold text-slate-900`}
+      >
         {value}
       </p>
     </div>

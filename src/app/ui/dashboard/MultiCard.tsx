@@ -39,9 +39,12 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
     const fetWagesData = async () => {
       try {
         const res = await fetch(`/api/dashboard/wagescards?startDate=${startDate}&endDate=${endDate}`);
-        const result = await res.json();
-        if (!res.ok) throw new Error('Failed to fetch dashboard data');
-        setWagesData(result);
+        if (!res.ok) return;
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const result = await res.json();
+          setWagesData(result);
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
