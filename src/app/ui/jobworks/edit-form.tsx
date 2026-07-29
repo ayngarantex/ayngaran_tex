@@ -35,8 +35,8 @@ export default function EditForm({
 
     const res = await updateLoom(loomData);
 
-    if (res?.data?.updateLoom) {
-      redirect('/admin/jobworks');
+    if (res) {
+      window.location.href = '/admin/jobworks';
     }
   };
 

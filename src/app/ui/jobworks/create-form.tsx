@@ -20,9 +20,9 @@ export default function Form() {
       Count: count
     };
 
-    const res = await createLoom(loomData)
-    if (res?.data?.createLoom) {
-      redirect('/admin/jobworks');
+    const res = await createLoom(loomData);
+    if (res) {
+      window.location.href = '/admin/jobworks';
     }
   };
 

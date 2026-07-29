@@ -53,11 +53,8 @@ export default function StockCreateForm({ product }: StockCreateFormProps) {
         Notes: notes.trim() || null
       });
 
-      if (res?.data?.createStockEntry) {
-        router.push(`/admin/products/${product.Id}/stocks`);
-        router.refresh();
-      } else {
-        alert(res?.errors?.[0]?.message || 'Failed to create stock entry');
+      if (res) {
+        window.location.href = `/admin/products/${product.Id}/stocks`;
       }
     } catch (err) {
       console.error(err);

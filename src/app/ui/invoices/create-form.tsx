@@ -76,42 +76,52 @@ export default function Form({
   const [cancelReason, setCancelReason] = useState("");
 
   const handleSubmit = async () => {
-    let payments = invPayments;
+    if (submitLoading) return;
+    setSubmitLoading(true);
 
-    if (payments.length === 1 && payments[0].date === 'date') {
-      payments = []
-    } else {
-      payments = payments.filter((row: PaymentRow) => row.date !== 'date')
-    }
+    try {
+      let payments = invPayments;
 
-    const invoiceData = {
-      CustomerId: selectedCustomer?.CustomerId ? Number(selectedCustomer?.CustomerId) : null,
-      InvoiceNumber: invoiceNumber,
-      InvoiceType: billType === 'gst' ? invoiceType : '',
-      EwayBillNumber: ewayBillNumber,
-      InvoiceDate: invoiceDate,
-      BeforeTax: Number(beforeTax.toFixed(2)),
-      TaxPercentage: taxPercentage,
-      Cgst: selectedCustomer?.State === 'TamilNadu' ? Number(cgstAmount.toFixed(2)) : 0,
-      Sgst: selectedCustomer?.State === 'TamilNadu' ? Number(sgstAmount.toFixed(2)) : 0,
-      Igst: selectedCustomer?.State !== 'TamilNadu' ? Number(igstAmount.toFixed(2)) : 0,
-      AfterTax: Number(afterTax.toFixed(2)),
-      BillType: billType,
-      RoundOff: roundOff ? Number(roundOff).toFixed(2) : '0.00',
-      Discount: discount ? Number(discount).toFixed(2) : '0.00',
-      InvoiceAmount: Number(invoiceAmount.toFixed(2)),
-      ReceivedAmount: receivedAmount,
-      IsCancel: isCancel,
-      CancelReason: isCancel ? cancelReason : null,
-      products: invProducts ? invProducts.map(({ pId, ...rest }) => rest) : null,
-      returnProducts: retProducts.length ? retProducts.filter((row: ProductRow) => row.product !== 0) : null,
-      payments: payments ? payments.map(({ pId, ...rest }) => rest) : null,
-    }
+      if (payments.length === 1 && payments[0].date === 'date') {
+        payments = []
+      } else {
+        payments = payments.filter((row: PaymentRow) => row.date !== 'date')
+      }
 
-    const res = await createInvoice(invoiceData);
+      const invoiceData = {
+        CustomerId: selectedCustomer?.CustomerId ? Number(selectedCustomer?.CustomerId) : null,
+        InvoiceNumber: invoiceNumber,
+        InvoiceType: billType === 'gst' ? invoiceType : '',
+        EwayBillNumber: ewayBillNumber,
+        InvoiceDate: invoiceDate,
+        BeforeTax: Number(beforeTax.toFixed(2)),
+        TaxPercentage: taxPercentage,
+        Cgst: selectedCustomer?.State === 'TamilNadu' ? Number(cgstAmount.toFixed(2)) : 0,
+        Sgst: selectedCustomer?.State === 'TamilNadu' ? Number(sgstAmount.toFixed(2)) : 0,
+        Igst: selectedCustomer?.State !== 'TamilNadu' ? Number(igstAmount.toFixed(2)) : 0,
+        AfterTax: Number(afterTax.toFixed(2)),
+        BillType: billType,
+        RoundOff: roundOff ? Number(roundOff).toFixed(2) : '0.00',
+        Discount: discount ? Number(discount).toFixed(2) : '0.00',
+        InvoiceAmount: Number(invoiceAmount.toFixed(2)),
+        ReceivedAmount: receivedAmount,
+        IsCancel: isCancel,
+        CancelReason: isCancel ? cancelReason : null,
+        products: invProducts ? invProducts.map(({ pId, ...rest }) => rest) : null,
+        returnProducts: retProducts.length ? retProducts.filter((row: ProductRow) => row.product !== 0) : null,
+        payments: payments ? payments.map(({ pId, ...rest }) => rest) : null,
+      }
 
-    if (res?.data?.createInvoice) {
-      redirect('/admin/invoices');
+      const res = await createInvoice(invoiceData);
+
+      if (res) {
+        window.location.href = '/admin/invoices';
+      } else {
+        setSubmitLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setSubmitLoading(false);
     }
   };
 
@@ -610,12 +620,14 @@ export default function Form({
         >
           Cancel
         </Link>
-        <Button type="button" onClick={() => {
-          setSubmitLoading(false)
-          if (!submitLoading) {
-            handleSubmit()
-          }
-        }}>Create Invoice</Button>
+        <Button
+          type="button"
+          loading={submitLoading}
+          disabled={submitLoading}
+          onClick={handleSubmit}
+        >
+          {submitLoading ? 'Creating Invoice...' : 'Create Invoice'}
+        </Button>
       </div>
     </form>
   );

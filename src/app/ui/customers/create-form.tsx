@@ -31,8 +31,8 @@ export default function Form() {
 
     const res = await createCustomer(customerData);
 
-    if (res?.data?.createCustomer) {
-      redirect('/admin/customers');
+    if (res) {
+      window.location.href = '/admin/customers';
     }
 
     // const jsonBody = JSON.stringify({

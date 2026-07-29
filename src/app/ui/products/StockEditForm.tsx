@@ -70,11 +70,8 @@ export default function StockEditForm({ product, entry }: StockEditFormProps) {
         Notes: notes.trim() || null
       });
 
-      if (res?.data?.updateStockEntry) {
-        router.push(`/admin/products/${product.Id}/stocks`);
-        router.refresh();
-      } else {
-        alert(res?.errors?.[0]?.message || 'Failed to update stock entry');
+      if (res) {
+        window.location.href = `/admin/products/${product.Id}/stocks`;
       }
     } catch (err) {
       console.error(err);

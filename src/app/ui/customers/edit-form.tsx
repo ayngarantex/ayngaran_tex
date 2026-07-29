@@ -47,8 +47,8 @@ export default function EditForm({
     };
 
     const res = await updateCustomer(customerData);
-    if (res?.data?.updateCustomer) {
-      redirect('/admin/customers');
+    if (res) {
+      window.location.href = '/admin/customers';
     }
 
     // const jsonBody = JSON.stringify({

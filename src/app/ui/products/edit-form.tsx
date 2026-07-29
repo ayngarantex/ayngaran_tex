@@ -86,8 +86,8 @@ export default function EditForm({
 
     const res = await updateProduct(productData);
 
-    if (res?.data?.updateProduct) {
-      redirect('/admin/products');
+    if (res) {
+      window.location.href = '/admin/products';
     }
   };
 

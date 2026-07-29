@@ -70,6 +70,7 @@ export default function EditForm({
   const [discount, setDiscount] = useState("");
   const [invoiceAmount, setInvoiceAmount] = useState(0);
   const [receivedAmount, setReceivedAmount] = useState(0);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const [isCancel, setIsCancel] = useState(0);
   const [cancelReason, setCancelReason] = useState("");
@@ -96,7 +97,7 @@ export default function EditForm({
     setInvoiceAmount(invoice?.InvoiceAmount);
     setReceivedAmount(invoice?.ReceivedAmount);
 
-    setInvProducts(invoice.invoice_details || []);
+    setInvProducts(invoice?.invoice_details || []);
     setRetProducts(invoice.invoice_return_details || []);
     setInvPayments(invoice.payment_details || []);
 
@@ -131,72 +132,49 @@ export default function EditForm({
   }, [invoice?.invoice_return_details]);
 
   const handleSubmit = async () => {
-    let payments = invPayments;
+    if (submitLoading) return;
+    setSubmitLoading(true);
 
-    if (payments.length === 1 && payments[0].date === 'date') {
-      payments = []
-    }
+    try {
+      let filteredProduct = invProducts.length ? invProducts.filter((row: any) => Number(row.product || row.ItemId) > 0) : [];
+      let filteredReturnProduct = retProducts.length ? retProducts.filter((row: any) => Number(row.product || row.ItemId) > 0) : [];
+      let filteredPayments = invPayments.length ? invPayments.filter((row: any) => row.date !== 'date') : [];
 
-    let filteredPayments: any = []
-    if (payments?.length) {
-      payments.forEach((row: any) => {
-        if (row.date !== 'date') {
-          row.amount = String(row.amount)
-          filteredPayments.push(row)
-        }
-      })
+      const invoiceData = {
+        InvoiceId: invoice.InvoiceId,
+        CustomerId: selectedCustomer?.CustomerId ? Number(selectedCustomer?.CustomerId) : null,
+        InvoiceNumber: invoiceNumber,
+        InvoiceType: billType === 'gst' ? invoiceType : '',
+        EwayBillNumber: ewayBillNumber,
+        InvoiceDate: invoiceDate,
+        BeforeTax: Number(beforeTax.toFixed(2)),
+        TaxPercentage: taxPercentage,
+        Cgst: selectedCustomer?.State === 'TamilNadu' ? Number(cgstAmount.toFixed(2)) : 0,
+        Sgst: selectedCustomer?.State === 'TamilNadu' ? Number(sgstAmount.toFixed(2)) : 0,
+        Igst: selectedCustomer?.State !== 'TamilNadu' ? Number(igstAmount.toFixed(2)) : 0,
+        AfterTax: Number(afterTax.toFixed(2)),
+        BillType: billType,
+        RoundOff: roundOff ? Number(roundOff).toFixed(2) : '0.00',
+        Discount: discount ? Number(discount).toFixed(2) : '0.00',
+        InvoiceAmount: Number(invoiceAmount.toFixed(2)),
+        ReceivedAmount: receivedAmount,
+        IsCancel: isCancel,
+        CancelReason: isCancel ? cancelReason : null,
+        products: filteredProduct.length ? filteredProduct.map(({ pId: any, ...rest }: any) => rest) : null,
+        returnProducts: filteredReturnProduct.length ? filteredReturnProduct.filter((row: ProductRow) => row.product !== 0) : null,
+        payments: filteredPayments.length ? filteredPayments.filter((row: PaymentRow) => row.date !== 'date') : null
+      };
 
-      filteredPayments = filteredPayments.map(({ pId: any, ...rest }: any) => rest)
-    }
+      const res = await updateInvoice(invoiceData);
 
-    let filteredProduct: any = []
-    if (invProducts?.length) {
-      invProducts.forEach((row: any) => {
-        if (row.product) {
-          filteredProduct.push(row)
-        }
-      })
-    }
-
-    let filteredReturnProduct: any = []
-    if (retProducts?.length) {
-      retProducts.forEach((row: any) => {
-        if (row.product) {
-          filteredReturnProduct.push(row)
-        }
-      })
-      filteredReturnProduct = filteredReturnProduct.map(({ pId: any, ...rest }: any) => rest)
-    }
-
-    const invoiceData = {
-      InvoiceId: invoice.InvoiceId,
-      CustomerId: selectedCustomer?.CustomerId,
-      InvoiceNumber: invoiceNumber,
-      InvoiceType: invoiceType,
-      EwayBillNumber: ewayBillNumber,
-      InvoiceDate: invoiceDate,
-      BeforeTax: Number(beforeTax.toFixed(2)),
-      TaxPercentage: taxPercentage,
-      Cgst: selectedCustomer?.State === 'TamilNadu' ? Number(cgstAmount.toFixed(2)) : 0,
-      Sgst: selectedCustomer?.State === 'TamilNadu' ? Number(sgstAmount.toFixed(2)) : 0,
-      Igst: selectedCustomer?.State !== 'TamilNadu' ? Number(igstAmount.toFixed(2)) : 0,
-      AfterTax: Number(afterTax.toFixed(2)),
-      BillType: billType,
-      RoundOff: roundOff ? Number(roundOff).toFixed(2) : '0.00',
-      Discount: discount ? Number(discount).toFixed(2) : '0.00',
-      InvoiceAmount: Number(invoiceAmount.toFixed(2)),
-      ReceivedAmount: receivedAmount,
-      IsCancel: isCancel,
-      CancelReason: isCancel ? cancelReason : null,
-      products: filteredProduct.length ? filteredProduct.map(({ pId: any, ...rest }: any) => rest) : null,
-      returnProducts: filteredReturnProduct.length ? filteredReturnProduct.filter((row: ProductRow) => row.product !== 0) : null,
-      payments: filteredPayments.length ? filteredPayments.filter((row: PaymentRow) => row.date !== 'date') : null
-    };
-
-    const res = await updateInvoice(invoiceData);
-
-    if (res?.data?.updateInvoice) {
-      redirect('/admin/invoices');
+      if (res) {
+        window.location.href = '/admin/invoices';
+      } else {
+        setSubmitLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setSubmitLoading(false);
     }
   };
 
@@ -686,7 +664,14 @@ export default function EditForm({
         >
           Cancel
         </Link>
-        <Button type="button" onClick={handleSubmit}>Update Invoice</Button>
+        <Button
+          type="button"
+          loading={submitLoading}
+          disabled={submitLoading}
+          onClick={handleSubmit}
+        >
+          {submitLoading ? 'Updating Invoice...' : 'Update Invoice'}
+        </Button>
       </div>
     </form >
   );

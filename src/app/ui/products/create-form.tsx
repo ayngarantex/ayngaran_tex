@@ -67,8 +67,8 @@ export default function Form() {
 
     const res = await createNodeProduct(productData);
 
-    if (res?.data?.createProduct) {
-      redirect('/admin/products');
+    if (res) {
+      window.location.href = '/admin/products';
     }
   };
 
