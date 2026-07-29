@@ -1,6 +1,5 @@
 import Form from '@/app/ui/sizing/edit-form';
-import { fetchAllSuppliers, fetchYarns, fetchAllLooms } from '@/app/lib/data';
-import { fetchSizingById } from '@/app/api/node/sizing';
+import { fetchAllSuppliers, fetchYarns, fetchAllLooms, fetchSizingById } from '@/app/lib/data';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -10,11 +9,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     const yarns = await fetchYarns("", 0, "", "", "", "");
     const looms = await fetchAllLooms();
 
-    console.log("suppliers", suppliers)
-
     return (
         <main>
-            <Form sizing={sizing?.[0] || {}} suppliers={suppliers} yarns={yarns} looms={looms} />
+            <Form sizing={sizing || {}} suppliers={suppliers} yarns={yarns} looms={looms} />
         </main>
     );
 }

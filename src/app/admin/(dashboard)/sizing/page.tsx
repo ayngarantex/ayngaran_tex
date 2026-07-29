@@ -28,8 +28,6 @@ export default async function Page(props: {
   const sizing = await fetchSizing(query, currentPage, startDate, endDate, billType, orderBy);
   const sizngTotal: any = await fetchSizingTotal(query, startDate, endDate, billType, orderBy);
 
-  console.log("sizing", sizing)
-
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
