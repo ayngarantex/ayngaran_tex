@@ -23,7 +23,7 @@ export default function EditForm({
   yarns: any,
   looms: any
 }) {
-  console.log("yarns", yarns)
+  console.log("sizing", sizing)
   const router = useRouter();
   const [selectedSupplier, setSelectedSuppliers] = useState<SupplierField | null>(null);
   const [selectedYarns, setSelectedYarns] = useState<any | null>(null);
@@ -265,7 +265,6 @@ export default function EditForm({
 
   useEffect(() => {
     const yarn = yarns.find((y: any) => Number(y.YarnId) === Number(yarnId)) || null;
-    console.log("yarn", yarn)
     let yarn_details = yarn?.yarn_details.filter((e: any) => e.Count !== 'Freight')
     const yarnDetails: any = {}
     yarnDetails.yarn = yarn_details

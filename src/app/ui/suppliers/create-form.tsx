@@ -42,7 +42,6 @@ export default function Form() {
       };
 
       const data = await createSupplier(supplierData);
-      console.log("data", data)
       if (data?.SupplierId) {
         window.location.href = '/admin/suppliers';
       } else {

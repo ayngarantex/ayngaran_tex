@@ -7,7 +7,6 @@ export default async function YarnTable({
 }: {
   yarns: any;
 }) {
-  console.log("yarns", yarns[7])
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">

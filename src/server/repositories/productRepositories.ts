@@ -169,9 +169,6 @@ export const getProductTotals = async (search: string | null, productId: string 
     }
     sql += " GROUP BY P.Id) AS ProductStats";
 
-    console.log(sql)
-    console.log("productId", productId)
-
     const [rows]: any = await db.query(sql, params);
     return rows[0] || { TotalStock: 0, SoldCount: 0, AvailableStock: 0 };
 };

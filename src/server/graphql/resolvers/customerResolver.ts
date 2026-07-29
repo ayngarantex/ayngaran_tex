@@ -9,7 +9,6 @@ export const customerResolver = {
             return await customerService.customerPendingPayment(search, startDate, endDate);
         },
         customerProducts: async (_: unknown, { CustomerId, productId, foldType }: any) => {
-            console.log(CustomerId, productId, foldType)
             return await customerService.customerProducts(CustomerId, productId, foldType);
         },
         customer: async (_: unknown, { CustomerId }: any) => {

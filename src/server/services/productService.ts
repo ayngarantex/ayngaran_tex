@@ -7,7 +7,6 @@ export const getProductCount = async (search: any) => {
     return await repo.getProductCount(search);
 };
 export const getProductTotals = async (search: any, productId: any) => {
-    console.log("productId - 1 - ", productId)
     return await repo.getProductTotals(search, productId);
 };
 export const productById = async (id: any) => {

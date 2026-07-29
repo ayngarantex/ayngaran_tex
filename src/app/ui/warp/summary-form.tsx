@@ -11,7 +11,6 @@ export default function EditForm({
 }: {
   summaryDetails: any;
 }) {
-  console.log("summaryDetails", summaryDetails)
   const router = useRouter();
   const [summaryProducts, setSummaryProducts] = useState<any[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
