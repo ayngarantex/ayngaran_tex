@@ -1,162 +1,77 @@
-import { prisma } from '@/app/lib/prisma';
-import { NextResponse } from 'next/server';
+import db from '@/server/config/db';
 
 const ITEMS_PER_PAGE = 20;
+
 export const fetchExpensesPage = async (query: string, startDate: string, endDate: string) => {
   try {
-    let lowercaseQuery = query?.toLocaleLowerCase()
-    const data = await prisma.expenses.count({
-      orderBy: [
-        {
-          Date: 'desc',
-        },
-        {
-          ExpenseId: 'desc',
-        }
-      ],
-      where: {
-        ...(startDate && endDate ? {
-          InvoiceDate: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
-          },
-        }
-          : {}),
-        OR: [
-          {
-            Reason: { contains: lowercaseQuery },
-          },
-          {
-            Type: { contains: lowercaseQuery },
-          },
-        ]
-      },
-    });
-    const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
+    let sql = `SELECT COUNT(*) AS count FROM expenses WHERE 1=1`;
+    let params: any[] = [];
+
+    if (startDate && endDate) {
+      sql += ` AND Date >= ? AND Date <= ?`;
+      params.push(startDate, endDate);
+    }
+
+    if (query) {
+      sql += ` AND (LOWER(Reason) LIKE ? OR LOWER(Type) LIKE ?)`;
+      params.push(`%${query.toLowerCase()}%`, `%${query.toLowerCase()}%`);
+    }
+
+    const [rows]: any = await db.query(sql, params);
+    const count = Number(rows[0]?.count || 0);
+    const totalPages = Math.ceil(count / ITEMS_PER_PAGE);
+
     return {
-      count: data,
-      totalPages: totalPages
+      count,
+      totalPages
     };
   } catch (error) {
-    return []
-    throw new Error('Failed to fetch total number of invoices.');
+    return { count: 0, totalPages: 0 };
   }
-}
+};
 
 export const fetchExpenses = async (query: string, currentPage: number, startDate: string, endDate: string) => {
   try {
-    let lowercaseQuery = query?.toLocaleLowerCase()
+    let whereSql = ` WHERE 1=1`;
+    let params: any[] = [];
 
-    const total = await prisma.expenses.count({
-      orderBy: [
-        {
-          Date: 'desc',
-        },
-        {
-          ExpenseId: 'desc',
-        }
-      ],
-      where: {
-        ...(startDate && endDate ? {
-          InvoiceDate: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
-          },
-        }
-          : {}),
-        OR: lowercaseQuery ? [
-          {
-            Reason: { contains: lowercaseQuery },
-          },
-          {
-            Type: { contains: lowercaseQuery },
-          },
-        ] : undefined
-      },
-    });
-    const totalPages = Math.ceil(Number(total) / ITEMS_PER_PAGE);
+    if (startDate && endDate) {
+      whereSql += ` AND Date >= ? AND Date <= ?`;
+      params.push(startDate, endDate);
+    }
 
-    const data = await prisma.expenses.findMany({
-      skip: (currentPage - 1) * ITEMS_PER_PAGE, // skip first page
-      take: ITEMS_PER_PAGE,
-      where: {
-        ...(startDate && endDate ? {
-          Date: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
-          },
-        }
-          : {}),
+    if (query) {
+      whereSql += ` AND (LOWER(Reason) LIKE ? OR LOWER(Type) LIKE ?)`;
+      params.push(`%${query.toLowerCase()}%`, `%${query.toLowerCase()}%`);
+    }
 
-        OR: lowercaseQuery ? [
-          {
-            Reason: { contains: lowercaseQuery },
-          },
-          {
-            Type: { contains: lowercaseQuery },
-          },
-        ] : undefined,
-      },
-      orderBy: [
-        {
-          Date: 'desc',
-        },
-        {
-          ExpenseId: 'desc',
-        }
-      ],
-    });
+    // Count & Total
+    const [countRows]: any = await db.query(`SELECT COUNT(*) AS count, SUM(Amount) AS totalAmount FROM expenses${whereSql}`, params);
+    const count = Number(countRows[0]?.count || 0);
+    const totalAmount = Number(countRows[0]?.totalAmount || 0);
+    const totalPages = Math.ceil(count / ITEMS_PER_PAGE);
 
-    const totals = await prisma.expenses.aggregate({
-      _sum: {
-        Amount: true
-      },
-      where: {
-        ...(startDate && endDate ? {
-          Date: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
-          },
-        }
-          : {}),
-
-        OR: lowercaseQuery ? [
-          {
-            Reason: { contains: lowercaseQuery },
-          },
-          {
-            Type: { contains: lowercaseQuery },
-          },
-        ] : undefined,
-      },
-    });
-
-    const totalAmount = totals._sum.Amount ?? 0;
+    // Page items
+    let dataSql = `SELECT * FROM expenses${whereSql} ORDER BY Date DESC, ExpenseId DESC LIMIT ? OFFSET ?`;
+    const dataParams = [...params, ITEMS_PER_PAGE, (currentPage - 1) * ITEMS_PER_PAGE];
+    const [data]: any = await db.query(dataSql, dataParams);
 
     return {
-      expenses: data,
-      count: total,
-      totalPages: totalPages,
+      expenses: data || [],
+      count,
+      totalPages,
       totalAmount
     };
-
-    // return data || [];
   } catch (error) {
-    return []
-    throw new Error('Failed to fetch total number of invoices.');
+    return { expenses: [], count: 0, totalPages: 0, totalAmount: 0 };
   }
-}
+};
 
 export const fetchExpenseById = async (id: number) => {
   try {
-    const data = await prisma.expenses.findMany({
-      where: {
-        ExpenseId: id
-      },
-    })
-    return data || [];
+    const [rows]: any = await db.query(`SELECT * FROM expenses WHERE ExpenseId = ?`, [id]);
+    return rows || [];
   } catch (error) {
-    // return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
     return [];
   }
-}
+};

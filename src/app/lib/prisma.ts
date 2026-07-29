@@ -1,10 +1,2 @@
-// lib/prisma.ts
-import { PrismaClient } from '@prisma/client';
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// Legacy prisma export stub - Prisma has been removed in favor of Node.js raw MySQL & GraphQL Yoga
+export const prisma: any = null;

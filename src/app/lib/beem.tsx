@@ -1,18 +1,13 @@
-import { prisma } from '@/app/lib/prisma';
+import db from '@/server/config/db';
 
 export const fetchBeemDetailsById = async (id: number) => {
     try {
-        const data = await prisma.beem_details.findMany({
-            where: {
-                BeemId: id
-            },
-        })
-        return data || [];
+        const [rows]: any = await db.query(`SELECT * FROM beem_details WHERE BeemId = ?`, [id]);
+        return rows || [];
     } catch (error) {
-        // return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
         return [];
     }
-}
+};
 
 export const fetchBeemDetails = async (
     query: string,
@@ -20,41 +15,40 @@ export const fetchBeemDetails = async (
     currentPage: number
 ) => {
     const ITEMS_PER_PAGE = 20;
-    const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
     try {
-        const where: any = {
-            loom_details: {
-                is: {},
-            },
-        };
+        let whereSql = ` WHERE 1=1`;
+        let params: any[] = [];
 
         if (query) {
-            where.loom_details.is.LoomName = {
-                contains: query,
-                mode: "insensitive",
-            };
+            whereSql += ` AND L.LoomName LIKE ?`;
+            params.push(`%${query}%`);
         }
 
-        // if (loomName) {
-        //     where.loom_details.is.LoomName = loomName;
-        // }
+        const sql = `
+            SELECT B.*, L.LoomName, L.ContactNumber, L.Address
+            FROM beem_details B
+            LEFT JOIN loom_details L ON B.LoomId = L.LoomId
+            ${whereSql}
+            ORDER BY B.Date DESC
+            LIMIT ? OFFSET ?
+        `;
 
-        const data = await prisma.beem_details.findMany({
-            distinct: ['LoomId'],
-            orderBy: [
-                { Date: 'desc' }
-            ],
-            skip,
-            take: ITEMS_PER_PAGE,
-            where,
-            include: {
-                loom_details: true,
-            },
-        });
+        const [rows]: any = await db.query(sql, [...params, ITEMS_PER_PAGE, offset]);
 
-        const sum = data.reduce(
-            (acc, row) => ({
+        const formatted = rows.map((r: any) => ({
+            ...r,
+            loom_details: r.LoomId ? {
+                LoomId: r.LoomId,
+                LoomName: r.LoomName,
+                ContactNumber: r.ContactNumber,
+                Address: r.Address
+            } : null
+        }));
+
+        const sum = formatted.reduce(
+            (acc: any, row: any) => ({
                 Loaded: acc.Loaded + (row.Loaded ?? 0),
                 Running: acc.Running + (row.Running ?? 0),
                 Empty: acc.Empty + (row.Empty ?? 0),
@@ -63,7 +57,7 @@ export const fetchBeemDetails = async (
             { Loaded: 0, Running: 0, Empty: 0, Return: 0 }
         );
 
-        return { data: data || [], sum };
+        return { data: formatted || [], sum };
     } catch (error) {
         return { data: [], sum: { Loaded: 0, Running: 0, Empty: 0, Return: 0 } };
     }
@@ -76,57 +70,47 @@ export const fetchBeemDetailPages = async (
     const ITEMS_PER_PAGE = 20;
 
     try {
-        const where: any = {
-            loom_details: {
-                is: {},
-            },
-        };
+        let whereSql = ` WHERE 1=1`;
+        let params: any[] = [];
 
         if (query) {
-            where.loom_details.is.LoomName = {
-                contains: query,
-                mode: "insensitive",
-            };
+            whereSql += ` AND L.LoomName LIKE ?`;
+            params.push(`%${query}%`);
         }
 
-        if (loomName) {
-            where.loom_details.is.LoomName = loomName;
-        }
-
-        const count = await prisma.beem_details.count({
-            orderBy: [
-                { LoomId: 'asc' },
-                { Date: 'desc' }  // latest first
-            ],
-            where,
-        });
-
+        const [rows]: any = await db.query(
+            `SELECT COUNT(*) AS count FROM beem_details B LEFT JOIN loom_details L ON B.LoomId = L.LoomId${whereSql}`,
+            params
+        );
+        const count = Number(rows[0]?.count || 0);
         const totalPages = Math.ceil(count / ITEMS_PER_PAGE);
 
         return { totalPages };
     } catch (error) {
-        console.error("Database error:", error);
         return { totalPages: 0 };
     }
 };
 
 export const fetchBeemDetailsByLoomId = async (id: number) => {
     try {
-        const data = await prisma.beem_details.findMany({
-            include: {
-                loom_details: true
-            },
-            where: {
-                LoomId: id
-            },
-            orderBy: {
-                Date: 'desc'
-            }
-        })
-        return data || [];
+        const [rows]: any = await db.query(`
+            SELECT B.*, L.LoomName, L.ContactNumber, L.Address
+            FROM beem_details B
+            LEFT JOIN loom_details L ON B.LoomId = L.LoomId
+            WHERE B.LoomId = ?
+            ORDER BY B.Date DESC
+        `, [id]);
+
+        return rows.map((r: any) => ({
+            ...r,
+            loom_details: r.LoomId ? {
+                LoomId: r.LoomId,
+                LoomName: r.LoomName,
+                ContactNumber: r.ContactNumber,
+                Address: r.Address
+            } : null
+        })) || [];
     } catch (error) {
-        // return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
         return [];
     }
-}
-
+};
