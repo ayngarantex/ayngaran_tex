@@ -308,9 +308,10 @@ export const getInvoice = async (id: any) => {
 
         let invoice = rows[0];
         if (invoice) {
-            invoice.invoice_details = details;
-            invoice.invoice_payments = payments;
-            invoice.invoice_return_details = returnProducts;
+            invoice.invoice_details = details || [];
+            invoice.payment_details = payments || [];
+            invoice.invoice_payments = payments || [];
+            invoice.invoice_return_details = returnProducts || [];
         }
 
         return invoice;

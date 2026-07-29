@@ -82,10 +82,10 @@ export const fetchInvoicesDetails = async (
 export const fetchInvoiceById = async (id: number) => {
     try {
         const data = await getInvoice(id);
-        return data ? JSON.parse(JSON.stringify([data])) : [];
+        return data ? JSON.parse(JSON.stringify(data)) : null;
     } catch (err) {
         console.error("fetchInvoiceById Error:", err);
-        return [];
+        return null;
     }
 };
 

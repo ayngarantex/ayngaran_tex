@@ -1,5 +1,5 @@
 import { UpdateYarn, DeleteYarn } from '@/app/ui/yarns/buttons';
-import { formatCurrency, formatDateNew } from '@/app/lib/utils';
+import { formatCurrency, formatDate, formatDateNew } from '@/app/lib/utils';
 import YarnStatus from './status';
 
 export default async function YarnTable({
@@ -7,6 +7,7 @@ export default async function YarnTable({
 }: {
   yarns: any;
 }) {
+  console.log("yarns", yarns[7])
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -72,8 +73,16 @@ export default async function YarnTable({
                   <td className="whitespace-nowrap px-3 py-3.5 text-slate-900 font-semibold">
                     {formatCurrency(yrn.InvoiceAmount || 0)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3.5 text-slate-800 font-semibold text-emerald-700">
-                    {formatCurrency(yrn.PaidAmount || 0)}
+                  <td className="px-4 py-3.5 text-slate-800 text-xs">
+                    {yrn?.yarn_payment_details?.length ?
+                      <div className="space-y-0.5">
+                        {yrn.yarn_payment_details.map((row: any, idx: number) => (
+                          <div key={idx} className="whitespace-nowrap">
+                            <span className="font-semibold text-slate-900">{formatDate(row.Date) + ' - ' + row.Type + ' - ' + row.Amount}</span>
+                          </div>
+                        ))}
+                      </div>
+                      : null}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5 font-bold">
                     <span className={(yrn.InvoiceAmount - yrn.PaidAmount) > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
