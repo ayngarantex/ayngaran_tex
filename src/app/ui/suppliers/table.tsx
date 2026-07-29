@@ -12,107 +12,80 @@ export default async function SupplierTable({
 }: {
   query: string;
   currentPage: number;
-  startDate: string,
-  endDate: string
-  billType: string,
-  orderBy: string
+  startDate: string;
+  endDate: string;
+  billType: string;
+  orderBy: string;
 }) {
   const suppliers = await fetchSuppliers(query, currentPage, orderBy);
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-blue-50 p-2 md:pt-0">
-          <table className="hidden min-w-full text-gray-900 md:table">
-            <thead className="rounded-lg text-left text-sm font-normal">
-              <tr className='font-bold'>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+        <div className="rounded-xl bg-white border border-slate-200 p-2 md:p-4 shadow-sm overflow-x-auto">
+          <table className="min-w-full text-slate-900 align-middle">
+            <thead className="rounded-lg text-left text-xs sm:text-sm font-bold bg-slate-100 text-slate-900 uppercase tracking-wider">
+              <tr>
+                <th scope="col" className="px-4 py-3.5 font-bold sm:pl-6">
                   Supplier Name
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold">
-                  Gst Number
+                <th scope="col" className="px-3 py-3.5 font-bold">
+                  GST Number
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   State
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Mobile
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Agent
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Pending
                 </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3">
-                  <span className="sr-only">Edit</span>
+                <th scope="col" className="px-4 py-3.5 font-bold">
+                  Address
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 w-[200px]">
-                  Adderss
+                <th scope="col" className="relative py-3.5 pl-6 pr-3 text-right font-bold">
+                  Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-white divide-y divide-slate-100 text-sm font-medium">
               {suppliers?.map((sup: any) => (
                 <tr
-                  key={`inv'${sup.SupplierId}`}
-                  className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                  key={`inv_${sup.SupplierId}`}
+                  className="hover:bg-slate-50/80 transition-colors text-slate-900"
                 >
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      {sup?.Name}
-                    </div>
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 font-semibold text-slate-900">
+                    {sup?.Name}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      {sup?.GstNumber}
-                    </div>
+                  <td className="whitespace-nowrap px-3 py-3.5 text-slate-800 font-mono text-xs font-semibold">
+                    {sup?.GstNumber || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      {sup?.State}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-800">
+                    {sup?.State || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      {sup?.Mobile}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-800 font-mono text-xs">
+                    {sup?.Mobile || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      {sup?.Agent}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-800">
+                    {sup?.Agent || '-'}
                   </td>
-
-                  {sup?.pendingAmount >= 0 ?
-                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                      <div className={`flex items-center gap-3 ${sup?.pendingAmount ? 'text-red-500 text-lg' : ''}`}>
-                        {formatCurrency(sup?.pendingAmount)}
-                      </div>
-                    </td>
-                    :
-                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                      <div className={`flex items-center gap-3 ${sup?.yarns.reduce((sum: number, yrn: any) => {
-                        return sum + ((yrn.InvoiceAmount ?? 0) - (yrn.PaidAmount ?? 0));
-                      }, 0) > 0 ? 'text-red-500 text-lg' : ''}`}>
-                        {formatCurrency(
-                          sup?.yarns.reduce((sum: number, yrn: any) => {
-                            return sum + ((yrn.InvoiceAmount ?? 0) - (yrn.PaidAmount ?? 0));
-                          }, 0)
-                        )}
-                      </div>
-                    </td>
-                  }
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex justify-end gap-3">
+                  <td className="whitespace-nowrap px-4 py-3.5 font-bold">
+                    <span className={sup?.pendingAmount > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
+                      {formatCurrency(sup?.pendingAmount || 0)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-slate-700 max-w-xs truncate">
+                    {sup?.Address || '-'}
+                  </td>
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 text-right">
+                    <div className="flex justify-end items-center gap-2">
                       <SupplierLeader id={sup.SupplierId} startDate={startDate} endDate={endDate} billType={billType} />
                       <UpdateSupplier id={sup.SupplierId} />
                       <DeleteSupplier id={sup.SupplierId} />
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 w-[200px]">
-                    <div className="flex items-center gap-3 w-[200px] text-wrap">
-                      {sup?.Address}
                     </div>
                   </td>
                 </tr>

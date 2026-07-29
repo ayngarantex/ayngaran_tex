@@ -16,8 +16,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Home', href: '/admin', icon: HomeIcon },
   { name: 'Invoices', href: '/admin/invoices', icon: DocumentDuplicateIcon },
@@ -33,25 +31,29 @@ const links = [
   { name: 'Beem', href: '/admin/beem', icon: DocumentDuplicateIcon },
 ];
 
-export default function NavLinks() {
+export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
+
   return (
     <>
       {links.map((link) => {
         const LinkIcon = link.icon;
+        const isActive = pathname === link.href;
         return (
           <Link
             key={link.name}
             href={link.href}
+            onClick={onItemClick}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-blue-50 p-3 text-sm font-medium hover:bg-black hover:text-white md:flex-none md:justify-start md:p-2 md:px-3',
+              'flex h-11 shrink-0 items-center justify-start gap-3 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition-all duration-150',
               {
-                'bg-blue-400 text-white': pathname === link.href,
+                'bg-slate-900 text-white shadow-md font-bold': isActive,
+                'bg-white text-slate-900 border border-slate-200/80 hover:bg-slate-100 hover:text-black': !isActive,
               },
             )}
           >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            <LinkIcon className="h-5 w-5 shrink-0" />
+            <p className="whitespace-nowrap text-sm font-semibold text-slate-900">{link.name}</p>
           </Link>
         );
       })}

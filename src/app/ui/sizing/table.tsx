@@ -10,84 +10,73 @@ export default async function InvoicesTable({
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-blue-50 p-2 md:pt-0">
-          <table className="hidden min-w-full text-gray-900 md:table">
-            <thead className="rounded-lg text-left text-sm font-normal">
-              <tr className='font-bold'>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+        <div className="rounded-xl bg-white border border-slate-200 p-2 md:p-4 shadow-sm overflow-x-auto">
+          <table className="min-w-full text-slate-900 align-middle">
+            <thead className="rounded-lg text-left text-xs sm:text-sm font-bold bg-slate-100 text-slate-900 uppercase tracking-wider">
+              <tr>
+                <th scope="col" className="px-4 py-3.5 font-bold sm:pl-6">
                   Bill Number
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold">
+                <th scope="col" className="px-3 py-3.5 font-bold">
                   Date
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Supplier
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Warp Design
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold">
+                <th scope="col" className="px-3 py-3.5 font-bold">
                   Amount
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold">
+                <th scope="col" className="px-3 py-3.5 font-bold">
                   Paid
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold">
+                <th scope="col" className="px-3 py-3.5 font-bold">
                   Balance
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold">
+                <th scope="col" className="px-3 py-3.5 font-bold">
                   Status
                 </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3">
-                  <span className="sr-only">Edit</span>
+                <th scope="col" className="relative py-3.5 pl-6 pr-3 text-right font-bold">
+                  Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-white divide-y divide-slate-100 text-sm font-medium">
               {sizing?.map((siz: any, index: number) => (
                 <tr
-                  key={`inv'${index}`}
-                  className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                  key={`inv_${index}`}
+                  className="hover:bg-slate-50/80 transition-colors text-slate-900"
                 >
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center">
-                      {siz?.BillType === 'gst' ?
-                        <span className=''>{siz?.BillType} - </span>
-                        : null}
-                      {siz?.InvoiceNumber}
-                    </div>
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 font-semibold text-slate-900">
+                    {siz?.InvoiceNumber}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateNew(siz?.InvoiceDate)}
+                  <td className="whitespace-nowrap px-3 py-3.5 text-slate-800">
+                    {siz?.InvoiceDate ? formatDateNew(siz.InvoiceDate) : '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
-                      {siz?.SizingName}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-900 font-semibold">
+                    {siz?.SupplierName}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3 font-semibold text-red-600">
-                      {siz?.Color}
-                    </div>
+                  <td className="px-4 py-3.5 text-slate-800 text-xs">
+                    {siz?.Color} ({siz?.Meters}m)
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {siz?.InvoiceAmount ? formatCurrency(siz?.InvoiceAmount) : ""}
+                  <td className="whitespace-nowrap px-3 py-3.5 text-slate-900 font-semibold">
+                    {formatCurrency(siz.InvoiceAmount || 0)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {siz?.ReceivedAmount ? formatCurrency(siz?.ReceivedAmount) : ""}
+                  <td className="whitespace-nowrap px-3 py-3.5 text-emerald-700 font-semibold">
+                    {formatCurrency(siz.ReceivedAmount || 0)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {formatCurrency(siz?.InvoiceAmount - (siz?.ReceivedAmount || 0))}
+                  <td className="whitespace-nowrap px-3 py-3.5 font-bold">
+                    <span className={(siz.InvoiceAmount - siz.ReceivedAmount) > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
+                      {formatCurrency((siz.InvoiceAmount || 0) - (siz.ReceivedAmount || 0))}
+                    </span>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    <InvoiceStatus
-                      ReceivedAmount={siz?.ReceivedAmount || 0}
-                      InvoiceAmount={siz?.InvoiceAmount || 0}
-                      InvoiceDate={siz?.InvoiceDate}
-                    />
+                  <td className="whitespace-nowrap px-3 py-3.5">
+                    <InvoiceStatus InvoiceAmount={siz.InvoiceAmount} ReceivedAmount={siz.ReceivedAmount} InvoiceDate={siz.InvoiceDate} />
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex justify-end gap-3">
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 text-right">
+                    <div className="flex justify-end items-center gap-2">
                       <UpdateSizing id={siz?.SizingId} />
                       <DeleteSizing id={siz?.SizingId} />
                     </div>

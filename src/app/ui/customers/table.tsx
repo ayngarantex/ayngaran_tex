@@ -13,94 +13,82 @@ export default async function CustomerTable({
 }: {
   query: string;
   currentPage: number;
-  startDate: string,
-  endDate: string
-  billType: string,
-  orderBy: string,
-  limit?: number | null
+  startDate: string;
+  endDate: string;
+  billType: string;
+  orderBy: string;
+  limit?: number | null;
 }) {
   const customers = await fetchCustomers(query, currentPage, orderBy, startDate, endDate, limit);
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-blue-50 p-2 md:pt-0">
-          <table className="hidden min-w-full text-gray-900 md:table">
-            <thead className="rounded-lg text-left text-sm font-normal">
-              <tr className='font-bold'>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 col-name">
+        <div className="rounded-xl bg-white border border-slate-200 p-2 md:p-4 shadow-sm overflow-x-auto">
+          <table className="min-w-full text-slate-900 align-middle">
+            <thead className="rounded-lg text-left text-xs sm:text-sm font-bold bg-slate-100 text-slate-900 uppercase tracking-wider">
+              <tr>
+                <th scope="col" className="px-4 py-3.5 font-bold sm:pl-6">
                   Customer Name
                 </th>
-                <th scope="col" className="px-3 py-5 font-bold col-gst">
-                  Gst Number
+                <th scope="col" className="px-3 py-3.5 font-bold">
+                  GST Number
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 col-state">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   State
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 col-mobile">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Mobile
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 col-agent">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Agent
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 col-pending">
+                <th scope="col" className="px-4 py-3.5 font-bold">
                   Pending
                 </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3 no-print">
-                  <span className="sr-only">Edit</span>
+                <th scope="col" className="px-4 py-3.5 font-bold">
+                  Address
                 </th>
-                <th scope="col" className="px-4 py-5 font-bold sm:pl-6 w-[200px] col-address">
-                  Adderss
+                <th scope="col" className="relative py-3.5 pl-6 pr-3 text-right font-bold no-print">
+                  Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
-              {customers?.map((cus: any) => (
+            <tbody className="bg-white divide-y divide-slate-100 text-sm font-medium">
+              {customers?.map((cust: any) => (
                 <tr
-                  key={`inv'${cus.CustomerId}`}
-                  className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                  key={`inv_${cust.CustomerId}`}
+                  className="hover:bg-slate-50/80 transition-colors text-slate-900"
                 >
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 col-name">
-                    <div className="flex items-center gap-3">
-                      {cus?.CustomerName}
-                    </div>
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 font-semibold text-slate-900">
+                    {cust?.CustomerName}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 col-gst">
-                    <div className="flex items-center gap-3">
-                      {cus?.GstNumber}
-                    </div>
+                  <td className="whitespace-nowrap px-3 py-3.5 text-slate-800 font-mono text-xs font-semibold">
+                    {cust?.GstNumber || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 col-state">
-                    <div className="flex items-center gap-3">
-                      {cus?.State}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-800">
+                    {cust?.State || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 col-mobile">
-                    <div className="flex items-center gap-3">
-                      {cus?.Mobile}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-800 font-mono text-xs">
+                    {cust?.Mobile || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 col-agent">
-                    <div className="flex items-center gap-3">
-                      {cus?.Agent}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-800">
+                    {cust?.Agent || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 col-pending">
-                    <div className={`flex items-center gap-3 ${cus?.pending > 0 ? 'text-red-500 text-lg' : ''}`}>
-                      {formatCurrency(cus?.pending || 0)}
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-3.5 font-bold">
+                    <span className={cust?.pending > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
+                      {formatCurrency(cust?.pending || 0)}
+                    </span>
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 no-print">
-                    <div className="flex justify-end gap-3">
-                      <UpdateCustomerProduct id={cus.CustomerId} />
-                      <CustomerLeader id={cus.CustomerId} startDate={startDate} endDate={endDate} billType={billType} />
-                      <UpdateCustomer id={cus.CustomerId} />
-                      <DeleteCustomer id={cus.CustomerId} />
-                    </div>
+                  <td className="px-4 py-3.5 text-slate-700 max-w-xs truncate">
+                    {cust?.Address || '-'}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3 w-[200px] col-address">
-                    <div className="flex items-center gap-3 w-[200px] text-wrap">
-                      {cus?.Address}
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 text-right no-print">
+                    <div className="flex justify-end items-center gap-2">
+                      <UpdateCustomerProduct id={cust.CustomerId} />
+                      <CustomerLeader id={cust.CustomerId} startDate={startDate} endDate={endDate} billType={billType} />
+                      <UpdateCustomer id={cust.CustomerId} />
+                      <DeleteCustomer id={cust.CustomerId} />
                     </div>
                   </td>
                 </tr>
