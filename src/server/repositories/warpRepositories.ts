@@ -224,7 +224,7 @@ export const getWarpSummary = async (
     }
 
     query += `
-    GROUP BY S.SizingId, L.LoomId
+    GROUP BY S.SizingId, L.LoomId, S.InvoiceDate, S.InvoiceNumber, S.Color, Sup.Name, L.LoomName
     ORDER BY S.InvoiceDate DESC
     `;
 
@@ -261,7 +261,7 @@ export const getWarpSummaryById = async (loomId: any, sizingId: any) => {
         LEFT JOIN sizing_warp_details SWD ON S.SizingId = SWD.SizingId AND SWD.LoomId = ${Number(loomId)}
         LEFT JOIN loom_details L ON SWD.LoomId = L.LoomId
         WHERE S.SizingId = ${Number(sizingId)}
-        GROUP BY S.SizingId
+        GROUP BY S.SizingId, L.LoomId, S.InvoiceDate, S.Color, L.LoomName
     `;
 
     const [sizingDetailsResult]: any = await db.query(sizingDetailsQuery);
