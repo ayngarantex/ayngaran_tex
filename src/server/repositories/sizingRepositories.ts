@@ -11,10 +11,10 @@ export const getSizings = async (
 ) => {
     let sql = `
     SELECT S.*, Sup.Name AS SupplierName, Sup.Name AS SizingName, Sup.GstNumber AS SupplierGstNumber,
-           Sup.Agent AS SupplierAgent, Sup.AccountNumber AS SupplierAccountNumber, Sup.Bank AS SupplierBank, COUNT(SWD.WarpId) AS TotalWarp
+           Sup.Agent AS SupplierAgent, Sup.AccountNumber AS SupplierAccountNumber, Sup.Bank AS SupplierBank,
+           (SELECT COUNT(*) FROM sizing_warp_details SWD WHERE SWD.SizingId = S.SizingId) AS TotalWarp
     FROM sizing S
     LEFT JOIN suppliers Sup ON S.SupplierId = Sup.SupplierId
-    LEFT JOIN sizing_warp_details SWD ON S.SizingId = SWD.SizingId    
     WHERE 1=1
     `;
     let params: any[] = [];
@@ -37,8 +37,6 @@ export const getSizings = async (
         sql += " AND S.BillType = ? ";
         params.push(billType);
     }
-
-    sql += " GROUP BY S.SizingId ";
 
     if (orderBy === 'pending') {
         sql += ` ORDER BY 
