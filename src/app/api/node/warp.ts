@@ -1,4 +1,5 @@
 import { pageLimit } from "@/app/lib/utils";
+import { getWarps, getWarpsCount, getWarpById, updateWarpRepo, getWarpSummary, getWarpSummaryById, updateWarpSummaryRepo } from "@/server/repositories/warpRepositories";
 
 export const fetchWarps = async (
     query: string,
@@ -7,64 +8,12 @@ export const fetchWarps = async (
     loomStatus: string,
     sizingId: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetWarps(
-                        $search: String,
-                        $page: Int,
-                        $limit: Int,
-                        $loomId: String,
-                        $loomStatus: String,
-                        $sizingId: String
-                    ) {
-                        warps(
-                            search: $search,
-                            page: $page,
-                            limit: $limit,
-                            loomId: $loomId,
-                            loomStatus: $loomStatus,
-                            sizingId: $sizingId,
-                        ) {
-                            WarpId,
-                            SizingId,
-                            Color,
-                            Weight,
-                            Meters,
-                            LoomId,
-                            LoomName,
-                            LoomNumber,
-                            lastDcNumber,
-                            lastCount,
-                            lastDcDate,
-                            totalDhoties,
-                            StartDate,
-                            CompletedDate,
-                            DeliveredDate                            
-                        }
-                    }
-                `,
-                variables: {
-                    search: query,
-                    loomId: loomId,
-                    loomStatus: loomStatus,
-                    sizingId: sizingId,
-                    page: currentPage,
-                    limit: pageLimit,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result?.data?.warps || [];
+    try {
+        return await getWarps(query || null, loomId || null, loomStatus || null, sizingId || null, currentPage || 1, pageLimit);
+    } catch (err) {
+        console.error("fetchWarps Error:", err);
+        return [];
+    }
 };
 
 export const fetchWarpsCount = async (
@@ -73,120 +22,25 @@ export const fetchWarpsCount = async (
     loomStatus: string,
     sizingId: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetWarpsCount(
-                        $search: String,
-                        $loomId: String,
-                        $loomStatus: String,
-                        $sizingId: String
-                    ) {
-                        warpCount(
-                            search: $search,
-                            loomId: $loomId,
-                            loomStatus: $loomStatus,
-                            sizingId: $sizingId,
-                        )
-                    }
-                `,
-                variables: {
-                    search: query,
-                    loomId: loomId,
-                    loomStatus: loomStatus,
-                    sizingId: sizingId,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result?.data?.warpCount;
+    try {
+        return await getWarpsCount(query || null, loomId || null, loomStatus || null, sizingId || null);
+    } catch (err) {
+        console.error("fetchWarpsCount Error:", err);
+        return 0;
+    }
 };
 
 export const fetchWarpById = async (id: string) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetWarpById(
-                        $Id: ID!
-                    ) {
-                        warp(Id: $Id) {
-                            WarpId,
-                            SizingId,
-                            Color,
-                            Weight,
-                            Meters,
-                            LoomId,
-                            LoomName,
-                            LoomNumber,
-                            StartDate,
-                            CompletedDate,
-                            DeliveredDate,
-                            warp_dc_details {
-                                DcId,
-                                Dc,
-                                Color,
-                                Date,
-                                Piece,                                
-                                Count,
-                                Weight
-                            }
-                        }
-                    }
-                `,
-                variables: {
-                    Id: id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result?.data?.warp;
+    try {
+        return await getWarpById(id);
+    } catch (err) {
+        console.error("fetchWarpById Error:", err);
+        return null;
+    }
 };
 
 export const updateWarp = async (warpData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateWarp($warpData: WarpInput!) {
-                        updateWarp(warpData: $warpData)
-                    }
-                `,
-                variables: {
-                    warpData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
+    return await updateWarpRepo(warpData);
 };
 
 export const fetchWarpSummary = async (
@@ -194,132 +48,23 @@ export const fetchWarpSummary = async (
     loomId: string,
     sizingId: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetWarpSummary(
-                        $search: String,
-                        $loomId: String,
-                        $sizingId: String
-                    ) {
-                        warpSummary(
-                            search: $search,
-                            loomId: $loomId,
-                            sizingId: $sizingId
-                        ) {
-                            InvoiceDate,
-                            InvoiceNumber,
-                            SizingId,
-                            SupplierName
-                            Color
-                            TotalWarps,
-                            TotalWeight,
-                            TotalMeters,
-                            LoomId,
-                            LoomName,
-                            ReceivedWeight,
-                            ReceivedDhoties
-                            IsCompleted                        
-                        }
-                    }
-                `,
-                variables: {
-                    search: query,
-                    loomId: loomId,
-                    sizingId: sizingId,
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result?.data?.warpSummary || [];
+    try {
+        return await getWarpSummary(query || null, loomId || null, sizingId || null);
+    } catch (err) {
+        console.error("fetchWarpSummary Error:", err);
+        return [];
+    }
 };
 
 export const fetchWarpSummaryById = async (sizingId: string, loomId: string) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetWarpSummaryById(
-                        $sizingId: String
-                        $loomId: String
-                    ) {
-                        warpSummaryById(sizingId: $sizingId, loomId: $loomId) {
-                            InvoiceDate
-                            SizingId
-                            Color
-                            TotalWarps
-                            TotalWeight
-                            TotalMeters
-                            LoomId,
-                            LoomName
-                            IsCompleted
-                            warp_detail {
-                                WarpId
-                                SizingId
-                                Color
-                                Weight
-                                Meters
-                            }
-                            warp_summary_details {
-                                DcId
-                                Dc
-                                Date
-                                Piece
-                                Count
-                                Weight
-                            }
-                        }
-                    }
-                `,
-                variables: {
-                    sizingId: sizingId,
-                    loomId: loomId
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result?.data?.warpSummaryById;
+    try {
+        return await getWarpSummaryById(sizingId, loomId);
+    } catch (err) {
+        console.error("fetchWarpSummaryById Error:", err);
+        return null;
+    }
 };
 
 export const updateWarpSummary = async (summaryData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateWarpSummary($summaryData: WarpSummaryUpdateInput!) {
-                        updateWarpSummary(summaryData: $summaryData)
-                    }
-                `,
-                variables: {
-                    summaryData
-                }
-            })
-        }
-    );
-    const result = await response.json();
-    return result;
+    return await updateWarpSummaryRepo(summaryData);
 };
