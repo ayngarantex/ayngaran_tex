@@ -7,21 +7,26 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = false, LoomName = false, LoomsFetch = false, looms = [], hideBillType = false, LoomStatus = false, sizing = false, sizingList = [] }: {
     hidePage?: boolean, hideYear?: boolean, orderBy?: boolean, LoomName?: boolean, LoomsFetch?: boolean, looms?: any[], hideBillType?: boolean, LoomStatus?: boolean, sizing?: boolean, sizingList?: any[]
 }) {
-    const [startDate, setStartDate] = useState<string>("");
-    const [endDate, setEndDate] = useState<string>("");
-    const [billType, setBillType] = useState<string>("");
-    const [orderByColumn, setOrderByColumn] = useState<string>("");
-    const [loomName, setLoomName] = useState<string>("");
-    const [loomId, setLoomId] = useState<string>("");
-    const [sizingId, setSizingId] = useState<string>("");
-    const [loomStatus, setLoomStatus] = useState<string>("");
-    const [financialYear, setFinancialYear] = useState<string>(getFinancialYear(new Date().toISOString()));
-
-    const searchParams = useSearchParams()
+    const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
 
-    const [start, end] = financialYear.split("-").map(String);
+    const paramStartDate = searchParams.get('startDate');
+    const paramEndDate = searchParams.get('endDate');
+
+    const initialFy = paramStartDate && paramEndDate 
+        ? getFinancialYear(paramStartDate)
+        : "All";
+
+    const [financialYear, setFinancialYear] = useState<string>(initialFy);
+    const [startDate, setStartDate] = useState<string>(paramStartDate || "");
+    const [endDate, setEndDate] = useState<string>(paramEndDate || "");
+    const [billType, setBillType] = useState<string>(searchParams.get('billType') || "");
+    const [orderByColumn, setOrderByColumn] = useState<string>(searchParams.get('orderBy') || "");
+    const [loomName, setLoomName] = useState<string>(searchParams.get('loomName') || "");
+    const [loomId, setLoomId] = useState<string>(searchParams.get('loomId') || "");
+    const [sizingId, setSizingId] = useState<string>(searchParams.get('sizingId') || "");
+    const [loomStatus, setLoomStatus] = useState<string>(searchParams.get('loomStatus') || "");
 
     useEffect(() => {
         const params = new URLSearchParams(searchParams);
@@ -121,7 +126,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                             setBillType(e.target.value)
                         }}
                         className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-5 text-sm outline-2 placeholder:text-gray-500"
-                    // value={billType}
+                        value={billType}
                     >
                         <option key={'select'} value={''}>Bill Type </option>
                         <option key='normal' value='normal'>Normal Bill</option>
