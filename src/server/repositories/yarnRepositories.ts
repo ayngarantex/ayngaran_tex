@@ -250,7 +250,7 @@ export const createYarn = async (
                 Cgst, Sgst, Igst, AfterTax, BillType, RoundOff, InvoiceAmount, PaidAmount
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                invoiceData.SupplierId || null,
+                Number(invoiceData.SupplierId) > 0 ? Number(invoiceData.SupplierId) : null,
                 invoiceData.InvoiceNumber || null,
                 invoiceData.InvoiceDate ? new Date(invoiceData.InvoiceDate) : null,
                 invoiceData.BeforeTax || 0,

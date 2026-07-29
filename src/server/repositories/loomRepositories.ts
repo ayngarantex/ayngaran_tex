@@ -67,9 +67,10 @@ export const getEntryById = async (Id: any) => {
 export const createEntry = async (entryData: any) => {
     if (entryData && entryData.length > 0) {
         for (const item of entryData) {
+            const loomId = Number(item.LoomId) > 0 ? Number(item.LoomId) : null;
             await db.query(
                 "INSERT INTO loom_entries (Date, Type, LoomId, Details, BabbinCount, Weight) VALUES (?, ?, ?, ?, ?, ?)",
-                [item.Date, item.Type, item.LoomId, item.Details, item.BabbinCount, item.Weight]
+                [item.Date, item.Type, loomId, item.Details, item.BabbinCount, item.Weight]
             );
         }
         return "Created";
@@ -79,10 +80,11 @@ export const createEntry = async (entryData: any) => {
 
 export const updateEntry = async (entryData: any) => {
     const { LoomEntryId, Date, Type, LoomId, Details, BabbinCount, Weight } = entryData;
+    const loomId = Number(LoomId) > 0 ? Number(LoomId) : null;
 
     const [result]: any = await db.query(
         "UPDATE loom_entries SET Date = ?, Type = ?, LoomId = ?, Details = ?, BabbinCount = ?, Weight = ? WHERE LoomEntryId = ?",
-        [Date, Type, LoomId, Details, BabbinCount, Weight, LoomEntryId]
+        [Date, Type, loomId, Details, BabbinCount, Weight, LoomEntryId]
     );
     return result.affectedRows;
 }

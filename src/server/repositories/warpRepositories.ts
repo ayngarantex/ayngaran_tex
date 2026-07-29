@@ -131,7 +131,7 @@ export const getWarpById = async (id: any) => {
 export const updateWarp = async (warpData: any) => {
     await db.query(
         "UPDATE sizing_warp_details SET StartDate=?, CompletedDate=?, LoomId=?, LoomNumber=? WHERE WarpId=?",
-        [warpData?.StartDate || null, warpData?.EndDate || null, warpData?.LoomId || null, warpData?.LoomNumber || null, warpData.WarpId]
+        [warpData?.StartDate || null, warpData?.EndDate || null, Number(warpData?.LoomId) > 0 ? Number(warpData?.LoomId) : null, warpData?.LoomNumber || null, Number(warpData.WarpId)]
     );
 
     const [getWarpDc]: any = await db.query(

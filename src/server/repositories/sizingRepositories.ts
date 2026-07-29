@@ -255,7 +255,7 @@ export const createSizing = async (
                 Cgst, Sgst, Igst, AfterTax, RoundOff, InvoiceAmount, ReceivedAmount
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                invoiceData.SupplierId || null,
+                Number(invoiceData.SupplierId) > 0 ? Number(invoiceData.SupplierId) : null,
                 invoiceData.InvoiceNumber || null,
                 invoiceData.InvoiceDate ? new Date(invoiceData.InvoiceDate) : null,
                 invoiceData.WarpType || null,

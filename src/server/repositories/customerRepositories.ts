@@ -194,11 +194,14 @@ export const updateCustomerProduct = async (CustomerData: any) => {
             [CustomerData.CustomerId]
         );
 
-        for (const item of CustomerData.Products) {
-            await conn.query(
-                "INSERT INTO customer_product_code (CustomerId, ProductId, ProductCode) VALUES (?, ?, ?)",
-                [CustomerData.CustomerId, item.id, item.code]
-            );
+        for (const item of CustomerData.Products || []) {
+            const prodId = Number(item.id || item.ProductId || 0);
+            if (prodId > 0) {
+                await conn.query(
+                    "INSERT INTO customer_product_code (CustomerId, ProductId, ProductCode) VALUES (?, ?, ?)",
+                    [Number(CustomerData.CustomerId), prodId, item.code || '']
+                );
+            }
         }
 
         await conn.commit();

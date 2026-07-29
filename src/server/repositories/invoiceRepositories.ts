@@ -222,37 +222,48 @@ export const createInvoice = async (invoiceData: any) => {
     try {
         await conn.beginTransaction();
 
+        const customerId = Number(invoiceData.CustomerId) > 0 ? Number(invoiceData.CustomerId) : null;
+
         const [result]: any = await conn.query(
             "INSERT INTO invoice (InvoiceNumber, InvoiceDate, InvoiceType, CustomerId, EwayBillNumber, BillType, BeforeTax, TaxPercentage, Cgst, Sgst, Igst, AfterTax, RoundOff, Discount, InvoiceAmount, ReceivedAmount, IsCancel, CancelReason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, invoiceData.CustomerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason]
+            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason]
         );
 
         const invoiceId = result.insertId;
 
         if (invoiceData.products && invoiceData.products.length > 0) {
             for (const item of invoiceData.products) {
-                await conn.query(
-                    `INSERT INTO invoice_details (InvoiceId, ItemId, ProductName, Quantity, QuantityType, Price, Type, Total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [invoiceId, item.product, item.productName, item.quantity, item.quantityType, item.price, item.type, item.price * item.quantity]
-                );
+                const itemId = Number(item.product ?? item.ItemId ?? item.Pid ?? 0);
+                if (itemId > 0) {
+                    await conn.query(
+                        `INSERT INTO invoice_details (InvoiceId, ItemId, ProductName, Quantity, QuantityType, Price, Type, Total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [invoiceId, itemId, item.productName || item.ProductName || '', Number(item.quantity || item.Quantity || 0), item.quantityType || item.QuantityType || '', Number(item.price || item.Price || 0), item.type || item.Type || '', Number(item.price || item.Price || 0) * Number(item.quantity || item.Quantity || 0)]
+                    );
+                }
             }
         }
 
-        if (invoiceData.retrunProducts && invoiceData.retrunProducts.length > 0) {
-            for (const item of invoiceData.retrunProducts) {
-                await conn.query(
-                    `INSERT INTO invoice_return_details (InvoiceId, ItemId, ProductName, Quantity, Price) VALUES (?, ?, ?, ?, ?)`,
-                    [invoiceId, item.product, item.productName, item.quantity, item.price]
-                );
+        const returnList = invoiceData.returnProducts || invoiceData.retrunProducts || [];
+        if (returnList && returnList.length > 0) {
+            for (const item of returnList) {
+                const itemId = Number(item.product ?? item.ItemId ?? item.Pid ?? 0);
+                if (itemId > 0) {
+                    await conn.query(
+                        `INSERT INTO invoice_return_details (InvoiceId, ItemId, ProductName, Quantity, Price) VALUES (?, ?, ?, ?, ?)`,
+                        [invoiceId, itemId, item.productName || item.ProductName || '', Number(item.quantity || item.Quantity || 0), Number(item.price || item.Price || 0)]
+                    );
+                }
             }
         }
 
         if (invoiceData.payments && invoiceData.payments.length > 0) {
             for (const item of invoiceData.payments) {
-                await conn.query(
-                    `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
-                    [invoiceId, item.date, item.amount, item.type, item.to]
-                );
+                if (item.date && item.date !== 'date') {
+                    await conn.query(
+                        `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                        [invoiceId, item.date, item.amount, item.type, item.to]
+                    );
+                }
             }
         }
 
@@ -314,50 +325,62 @@ export const updateInvoice = async (invoiceData: any) => {
     try {
         await conn.beginTransaction();
 
+        const customerId = Number(invoiceData.CustomerId) > 0 ? Number(invoiceData.CustomerId) : null;
+        const invId = Number(invoiceData.InvoiceId || invoiceData.id);
+
         await conn.query(
             "UPDATE invoice SET InvoiceNumber = ?, InvoiceDate = ?, InvoiceType = ?, CustomerId = ?, EwayBillNumber = ?, BillType = ?, BeforeTax = ?, TaxPercentage = ?, Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, Discount = ?, InvoiceAmount = ?, ReceivedAmount = ?, IsCancel = ?, CancelReason = ? WHERE InvoiceId = ?",
-            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, invoiceData.CustomerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.InvoiceId]
+            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invId]
         );
 
         await conn.query(
             "DELETE FROM invoice_details WHERE InvoiceId = ?",
-            [invoiceData.InvoiceId]
+            [invId]
         );
 
         await conn.query(
             "DELETE FROM payment_details WHERE InvoiceId = ?",
-            [invoiceData.InvoiceId]
+            [invId]
         );
 
         await conn.query(
             "DELETE FROM invoice_return_details WHERE InvoiceId = ?",
-            [invoiceData.InvoiceId]
+            [invId]
         );
 
         if (invoiceData.products && invoiceData.products.length > 0) {
             for (const item of invoiceData.products) {
-                await conn.query(
-                    `INSERT INTO invoice_details (InvoiceId, ItemId, ProductName, Quantity, QuantityType, Price, Type, Total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [invoiceData.InvoiceId, item.product, item.productName, item.quantity, item.quantityType, item.price, item.type, item.price * item.quantity]
-                );
+                const itemId = Number(item.product ?? item.ItemId ?? item.Pid ?? 0);
+                if (itemId > 0) {
+                    await conn.query(
+                        `INSERT INTO invoice_details (InvoiceId, ItemId, ProductName, Quantity, QuantityType, Price, Type, Total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [invId, itemId, item.productName || item.ProductName || '', Number(item.quantity || item.Quantity || 0), item.quantityType || item.QuantityType || '', Number(item.price || item.Price || 0), item.type || item.Type || '', Number(item.price || item.Price || 0) * Number(item.quantity || item.Quantity || 0)]
+                    );
+                }
             }
         }
 
-        if (invoiceData.returnProducts && invoiceData.returnProducts.length > 0) {
-            for (const item of invoiceData.returnProducts) {
-                await conn.query(
-                    `INSERT INTO invoice_return_details (InvoiceId, ItemId, ProductName, Quantity, QuantityType, Price, Type, Total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [invoiceData.InvoiceId, item.product, item.productName, item.quantity, item.quantityType, item.price, item.type, item.price * item.quantity]
-                );
+        const returnList = invoiceData.returnProducts || invoiceData.retrunProducts || [];
+        if (returnList && returnList.length > 0) {
+            for (const item of returnList) {
+                const itemId = Number(item.product ?? item.ItemId ?? item.Pid ?? 0);
+                if (itemId > 0) {
+                    await conn.query(
+                        `INSERT INTO invoice_return_details (InvoiceId, ItemId, ProductName, Quantity, QuantityType, Price, Type, Total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [invId, itemId, item.productName || item.ProductName || '', Number(item.quantity || item.Quantity || 0), item.quantityType || item.QuantityType || '', Number(item.price || item.Price || 0), item.type || item.Type || '', Number(item.price || item.Price || 0) * Number(item.quantity || item.Quantity || 0)]
+                    );
+                }
             }
         }
 
         if (invoiceData.payments && invoiceData.payments.length > 0) {
             for (const item of invoiceData.payments) {
-                await conn.query(
-                    `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
-                    [invoiceData.InvoiceId, item.date, item.amount, item.type, item.to]
-                );
+                if (item.date && item.date !== 'date') {
+                    await conn.query(
+                        `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                        [invId, item.date, item.amount, item.type, item.to]
+                    );
+                }
             }
         }
 
