@@ -20,8 +20,8 @@ export const getSuppliers = async (
     let params: any[] = [];
 
     if (search != null && search !== "") {
-        sql += " AND (S.Name LIKE ? OR S.GstNumber LIKE ? OR S.State LIKE ?)";
-        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        sql += " AND (LOWER(S.Name) LIKE LOWER(?) OR LOWER(S.GstNumber) LIKE LOWER(?) OR LOWER(S.State) LIKE LOWER(?) OR LOWER(S.Agent) LIKE LOWER(?))";
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     if (type != null && type !== "" && type !== "All") {
@@ -50,8 +50,8 @@ export const getSupplierCount = async (search: string | null, type: string | nul
     let params: any[] = [];
 
     if (search != null && search !== "") {
-        sql += " AND (S.Name LIKE ? OR S.GstNumber LIKE ? OR S.State LIKE ?)";
-        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        sql += " AND (LOWER(S.Name) LIKE LOWER(?) OR LOWER(S.GstNumber) LIKE LOWER(?) OR LOWER(S.State) LIKE LOWER(?) OR LOWER(S.Agent) LIKE LOWER(?))";
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     if (type != null && type !== "" && type !== "All") {

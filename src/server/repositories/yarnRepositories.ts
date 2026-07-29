@@ -22,9 +22,9 @@ export const getYarns = async (
 
     if (search != null && search !== "") {
         sql += ` AND (
-            Y.InvoiceNumber LIKE ?
-            OR Sup.Name LIKE ?
-            OR Sup.GstNumber LIKE ?
+            LOWER(Y.InvoiceNumber) LIKE LOWER(?)
+            OR LOWER(Sup.Name) LIKE LOWER(?)
+            OR LOWER(Sup.GstNumber) LIKE LOWER(?)
         ) `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
@@ -110,9 +110,9 @@ export const getYarnCount = async (
 
     if (search != null && search !== "") {
         sql += ` AND (
-            Y.InvoiceNumber LIKE ?
-            OR Sup.Name LIKE ?
-            OR Sup.GstNumber LIKE ?
+            LOWER(Y.InvoiceNumber) LIKE LOWER(?)
+            OR LOWER(Sup.Name) LIKE LOWER(?)
+            OR LOWER(Sup.GstNumber) LIKE LOWER(?)
         ) `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
@@ -148,9 +148,9 @@ export const getYarnTotal = async (
 
     if (search != null && search !== "") {
         sql += ` AND (
-            Y.InvoiceNumber LIKE ?
-            OR Sup.Name LIKE ?
-            OR Sup.GstNumber LIKE ?
+            LOWER(Y.InvoiceNumber) LIKE LOWER(?)
+            OR LOWER(Sup.Name) LIKE LOWER(?)
+            OR LOWER(Sup.GstNumber) LIKE LOWER(?)
         ) `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }

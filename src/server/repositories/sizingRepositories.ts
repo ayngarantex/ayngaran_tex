@@ -21,9 +21,9 @@ export const getSizings = async (
 
     if (search != null && search !== "") {
         sql += ` AND (
-            S.InvoiceNumber LIKE ?
-            OR Sup.Name LIKE ?
-            OR Sup.GstNumber LIKE ?
+            LOWER(S.InvoiceNumber) LIKE LOWER(?)
+            OR LOWER(Sup.Name) LIKE LOWER(?)
+            OR LOWER(Sup.GstNumber) LIKE LOWER(?)
         ) `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }

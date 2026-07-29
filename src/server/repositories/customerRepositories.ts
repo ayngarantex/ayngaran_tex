@@ -21,10 +21,10 @@ export const getCustomers = async (
     if (search != "") {
         sql += `
         WHERE (
-            C.CustomerName LIKE ?
-            OR C.GstNumber LIKE ?
-            OR C.Agent LIKE ?
-            OR C.State LIKE ?
+            LOWER(C.CustomerName) LIKE LOWER(?)
+            OR LOWER(C.GstNumber) LIKE LOWER(?)
+            OR LOWER(C.Agent) LIKE LOWER(?)
+            OR LOWER(C.State) LIKE LOWER(?)
         )
     `;
 
@@ -68,10 +68,10 @@ export const customerPendingPayment = async (
     if (search != "") {
         sql += `
         WHERE (
-            C.CustomerName LIKE ?
-            OR C.GstNumber LIKE ?
-            OR C.Agent LIKE ?
-            OR C.State LIKE ?
+            LOWER(C.CustomerName) LIKE LOWER(?)
+            OR LOWER(C.GstNumber) LIKE LOWER(?)
+            OR LOWER(C.Agent) LIKE LOWER(?)
+            OR LOWER(C.State) LIKE LOWER(?)
         )
     `;
 
