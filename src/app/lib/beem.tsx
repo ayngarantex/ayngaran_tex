@@ -1,3 +1,5 @@
+"use server";
+
 import db from '@/server/config/db';
 
 export const fetchBeemDetailsById = async (id: number) => {

@@ -1,3 +1,5 @@
+"use server";
+
 import { pageLimit } from "@/app/lib/utils";
 
 export const fetchNodeProducts = async (

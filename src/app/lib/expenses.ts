@@ -1,3 +1,5 @@
+"use server";
+
 import db from '@/server/config/db';
 
 const ITEMS_PER_PAGE = 20;

@@ -1,3 +1,5 @@
+"use server";
+
 import { pageLimit } from "@/app/lib/utils";
 import { getWarps, getWarpCount, getWarpById, updateWarp as updateWarpRepo, getWarpSummary, getWarpSummaryById, updateWarpSummary as updateWarpSummaryRepo } from "@/server/repositories/warpRepositories";
 

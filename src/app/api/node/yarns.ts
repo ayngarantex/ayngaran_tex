@@ -1,3 +1,5 @@
+"use server";
+
 import { pageLimit } from "@/app/lib/utils";
 import { getYarns, getYarnCount, getYarnTotal, getYarnById, createYarn as createYarnRepo, updateYarn as updateYarnRepo, deleteYarn as deleteYarnRepo } from '@/server/repositories/yarnRepositories';
 

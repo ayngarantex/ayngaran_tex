@@ -1,3 +1,5 @@
+"use server";
+
 import { pageLimit } from "@/app/lib/utils";
 import { getSizings, getSizingCount, getSizingTotal, getSizingById, createSizing as createSizingRepo, updateSizing as updateSizingRepo, deleteSizing as deleteSizingRepo } from "@/server/repositories/sizingRepositories";
 
