@@ -1,408 +1,109 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
+import { getLooms, getLoomCount, getLoomById, createLoom as createLoomRepo, updateLoom as updateLoomRepo, deleteLoom as deleteLoomRepo, getEntryById, createEntry as createEntryRepo, updateEntry as updateEntryRepo, deleteEntry as deleteEntryRepo, getLoomEntriesByLoomId, getSizingWarpDetailsByLoomId } from "@/server/repositories/loomRepositories";
 
 export const fetchLooms = async (
     query: string,
     currentPage: number,
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetLooms(
-                        $search: String
-                    ) {
-                        looms(
-                            search: $search
-                        ) {
-                            LoomId
-                            LoomName
-                            Address
-                            ContactNumber
-                            Count   
-                        }
-                    }
-                `,
-                variables: {
-                    search: query,
-                    page: currentPage,
-                    limit: pageLimit
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.looms;
+    try {
+        const rows = await getLooms(query || null, currentPage || null, pageLimit);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchLooms Error:", err);
+        return [];
+    }
 };
 
 export const fetchLoomsCount = async (
     query: string,
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetLooms(
-                        $search: String
-                    ) {
-                        loomCount(
-                            search: $search
-                        )
-                    }
-                `,
-                variables: {
-                    search: query
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.loomCount;
+    try {
+        const count = await getLoomCount(query || null);
+        return count || 0;
+    } catch (err) {
+        console.error("fetchLoomsCount Error:", err);
+        return 0;
+    }
 };
 
 export const fetchLoomEntriesById = async (Id: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetLoomEntriesById(
-                        $Id: String
-                    ) {
-                        loomEntriesById(
-                            LoomEntryId: $Id
-                        )
-                    }
-                `,
-                variables: {
-                    Id: Id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.loomCount;
-}
+    try {
+        const entry = await getEntryById(Id);
+        return entry ? JSON.parse(JSON.stringify(entry)) : null;
+    } catch (err) {
+        console.error("fetchLoomEntriesById Error:", err);
+        return null;
+    }
+};
 
 export const createLoom = async (loomData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation CreateLoom($loomData: LoomInput!) {
-                        createLoom(loomData: $loomData)
-                    }
-                `,
-                variables: {
-                    loomData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
-}
+    const res = await createLoomRepo(loomData);
+    return JSON.parse(JSON.stringify(res));
+};
 
 export const fetchLoomById = async (Id: string) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetLoomById($Id: ID!) {
-                        loom(Id: $Id) {
-                            LoomId
-                            LoomName
-                            Address
-                            ContactNumber
-                            Count   
-                        }
-                    }
-                `,
-                variables: {
-                    Id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.loom;
-}
+    try {
+        const data = await getLoomById(Id);
+        return data ? JSON.parse(JSON.stringify(data)) : null;
+    } catch (err) {
+        console.error("fetchLoomById Error:", err);
+        return null;
+    }
+};
 
 export const updateLoom = async (loomData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateLoom($loomData: LoomInput!) {
-                        updateLoom(loomData: $loomData)
-                    }
-                `,
-                variables: {
-                    loomData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
-}
+    const res = await updateLoomRepo(loomData);
+    return JSON.parse(JSON.stringify(res));
+};
 
 export const deleteLoom = async (Id: string) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation DeleteLoom($Id: ID!) {
-                        deleteLoom(Id: $Id)
-                    }
-                `,
-                variables: {
-                    Id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
-}
+    const res = await deleteLoomRepo(Id);
+    return JSON.parse(JSON.stringify(res));
+};
 
 export const fetchEntryById = async (Id: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetEntryById($Id: ID!) {
-                        entry(Id: $Id) {
-                            LoomEntryId
-                            Date
-                            Type
-                            LoomId
-                            Details
-                            BabbinCount
-                            Weight  
-                        }
-                    }
-                `,
-                variables: {
-                    Id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.entry;
-}
+    try {
+        const data = await getEntryById(Id);
+        return data ? JSON.parse(JSON.stringify(data)) : null;
+    } catch (err) {
+        console.error("fetchEntryById Error:", err);
+        return null;
+    }
+};
 
 export const createEntry = async (entryData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation CreateEntry($entryData: [EntryInput!]!) {
-                        createEntry(entryData: $entryData)
-                    }
-                `,
-                variables: {
-                    entryData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
-}
+    const res = await createEntryRepo(entryData);
+    return JSON.parse(JSON.stringify(res));
+};
 
 export const updateEntry = async (entryData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateEntry($entryData: EntryInput!) {
-                        updateEntry(entryData: $entryData)
-                    }
-                `,
-                variables: {
-                    entryData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
-}
+    const res = await updateEntryRepo(entryData);
+    return JSON.parse(JSON.stringify(res));
+};
 
 export const deleteEntry = async (Id: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation DeleteEntry($Id: ID!) {
-                        deleteEntry(Id: $Id)
-                    }
-                `,
-                variables: {
-                    Id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
-}
+    const res = await deleteEntryRepo(Id);
+    return JSON.parse(JSON.stringify(res));
+};
 
 export const fetchLoomEntriesByLoomId = async (loomId: number) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetLoomEntries($LoomId: ID!) {
-                        loomEntries(LoomId: $LoomId) {
-                            LoomEntryId
-                            Date
-                            Type
-                            LoomId
-                            Details
-                            BabbinCount
-                            Weight
-                        }
-                    }
-                `,
-                variables: {
-                    LoomId: String(loomId)
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result?.data?.loomEntries || [];
+    try {
+        const rows = await getLoomEntriesByLoomId(loomId);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchLoomEntriesByLoomId Error:", err);
+        return [];
+    }
 };
 
 export const fetchSizingWarpDetailsByLoomId = async (loomId: number) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetSizingWarpDetails($LoomId: ID!) {
-                        sizingWarpDetails(LoomId: $LoomId) {
-                            sizingId
-                            id
-                            Type
-                            LoomId
-                            Date
-                            Details
-                            Weight
-                            isSizingGroup
-                        }
-                    }
-                `,
-                variables: {
-                    LoomId: String(loomId)
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result?.data?.sizingWarpDetails || [];
+    try {
+        const rows = await getSizingWarpDetailsByLoomId(loomId);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchSizingWarpDetailsByLoomId Error:", err);
+        return [];
+    }
 };

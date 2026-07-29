@@ -12,7 +12,8 @@ export const fetchYarns = async (
     orderBy: string
 ) => {
     try {
-        return await getYarns(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
+        const rows = await getYarns(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
+        return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchYarns Error:", err);
         return [];
@@ -58,7 +59,7 @@ export const fetchYarnsDetails = async (
 export const fetchYarnById = async (id: number) => {
     try {
         const yarnData = await getYarnById(id);
-        return yarnData ? [yarnData] : [];
+        return yarnData ? JSON.parse(JSON.stringify([yarnData])) : [];
     } catch (err) {
         console.error("fetchYarnById Error:", err);
         return [];
@@ -66,7 +67,8 @@ export const fetchYarnById = async (id: number) => {
 };
 
 export const deleteYarn = async (id: number) => {
-    return await deleteYarnRepo(id);
+    const res = await deleteYarnRepo(id);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const createYarn = async (payload: {
@@ -78,7 +80,8 @@ export const createYarn = async (payload: {
 }) => {
     const products = payload.products || payload.yarnDetailsList || [];
     const payments = payload.payments || payload.paymentDetailsList || [];
-    return await createYarnRepo(payload.invoiceData, products, payments);
+    const res = await createYarnRepo(payload.invoiceData, products, payments);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const updateYarn = async (payload: {
@@ -95,5 +98,6 @@ export const updateYarn = async (payload: {
     }
     const products = payload.products || payload.yarnDetailsList || [];
     const payments = payload.payments || payload.paymentDetailsList || [];
-    return await updateYarnRepo(invoiceData, products, payments);
+    const res = await updateYarnRepo(invoiceData, products, payments);
+    return JSON.parse(JSON.stringify(res));
 };

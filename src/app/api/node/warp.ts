@@ -11,7 +11,8 @@ export const fetchWarps = async (
     sizingId: string
 ) => {
     try {
-        return await getWarps(query || null, loomId || null, loomStatus || null, sizingId || null, currentPage || 1, pageLimit);
+        const rows = await getWarps(query || null, loomId || null, loomStatus || null, sizingId || null, currentPage || 1, pageLimit);
+        return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchWarps Error:", err);
         return [];
@@ -25,7 +26,8 @@ export const fetchWarpsCount = async (
     sizingId: string
 ) => {
     try {
-        return await getWarpCount(query || null, loomId || null, loomStatus || null, sizingId || null);
+        const count = await getWarpCount(query || null, loomId || null, loomStatus || null, sizingId || null);
+        return count;
     } catch (err) {
         console.error("fetchWarpsCount Error:", err);
         return 0;
@@ -34,7 +36,8 @@ export const fetchWarpsCount = async (
 
 export const fetchWarpById = async (id: string) => {
     try {
-        return await getWarpById(id);
+        const data = await getWarpById(id);
+        return data ? JSON.parse(JSON.stringify(data)) : null;
     } catch (err) {
         console.error("fetchWarpById Error:", err);
         return null;
@@ -42,7 +45,8 @@ export const fetchWarpById = async (id: string) => {
 };
 
 export const updateWarp = async (warpData: any) => {
-    return await updateWarpRepo(warpData);
+    const res = await updateWarpRepo(warpData);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const fetchWarpSummary = async (
@@ -51,7 +55,8 @@ export const fetchWarpSummary = async (
     sizingId: string
 ) => {
     try {
-        return await getWarpSummary(query || null, loomId || null, sizingId || null);
+        const rows = await getWarpSummary(query || null, loomId || null, sizingId || null);
+        return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchWarpSummary Error:", err);
         return [];
@@ -60,7 +65,8 @@ export const fetchWarpSummary = async (
 
 export const fetchWarpSummaryById = async (sizingId: string, loomId: string) => {
     try {
-        return await getWarpSummaryById(sizingId, loomId);
+        const data = await getWarpSummaryById(sizingId, loomId);
+        return data ? JSON.parse(JSON.stringify(data)) : null;
     } catch (err) {
         console.error("fetchWarpSummaryById Error:", err);
         return null;
@@ -68,5 +74,6 @@ export const fetchWarpSummaryById = async (sizingId: string, loomId: string) => 
 };
 
 export const updateWarpSummary = async (summaryData: any) => {
-    return await updateWarpSummaryRepo(summaryData);
+    const res = await updateWarpSummaryRepo(summaryData);
+    return JSON.parse(JSON.stringify(res));
 };

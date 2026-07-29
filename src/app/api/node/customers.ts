@@ -1,6 +1,7 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
+import { getCustomers, customerPendingPayment, getCustomerCount, getCustomerById, customerProducts, createCustomer as createCustomerRepo, updateCustomer as updateCustomerRepo, updateCustomerProduct as updateCustomerProductRepo, deleteCustomer as deleteCustomerRepo } from "@/server/repositories/customerRepositories";
 
 export const fetchCustomers = async (
     query: string,
@@ -10,67 +11,13 @@ export const fetchCustomers = async (
     endDate: string,
     limit?: number | null
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetCustomers(
-                        $search: String,
-                        $orderBy: String,
-                        $page: Int,
-                        $limit: Int,
-                        $startDate: String,
-                        $endDate: String
-                    ) {
-                        customers(
-                            search: $search,
-                            orderBy: $orderBy,
-                            page: $page,
-                            limit: $limit,
-                            startDate: $startDate,
-                            endDate: $endDate
-                        ) {
-                            CustomerId
-                            CustomerName
-                            GstNumber
-                            Address
-                            Address2
-                            State
-                            Phone
-                            Mobile
-                            Agent
-                            customer_product_code
-                            pending
-                            invoices {
-                                InvoiceNumber
-                                InvoiceDate
-                                InvoiceAmount
-                                ReceivedAmount
-                            }
-                        }
-                    }
-                `,
-                variables: {
-                    search: query,
-                    orderBy: orderBy,
-                    page: currentPage,
-                    limit: limit === undefined ? pageLimit : limit,
-                    startDate: startDate,
-                    endDate: endDate
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result?.data?.customers;
+    try {
+        const rows = await getCustomers(query || "", currentPage || 1, limit === undefined ? pageLimit : limit, orderBy || null, startDate || null, endDate || null);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchCustomers Error:", err);
+        return [];
+    }
 };
 
 export const fetchTotalPending = async (
@@ -78,257 +25,63 @@ export const fetchTotalPending = async (
     startDate: string,
     endDate: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetCustomerPendingPayment(
-                        $search: String,
-                        $startDate: String,
-                        $endDate: String
-                    ) {
-                        customerPendingPayment(
-                            search: $search,
-                            startDate: $startDate,
-                            endDate: $endDate
-                        )
-                    }
-                `,
-                variables: {
-                    search: query,
-                    startDate: startDate,
-                    endDate: endDate
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result?.data?.customerPendingPayment;
+    try {
+        const pending = await customerPendingPayment(query || "", startDate || null, endDate || null);
+        return pending || 0;
+    } catch (err) {
+        console.error("fetchTotalPending Error:", err);
+        return 0;
+    }
 };
 
 export const fetchCustomerCount = async (
     query: string
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetCustomerCount(
-                        $search: String
-                    ) {
-                        customerCount(search: $search)
-                    }
-                `,
-                variables: {
-                    search: query
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.customerCount;
+    try {
+        const count = await getCustomerCount(query || "");
+        return count || 0;
+    } catch (err) {
+        console.error("fetchCustomerCount Error:", err);
+        return 0;
+    }
 };
 
 export const fetchCustomerById = async (id: string) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetCustomerById(
-                        $CustomerId: ID!
-                    ) {
-                        customer(CustomerId: $CustomerId) {
-                            CustomerId,
-                            CustomerName,
-                            GstNumber,
-                            Address,
-                            Address2,
-                            State,
-                            Phone,
-                            Mobile,
-                            Agent,
-                            customer_product_code
-                        }
-                    }
-                `,
-                variables: {
-                    CustomerId: id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result.data.customer;
+    try {
+        const data = await getCustomerById(id);
+        return data ? JSON.parse(JSON.stringify(data)) : null;
+    } catch (err) {
+        console.error("fetchCustomerById Error:", err);
+        return null;
+    }
 };
 
 export const createCustomer = async (customerData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation CreateCustomer($customerData: CustomerInput!) {
-                        createCustomer(customerData: $customerData)
-                    }
-                `,
-                variables: {
-                    customerData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
+    const res = await createCustomerRepo(customerData);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const updateCustomer = async (customerData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateCustomer($customerData: CustomerInput!) {
-                        updateCustomer(customerData: $customerData)
-                    }
-                `,
-                variables: {
-                    customerData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
+    const res = await updateCustomerRepo(customerData);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const updateCustomerProduct = async (customerData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateCustomerProduct($customerData: CustomerProductInput!) {
-                        updateCustomerProduct(customerData: $customerData)
-                    }
-                `,
-                variables: {
-                    customerData
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
+    const res = await updateCustomerProductRepo(customerData);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const fetchProductsWithCode = async (id: any, productId?: any, foldType?: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    query GetCustomerProducts($CustomerId: ID!, $productId: Int, $foldType: String) {
-                        customerProducts(CustomerId: $CustomerId, productId: $productId, foldType: $foldType) {
-                            Id
-                            Name
-                            HSNCode
-                            ProductCode
-                            ProductPrice
-                            ProductSoldQuantity
-                            PurchaseType
-                            Type
-                        }
-                    }
-                `,
-                variables: {
-                    CustomerId: id,
-                    productId: productId,
-                    foldType: foldType
-                }
-            })
-        }
-    );
-
-
-    const result = await response.json();
-    console.log("result", result)
-
-    return result?.data?.customerProducts;
-}
+    try {
+        const rows = await customerProducts(id, productId, foldType);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchProductsWithCode Error:", err);
+        return [];
+    }
+};
 
 export const deleteCustomer = async (id: string) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                query: `
-                    mutation DeleteCustomer($CustomerId: ID!) {
-                        deleteCustomer(CustomerId: $CustomerId)
-                    }
-                `,
-                variables: {
-                    CustomerId: id
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    return result;
+    const res = await deleteCustomerRepo(id);
+    return JSON.parse(JSON.stringify(res));
 };

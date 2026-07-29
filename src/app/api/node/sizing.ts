@@ -12,7 +12,8 @@ export const fetchSizing = async (
     orderBy: string = ''
 ) => {
     try {
-        return await getSizings(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
+        const rows = await getSizings(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
+        return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchSizing Error:", err);
         return [];
@@ -43,7 +44,8 @@ export const fetchSizingTotal = async (
     orderBy: string
 ) => {
     try {
-        return await getSizingTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        const totals = await getSizingTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        return JSON.parse(JSON.stringify(totals));
     } catch (err) {
         console.error("fetchSizingTotal Error:", err);
         return { totalInvoiceAmount: 0, totalReceived: 0, balance: 0 };
@@ -53,7 +55,7 @@ export const fetchSizingTotal = async (
 export const fetchSizingById = async (id: number) => {
     try {
         const sizingData = await getSizingById(id);
-        return sizingData ? [sizingData] : [];
+        return sizingData ? JSON.parse(JSON.stringify([sizingData])) : [];
     } catch (err) {
         console.error("fetchSizingById Error:", err);
         return [];
@@ -61,7 +63,8 @@ export const fetchSizingById = async (id: number) => {
 };
 
 export const deleteSizing = async (id: number) => {
-    return await deleteSizingRepo(id);
+    const res = await deleteSizingRepo(id);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const createSizing = async (payload: {
@@ -70,7 +73,8 @@ export const createSizing = async (payload: {
     payments: any[];
     sizingYarn: any[];
 }) => {
-    return await createSizingRepo(payload.invoiceData, payload.products || [], payload.payments || [], payload.sizingYarn || []);
+    const res = await createSizingRepo(payload.invoiceData, payload.products || [], payload.payments || [], payload.sizingYarn || []);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const updateSizing = async (payload: {
@@ -84,5 +88,6 @@ export const updateSizing = async (payload: {
     if (payload.id && !invoiceData.SizingId) {
         invoiceData.SizingId = payload.id;
     }
-    return await updateSizingRepo(invoiceData, payload.products || [], payload.payments || [], payload.sizingYarn || []);
+    const res = await updateSizingRepo(invoiceData, payload.products || [], payload.payments || [], payload.sizingYarn || []);
+    return JSON.parse(JSON.stringify(res));
 };

@@ -10,7 +10,8 @@ export const fetchSuppliers = async (
     orderBy: string = ''
 ) => {
     try {
-        return await getSuppliers(query || null, type || null, currentPage || 1, pageLimit, orderBy || null);
+        const rows = await getSuppliers(query || null, type || null, currentPage || 1, pageLimit, orderBy || null);
+        return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchSuppliers Error:", err);
         return [];
@@ -19,7 +20,8 @@ export const fetchSuppliers = async (
 
 export const fetchAllSuppliers = async (type: string = 'All') => {
     try {
-        return await getSuppliers(null, type || null, null, null, null);
+        const rows = await getSuppliers(null, type || null, null, null, null);
+        return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchAllSuppliers Error:", err);
         return [];
@@ -43,7 +45,7 @@ export const fetchSupplierPages = async (
 export const fetchSupplierById = async (id: number) => {
     try {
         const data = await getSupplierById(id);
-        return data ? [data] : [];
+        return data ? JSON.parse(JSON.stringify([data])) : [];
     } catch (err) {
         console.error("fetchSupplierById Error:", err);
         return [];
@@ -51,13 +53,16 @@ export const fetchSupplierById = async (id: number) => {
 };
 
 export const createSupplier = async (supplierData: any) => {
-    return await createSupplierRepo(supplierData);
+    const res = await createSupplierRepo(supplierData);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const updateSupplier = async (supplierData: any) => {
-    return await updateSupplierRepo(supplierData);
+    const res = await updateSupplierRepo(supplierData);
+    return JSON.parse(JSON.stringify(res));
 };
 
 export const deleteSupplier = async (id: number) => {
-    return await deleteSupplierRepo(id);
+    const res = await deleteSupplierRepo(id);
+    return JSON.parse(JSON.stringify(res));
 };
