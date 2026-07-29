@@ -1,229 +1,63 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
+import { getSuppliers, getSupplierCount, getSupplierById, createSupplier as createSupplierRepo, updateSupplier as updateSupplierRepo, deleteSupplier as deleteSupplierRepo } from "@/server/repositories/supplierRepositories";
 
 export const fetchSuppliers = async (
     query: string,
     currentPage: number,
-    orderBy: string,
-    type: string = "All"
+    type: string = '',
+    orderBy: string = ''
 ) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    query GetSuppliers(
-                        $search: String,
-                        $type: String,
-                        $page: Int,
-                        $limit: Int,
-                        $orderBy: String
-                    ) {
-                        suppliers(
-                            search: $search,
-                            type: $type,
-                            page: $page,
-                            limit: $limit,
-                            orderBy: $orderBy
-                        ) {
-                            SupplierId
-                            Name
-                            GstNumber
-                            Adress
-                            State
-                            Phone
-                            Mobile
-                            Agent
-                            AccountNumber
-                            Bank
-                            IfscCode
-                            Type
-                            pendingAmount
-                        }
-                    }
-                `,
-                variables: {
-                    search: query,
-                    type: type,
-                    page: currentPage,
-                    limit: pageLimit,
-                    orderBy: orderBy
-                }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result.data?.suppliers || [];
+    try {
+        return await getSuppliers(query || null, type || null, currentPage || 1, pageLimit, orderBy || null);
+    } catch (err) {
+        console.error("fetchSuppliers Error:", err);
+        return [];
+    }
 };
 
-export const fetchSupplierPages = async (query: string, type: string = "All") => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    query GetSupplierPages($search: String, $type: String) {
-                        supplierCount(search: $search, type: $type)
-                    }
-                `,
-                variables: {
-                    search: query,
-                    type: type
-                }
-            })
-        }
-    );
+export const fetchAllSuppliers = async (type: string = 'All') => {
+    try {
+        return await getSuppliers(null, type || null, null, null, null);
+    } catch (err) {
+        console.error("fetchAllSuppliers Error:", err);
+        return [];
+    }
+};
 
-    const result = await response.json();
-    const count = result.data?.supplierCount || 0;
-    return Math.ceil(count / pageLimit);
+export const fetchSupplierPages = async (
+    query: string = '',
+    type: string = ''
+) => {
+    try {
+        const count = await getSupplierCount(query || null, type || null);
+        const totalPages = Math.ceil(Number(count) / pageLimit);
+        return totalPages;
+    } catch (err) {
+        console.error("fetchSupplierPages Error:", err);
+        return 0;
+    }
 };
 
 export const fetchSupplierById = async (id: number) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    query GetSupplierById($id: ID!) {
-                        supplier(Id: $id) {
-                            SupplierId
-                            Name
-                            GstNumber
-                            Adress
-                            State
-                            Phone
-                            Mobile
-                            Agent
-                            AccountNumber
-                            Bank
-                            IfscCode
-                            Type
-                        }
-                    }
-                `,
-                variables: { id: String(id) }
-            })
-        }
-    );
-
-    const result = await response.json();
-    const supplier = result.data?.supplier;
-    return supplier ? [supplier] : [];
-};
-
-export const fetchAllSuppliers = async (type: string = "All") => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    query GetAllSuppliers($type: String) {
-                        suppliers(type: $type) {
-                            SupplierId
-                            Name
-                            Type
-                        }
-                    }
-                `,
-                variables: { type }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result.data?.suppliers || [];
+    try {
+        const data = await getSupplierById(id);
+        return data ? [data] : [];
+    } catch (err) {
+        console.error("fetchSupplierById Error:", err);
+        return [];
+    }
 };
 
 export const createSupplier = async (supplierData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    mutation CreateSupplier($supplierData: SupplierInput!) {
-                        createSupplier(supplierData: $supplierData) {
-                            SupplierId
-                            Name
-                        }
-                    }
-                `,
-                variables: { supplierData }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result.data?.createSupplier;
+    return await createSupplierRepo(supplierData);
 };
 
 export const updateSupplier = async (supplierData: any) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    mutation UpdateSupplier($supplierData: SupplierInput!) {
-                        updateSupplier(supplierData: $supplierData) {
-                            SupplierId
-                            Name
-                        }
-                    }
-                `,
-                variables: { supplierData }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result.data?.updateSupplier;
+    return await updateSupplierRepo(supplierData);
 };
 
 export const deleteSupplier = async (id: number) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `
-                    mutation DeleteSupplier($id: ID!) {
-                        deleteSupplier(SupplierId: $id)
-                    }
-                `,
-                variables: { id: String(id) }
-            })
-        }
-    );
-
-    const result = await response.json();
-    return result.data?.deleteSupplier;
+    return await deleteSupplierRepo(id);
 };

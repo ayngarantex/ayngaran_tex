@@ -5,7 +5,7 @@ import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { useState, useEffect, useMemo } from 'react';
 import WarpProductForm from './products-form';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { formatDateToLocalNew } from '@/app/lib/utils';
 import { updateWarp } from '@/app/api/node/warp';
 export default function EditForm({
@@ -15,6 +15,7 @@ export default function EditForm({
   warpDetails: any;
   looms: any;
 }) {
+  const router = useRouter();
   const [loomId, setLoomId] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -64,7 +65,7 @@ export default function EditForm({
     const res = await updateWarp(warpData);
 
     if (res) {
-      redirect('/admin/warp');
+      router.push('/admin/warp');
     }
   };
 

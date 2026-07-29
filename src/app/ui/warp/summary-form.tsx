@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { useState, useEffect } from 'react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { formatDateNew, formatDateToLocalNew } from '@/app/lib/utils';
 import { updateWarpSummary } from '@/app/api/node/warp';
 
@@ -11,6 +11,7 @@ export default function EditForm({
 }: {
   summaryDetails: any;
 }) {
+  const router = useRouter();
   const [summaryProducts, setSummaryProducts] = useState<any[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
 
@@ -45,7 +46,7 @@ export default function EditForm({
     const res = await updateWarpSummary(summaryData);
 
     if (res) {
-      redirect('/admin/warp');
+      router.push('/admin/warp');
     }
   };
 
