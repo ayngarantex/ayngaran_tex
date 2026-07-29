@@ -53,7 +53,10 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
             )}
           >
             <LinkIcon className="h-5 w-5 shrink-0" />
-            <p className="whitespace-nowrap text-sm font-semibold text-slate-900">{link.name}</p>
+            <p className={clsx('whitespace-nowrap text-sm font-semibold', {
+              'text-white': isActive,
+              'text-slate-900': !isActive,
+            })}>{link.name}</p>
           </Link>
         );
       })}

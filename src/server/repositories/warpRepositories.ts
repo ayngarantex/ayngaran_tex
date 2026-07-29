@@ -246,7 +246,10 @@ export const getWarpSummary = async (
     }));
 };
 
-export const getWarpSummaryById = async (loomId: any, sizingId: any) => {
+export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
+    const sId = Number(sizingId);
+    const lId = Number(loomId);
+
     let sizingDetailsQuery = `
         SELECT 
             S.InvoiceDate,
@@ -258,9 +261,9 @@ export const getWarpSummaryById = async (loomId: any, sizingId: any) => {
             L.LoomId,
             L.LoomName
         FROM sizing S 
-        LEFT JOIN sizing_warp_details SWD ON S.SizingId = SWD.SizingId AND SWD.LoomId = ${Number(loomId)}
+        LEFT JOIN sizing_warp_details SWD ON S.SizingId = SWD.SizingId ${lId > 0 ? `AND SWD.LoomId = ${lId}` : ''}
         LEFT JOIN loom_details L ON SWD.LoomId = L.LoomId
-        WHERE S.SizingId = ${Number(sizingId)}
+        WHERE S.SizingId = ${sId}
         GROUP BY S.SizingId, L.LoomId, S.InvoiceDate, S.Color, L.LoomName
     `;
 
@@ -275,29 +278,31 @@ export const getWarpSummaryById = async (loomId: any, sizingId: any) => {
         SSD.Dc,
         SSD.IsCompleted
         FROM sizing_summary_details SSD
-        WHERE SSD.LoomId = ${Number(loomId)} AND SSD.SizingId = ${Number(sizingId)}
+        WHERE SSD.SizingId = ${sId} ${lId > 0 ? `AND SSD.LoomId = ${lId}` : ''}
     `;
     const [sizingSummaryResult]: any = await db.query(sizingSummaryQuery);
 
     let warpDhotieDetailsQuery = `
         SELECT SWD.*
         FROM sizing_warp_details SWD 
-        WHERE SWD.LoomId = ${Number(loomId)} AND SWD.SizingId = ${Number(sizingId)}
+        WHERE SWD.SizingId = ${sId} ${lId > 0 ? `AND SWD.LoomId = ${lId}` : ''}
     `;
     const [warpDhotieDetailsResult]: any = await db.query(warpDhotieDetailsQuery);
 
+    const firstRow = sizingDetailsResult && sizingDetailsResult.length > 0 ? sizingDetailsResult[0] : {};
+
     let data = {
-        InvoiceDate: sizingDetailsResult[0].InvoiceDate,
-        SizingId: sizingDetailsResult[0].SizingId,
-        Color: sizingDetailsResult[0].Color,
-        LoomId: sizingDetailsResult[0].LoomId,
-        LoomName: sizingDetailsResult[0].LoomName,
-        TotalWarps: sizingDetailsResult[0].TotalWarps,
-        TotalWeight: sizingDetailsResult[0].TotalWeight,
-        TotalMeters: sizingDetailsResult[0].TotalMeters,
+        InvoiceDate: firstRow.InvoiceDate || null,
+        SizingId: firstRow.SizingId || sId,
+        Color: firstRow.Color || '',
+        LoomId: firstRow.LoomId || lId,
+        LoomName: firstRow.LoomName || '',
+        TotalWarps: firstRow.TotalWarps || 0,
+        TotalWeight: firstRow.TotalWeight || 0,
+        TotalMeters: firstRow.TotalMeters || 0,
         IsCompleted: sizingSummaryResult.length > 0 ? (sizingSummaryResult[0].IsCompleted ? 1 : 0) : 0,
-        warp_detail: warpDhotieDetailsResult,
-        warp_summary_details: sizingSummaryResult
+        warp_detail: warpDhotieDetailsResult || [],
+        warp_summary_details: sizingSummaryResult || []
     };
 
     return data;
