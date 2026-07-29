@@ -59,10 +59,10 @@ export const fetchYarnsDetails = async (
 export const fetchYarnById = async (id: number) => {
     try {
         const yarnData = await getYarnById(id);
-        return yarnData ? JSON.parse(JSON.stringify([yarnData])) : [];
+        return yarnData ? JSON.parse(JSON.stringify(yarnData)) : null;
     } catch (err) {
         console.error("fetchYarnById Error:", err);
-        return [];
+        return null;
     }
 };
 

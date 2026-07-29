@@ -55,10 +55,10 @@ export const fetchSizingTotal = async (
 export const fetchSizingById = async (id: number) => {
     try {
         const sizingData = await getSizingById(id);
-        return sizingData ? JSON.parse(JSON.stringify([sizingData])) : [];
+        return sizingData ? JSON.parse(JSON.stringify(sizingData)) : null;
     } catch (err) {
         console.error("fetchSizingById Error:", err);
-        return [];
+        return null;
     }
 };
 
