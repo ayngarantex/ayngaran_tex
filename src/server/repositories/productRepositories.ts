@@ -1,6 +1,5 @@
 import db from '../config/db';
 
-// AND I.InvoiceNumber LIKE '%ref%'
 export const getProducts = async (search: string | null, page: number | null, limit: number | null) => {
     let sql = `
         SELECT P.*, 
