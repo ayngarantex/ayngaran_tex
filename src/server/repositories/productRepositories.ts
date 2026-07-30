@@ -23,7 +23,7 @@ export const getProducts = async (search: string | null, page: number | null, li
     let params: any[] = [];
 
     if (search != null && search != "") {
-        sql += ` WHERE P.Name LIKE ? OR P.Type LIKE ? OR P.HSNCode LIKE ? OR P.Tags LIKE ? OR P.Description LIKE ? OR P.Details LIKE ? OR P.Size LIKE ? OR P.Composition LIKE ? OR P.WashCare LIKE ?`;
+        sql += ` WHERE LOWER(P.Name) LIKE ? OR LOWER(P.Type) LIKE ? OR LOWER(P.HSNCode) LIKE ? OR LOWER(P.Tags) LIKE ? OR LOWER(P.Description) LIKE ? OR LOWER(P.Details) LIKE ? OR LOWER(P.Size) LIKE ? OR LOWER(P.Composition) LIKE ? OR LOWER(P.WashCare) LIKE ?`;
         for (let i = 0; i < 9; i++) {
             params.push(`%${search}%`);
         }
@@ -46,7 +46,7 @@ export const getProductCount = async (search: string | null) => {
     let params: any[] = [];
 
     if (search) {
-        sql += " WHERE Name LIKE ?";
+        sql += " WHERE LOWER(Name) LIKE ?";
         params.push(`%${search}%`);
     }
 
@@ -162,7 +162,7 @@ export const getProductTotals = async (search: string | null, productId: string 
         params.push(productId);
     }
     if (search != null && search != "") {
-        sql += ` AND (P.Name LIKE ? OR P.Type LIKE ? OR P.HSNCode LIKE ? OR P.Tags LIKE ? OR P.Description LIKE ? OR P.Details LIKE ? OR P.Size LIKE ? OR P.Composition LIKE ? OR P.WashCare LIKE ?)`;
+        sql += ` AND (LOWER(P.Name) LIKE ? OR LOWER(P.Type) LIKE ? OR LOWER(P.HSNCode) LIKE ? OR LOWER(P.Tags) LIKE ? OR LOWER(P.Description) LIKE ? OR LOWER(P.Details) LIKE ? OR LOWER(P.Size) LIKE ? OR LOWER(P.Composition) LIKE ? OR LOWER(P.WashCare) LIKE ?)`;
         for (let i = 0; i < 9; i++) {
             params.push(`%${search}%`);
         }

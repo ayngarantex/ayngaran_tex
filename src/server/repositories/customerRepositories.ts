@@ -87,7 +87,7 @@ export const customerPendingPayment = async (
 
 export const customerProducts = async (CustomerId: any, ProductId: any, FoldType: any) => {
     const params: any[] = [];
-    
+
     params.push(Number(CustomerId)); // For C.CustomerId = ?
     params.push(Number(CustomerId)); // For I.CustomerId = ? in LPP
 
@@ -148,7 +148,7 @@ export const getCustomerCount = async (search: string) => {
     let params: any[] = [];
 
     if (search) {
-        sql += " WHERE CustomerName LIKE ?";
+        sql += " WHERE LOWER(CustomerName) LIKE ?";
         params.push(`%${search}%`);
     }
 

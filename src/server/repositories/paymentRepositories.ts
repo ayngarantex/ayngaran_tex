@@ -29,10 +29,10 @@ export const getPayments = async (
     if (search != null && search != "") {
         sql += `
         WHERE (
-            C.CustomerName LIKE ?
-            OR C.GstNumber LIKE ?
-            OR C.Agent LIKE ?
-            OR C.State LIKE ?
+            LOWER(C.CustomerName) LIKE ?
+            OR LOWER(C.GstNumber) LIKE ?
+            OR LOWER(C.Agent) LIKE ?
+            OR LOWER(C.State) LIKE ?
         )
     `;
 
@@ -80,10 +80,10 @@ export const getPaymentCount = async (
     if (search != null && search != "") {
         conditions.push(`
             (
-                C.CustomerName LIKE ?
-                OR C.GstNumber LIKE ?
-                OR C.Agent LIKE ?
-                OR C.State LIKE ?
+                LOWER(C.CustomerName) LIKE ?
+                OR LOWER(C.GstNumber) LIKE ?
+                OR LOWER(C.Agent) LIKE ?
+                OR LOWER(C.State) LIKE ?
             )
         `);
 
