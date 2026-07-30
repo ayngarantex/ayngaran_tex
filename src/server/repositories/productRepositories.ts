@@ -8,13 +8,13 @@ export const getProducts = async (search: string | null, page: number | null, li
                COALESCE((
                    SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                    FROM invoice_details ID
-                   JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND I.InvoiceNumber NOT LIKE '%ref%'
+                   JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
                    WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
                ), 0) AS SoldCount,
                CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) - COALESCE((
                    SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                    FROM invoice_details ID
-                   JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND I.InvoiceNumber NOT LIKE '%ref%'
+                   JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
                    WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
                ), 0) AS AvailableStock
         FROM products P 
@@ -61,13 +61,13 @@ export const getProductById = async (id: any) => {
                 COALESCE((
                     SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                     FROM invoice_details ID
-                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND I.InvoiceNumber NOT LIKE '%ref%'
+                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
                     WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
                 ), 0) AS SoldCount,
                 CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) - COALESCE((
                     SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                     FROM invoice_details ID
-                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND I.InvoiceNumber NOT LIKE '%ref%'
+                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
                     WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
                 ), 0) AS AvailableStock
          FROM products P 
@@ -143,13 +143,13 @@ export const getProductTotals = async (search: string | null, productId: string 
                    COALESCE((
                        SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                        FROM invoice_details ID
-                       JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND I.InvoiceNumber NOT LIKE '%ref%'
+                       JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
                        WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
                    ), 0) AS SoldCount,
                    CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) - COALESCE((
                        SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                        FROM invoice_details ID
-                       JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND I.InvoiceNumber NOT LIKE '%ref%'
+                       JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
                        WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
                    ), 0) AS AvailableStock
             FROM products P 
