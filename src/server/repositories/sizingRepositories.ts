@@ -91,8 +91,8 @@ export const getSizingCount = async (
     if (search != null && search !== "") {
         sql += ` AND (
             S.InvoiceNumber LIKE ?
-            OR Sup.Name LIKE ?
-            OR Sup.GstNumber LIKE ?
+            OR LOWER(Sup.Name) LIKE ?
+            OR LOWER(Sup.GstNumber) LIKE ?
         ) `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
@@ -129,8 +129,8 @@ export const getSizingTotal = async (
     if (search != null && search !== "") {
         sql += ` AND (
             S.InvoiceNumber LIKE ?
-            OR Sup.Name LIKE ?
-            OR Sup.GstNumber LIKE ?
+            OR LOWER(Sup.Name) LIKE ?
+            OR LOWER(Sup.GstNumber) LIKE ?
         ) `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }

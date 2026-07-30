@@ -23,7 +23,6 @@ export default function EditForm({
   yarns: any,
   looms: any
 }) {
-  console.log("sizing", sizing)
   const router = useRouter();
   const [selectedSupplier, setSelectedSuppliers] = useState<SupplierField | null>(null);
   const [selectedYarns, setSelectedYarns] = useState<any | null>(null);

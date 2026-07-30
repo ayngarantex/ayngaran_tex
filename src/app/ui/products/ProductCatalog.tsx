@@ -55,6 +55,7 @@ export default function ProductCatalog({ initialProducts }: ProductCatalogProps)
               height={70}
               className="object-contain"
               priority
+              unoptimized
             />
             <div className="flex flex-col">
               <span className="text-[40px] font-extrabold tracking-tight text-slate-900">Ayngaran Tex</span>

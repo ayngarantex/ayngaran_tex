@@ -19,9 +19,9 @@ export const getInvoices = async (
     if (search) {
         query += `
       AND (
-        I.InvoiceNumber LIKE '%${search}%'
-        OR C.CustomerName LIKE '%${search}%'
-        OR C.GstNumber LIKE '%${search}%'
+        LOWER(I.InvoiceNumber) LIKE '%${search}%'
+        OR LOWER(C.CustomerName) LIKE '%${search}%'
+        OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
       )
     `;
@@ -141,9 +141,9 @@ export const getInvoicesCount = async (
     if (search) {
         query += `
       AND (
-        I.InvoiceNumber LIKE '%${search}%'
-        OR C.CustomerName LIKE '%${search}%'
-        OR C.GstNumber LIKE '%${search}%'
+        LOWER(I.InvoiceNumber) LIKE '%${search}%'
+        OR LOWER(C.CustomerName) LIKE '%${search}%'
+        OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
       )
     `;
@@ -180,9 +180,9 @@ export const getInvoicesTotal = async (
     if (search) {
         query += `
       AND (
-        I.InvoiceNumber LIKE '%${search}%'
-        OR C.CustomerName LIKE '%${search}%'
-        OR C.GstNumber LIKE '%${search}%'
+        LOWER(I.InvoiceNumber) LIKE '%${search}%'
+        OR LOWER(C.CustomerName) LIKE '%${search}%'
+        OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
       )
     `;

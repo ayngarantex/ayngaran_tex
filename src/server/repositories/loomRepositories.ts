@@ -5,7 +5,7 @@ export const getLooms = async (search: string | null, page: number | null, limit
     let params: any[] = [];
 
     if (search != null && search != "") {
-        sql += " WHERE LoomName LIKE ?";
+        sql += " WHERE LOWER(LoomName) LIKE ?";
         params.push(`%${search}%`);
     }
 
@@ -23,7 +23,7 @@ export const getLoomCount = async (search: string | null) => {
     let params: any[] = [];
 
     if (search != null && search != "") {
-        sql += " WHERE LoomName LIKE ?";
+        sql += " WHERE LOWER(LoomName) LIKE ?";
         params.push(`%${search}%`);
     }
 

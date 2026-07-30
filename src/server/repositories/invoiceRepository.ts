@@ -36,7 +36,7 @@ export const getInvoices = async (
 
   if (query) {
     const q = `%${query}%`;
-    whereClauses.push('(InvoiceNumber LIKE ? OR InvoiceType LIKE ? OR InvoiceAmount LIKE ?)');
+    whereClauses.push('(LOWER(InvoiceNumber) LIKE ? OR LOWER(InvoiceType) LIKE ? OR LOWER(InvoiceAmount) LIKE ?)');
     params.push(q, q, q);
   }
 
@@ -120,7 +120,7 @@ export const getInvoiceTotals = async (
 
   if (query) {
     const q = `%${query}%`;
-    whereClauses.push('(InvoiceNumber LIKE ? OR InvoiceType LIKE ?)');
+    whereClauses.push('(LOWER(InvoiceNumber) LIKE ? OR LOWER(InvoiceType) LIKE ?)');
     params.push(q, q);
   }
 

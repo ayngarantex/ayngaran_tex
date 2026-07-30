@@ -35,6 +35,7 @@ export default async function Page(props: {
                 height={70}
                 className="object-contain"
                 priority
+                unoptimized
               />
             </Link>
           </div>
@@ -81,6 +82,7 @@ export default async function Page(props: {
               height={70}
               className="object-contain"
               priority
+              unoptimized
             />
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-tight text-slate-900">Ayngaran Tex</span>

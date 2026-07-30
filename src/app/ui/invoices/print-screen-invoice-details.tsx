@@ -42,7 +42,10 @@ export default function PrintScreenInvoiceDetails({
                                 <Image
                                     src={AyngaranLogo}
                                     alt="Ayngaran Logo"
+                                    width={120}
+                                    height={60}
                                     className="w-[120px] h-[60px] object-contain"
+                                    unoptimized
                                 />
                                 <div className="flex flex-col flex-wrap">
                                     <h1 className="text-4xl font-bold uppercase tracking-[0.25rem] text-center leading-tight">

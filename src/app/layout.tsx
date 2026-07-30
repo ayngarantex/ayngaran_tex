@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     { name: 'Ayngaran Textiles' },
     // { name: 'Naveenraj', url: 'https://naveenraj.in' },
   ],
+  icons: {
+    icon: '/uploads/favicon.png',
+  },
 };
 
 export default function RootLayout({
