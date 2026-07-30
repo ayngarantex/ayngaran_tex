@@ -16,6 +16,7 @@ export const getInvoices = async (
     WHERE 1=1
   `;
 
+
     if (search) {
         query += `
       AND (
