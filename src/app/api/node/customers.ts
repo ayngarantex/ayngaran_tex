@@ -1,6 +1,5 @@
 "use server";
 
-import { pageLimit } from "@/app/lib/utils";
 import { getCustomers, customerPendingPayment, getCustomerCount, getCustomerById, customerProducts, createCustomer as createCustomerRepo, updateCustomer as updateCustomerRepo, updateCustomerProduct as updateCustomerProductRepo, deleteCustomer as deleteCustomerRepo } from "@/server/repositories/customerRepositories";
 
 export const fetchCustomers = async (
@@ -12,7 +11,7 @@ export const fetchCustomers = async (
     limit?: number | null
 ) => {
     try {
-        const rows = await getCustomers(query || "", currentPage || 1, limit === undefined ? pageLimit : limit, orderBy || null, startDate || null, endDate || null);
+        const rows = await getCustomers(query || "", currentPage || 1, limit === undefined ? null : limit, orderBy || null, startDate || null, endDate || null);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchCustomers Error:", err);
