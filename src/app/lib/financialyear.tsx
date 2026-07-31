@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { getFinancialYears, getFinancialYear, loomsList, formatDateNew } from './utils';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { useLoading } from '../ui/loading-context';
 
 function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = false, LoomName = false, LoomsFetch = false, looms = [], hideBillType = false, LoomStatus = false, sizing = false, sizingList = [] }: {
     hidePage?: boolean, hideYear?: boolean, orderBy?: boolean, LoomName?: boolean, LoomsFetch?: boolean, looms?: any[], hideBillType?: boolean, LoomStatus?: boolean, sizing?: boolean, sizingList?: any[]
@@ -10,6 +11,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
+    const { startTransition } = useLoading();
 
     const paramStartDate = searchParams.get('startDate');
     const paramEndDate = searchParams.get('endDate');
@@ -78,7 +80,9 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
             params.delete('loomStatus');
         }
 
-        replace(`${pathname}?${params.toString()}`);
+        startTransition(() => {
+            replace(`${pathname}?${params.toString()}`);
+        });
     }, [startDate, endDate, billType, orderByColumn, loomName, loomId, loomStatus, sizingId])
 
     useEffect(() => {
