@@ -1,4 +1,5 @@
 import SideNav from '@/app/ui/dashboard/sidenav';
+import { LoadingProvider } from '@/app/ui/loading-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +9,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full flex-none md:w-64 no-print">
         <SideNav />
       </div>
-      <div className="flex-grow p-3 sm:p-6 md:overflow-y-auto md:p-8 bg-slate-50">{children}</div>
+      <div className="flex-grow p-3 sm:p-6 md:overflow-y-auto md:p-8 bg-slate-50">
+        <LoadingProvider>
+          {children}
+        </LoadingProvider>
+      </div>
     </div>
   );
 }

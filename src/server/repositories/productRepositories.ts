@@ -1,6 +1,5 @@
 import db from '../config/db';
 
-// AND I.InvoiceNumber LIKE '%ref%'
 export const getProducts = async (search: string | null, page: number | null, limit: number | null) => {
     let sql = `
         SELECT P.*, 
@@ -23,7 +22,7 @@ export const getProducts = async (search: string | null, page: number | null, li
     let params: any[] = [];
 
     if (search != null && search != "") {
-        sql += ` WHERE LOWER(P.Name) LIKE ? OR LOWER(P.Type) LIKE ? OR LOWER(P.HSNCode) LIKE ? OR LOWER(P.Tags) LIKE ? OR LOWER(P.Description) LIKE ? OR LOWER(P.Details) LIKE ? OR LOWER(P.Size) LIKE ? OR LOWER(P.Composition) LIKE ? OR LOWER(P.WashCare) LIKE ?`;
+        sql += ` WHERE LOWER(P.Name) LIKE LOWER(?) OR LOWER(P.Type) LIKE LOWER(?) OR LOWER(P.HSNCode) LIKE LOWER(?) OR LOWER(P.Tags) LIKE LOWER(?) OR LOWER(P.Description) LIKE LOWER(?) OR LOWER(P.Details) LIKE LOWER(?) OR LOWER(P.Size) LIKE LOWER(?) OR LOWER(P.Composition) LIKE LOWER(?) OR LOWER(P.WashCare) LIKE LOWER(?)`;
         for (let i = 0; i < 9; i++) {
             params.push(`%${search}%`);
         }
@@ -46,7 +45,7 @@ export const getProductCount = async (search: string | null) => {
     let params: any[] = [];
 
     if (search) {
-        sql += " WHERE LOWER(Name) LIKE ?";
+        sql += " WHERE LOWER(Name) LIKE LOWER(?)";
         params.push(`%${search}%`);
     }
 
@@ -162,7 +161,7 @@ export const getProductTotals = async (search: string | null, productId: string 
         params.push(productId);
     }
     if (search != null && search != "") {
-        sql += ` AND (LOWER(P.Name) LIKE ? OR LOWER(P.Type) LIKE ? OR LOWER(P.HSNCode) LIKE ? OR LOWER(P.Tags) LIKE ? OR LOWER(P.Description) LIKE ? OR LOWER(P.Details) LIKE ? OR LOWER(P.Size) LIKE ? OR LOWER(P.Composition) LIKE ? OR LOWER(P.WashCare) LIKE ?)`;
+        sql += ` AND (LOWER(P.Name) LIKE LOWER(?) OR LOWER(P.Type) LIKE LOWER(?) OR LOWER(P.HSNCode) LIKE LOWER(?) OR LOWER(P.Tags) LIKE LOWER(?) OR LOWER(P.Description) LIKE LOWER(?) OR LOWER(P.Details) LIKE LOWER(?) OR LOWER(P.Size) LIKE LOWER(?) OR LOWER(P.Composition) LIKE LOWER(?) OR LOWER(P.WashCare) LIKE LOWER(?))`;
         for (let i = 0; i < 9; i++) {
             params.push(`%${search}%`);
         }

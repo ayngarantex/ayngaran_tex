@@ -210,7 +210,7 @@ export const getWarpSummary = async (
         const searchEscaped = search.replace(/'/g, "''");
         query += ` AND (
             LOWER(Sup.Name) LIKE '%${searchEscaped}%'
-            OR LOWER(L.LoomName LIKE '%${searchEscaped}%'
+            OR LOWER(L.LoomName) LIKE '%${searchEscaped}%'
             OR LOWER(SWD.Color) LIKE '%${searchEscaped}%'
         ) `;
     }
