@@ -1,4 +1,4 @@
-import { formatDateNew } from "@/app/lib/utils";
+import { formatDate, formatDateNew } from "@/app/lib/utils";
 import { EditSUmmary } from "./buttons";
 import Link from "next/link";
 
@@ -7,6 +7,7 @@ export default function WarpSummaryTable({
 }: {
   summary: any[];
 }) {
+  { console.log("summary", summary?.[1]) }
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -73,6 +74,13 @@ export default function WarpSummaryTable({
                     </td>
                     <td className="whitespace-nowrap py-4 pl-6 pr-3 font-medium text-gray-700">
                       {row.Color || "-"}
+                      {row?.Dc && (
+                        <div className="space-y-0.5">
+                          <div className="whitespace-nowrap">
+                            <span className="font-semibold text-slate-900">{row.Dc} - {row?.Date ? formatDate(row.Date) : ''} - {row.Count} Unit @ {row?.Weight ? row.Weight + ' kgs' : ''}</span>
+                          </div>
+                        </div>
+                      )}
                     </td>
                     <td className="whitespace-nowrap py-4 pl-6 pr-3 font-bold text-blue-700">
                       {row.TotalWarps}
@@ -88,7 +96,7 @@ export default function WarpSummaryTable({
                       <p className="text-blue-600 w-24">
                         <span className="w-12 pr-4 inline-block text-right">Rec</span>:
                         <span className="w-12 pl-1 inline-block text-right">
-                          {row.LoomId === 11 ?
+                          {(row.LoomId === 11 || row.LoomId === 33) ?
                             Math.floor(row.ReceivedDhoties * 1.89) :
                             Math.floor(row.ReceivedDhoties * 1.93)
                           }
@@ -99,8 +107,8 @@ export default function WarpSummaryTable({
                       <p className="text-red-600 w-24 mb-1">
                         <span className="w-12 pr-4 inline-block text-right">Total</span>:
                         <span className="w-12 pl-1 inline-block text-right">
-                          {row.LoomId === 11 ?
-                            Math.floor(row.ReceivedDhoties * 1.89) :
+                          {(row.LoomId === 11 || row.LoomId === 33) ?
+                            Math.floor(row.TotalMeters / 1.89) :
                             Math.floor(row.TotalMeters / 1.93)
                           }
                         </span>
@@ -112,8 +120,8 @@ export default function WarpSummaryTable({
                       <p className="text-gray-600 w-24">
                         <span className="w-12 pr-3 inline-block text-right">Diff</span>:
                         <span className="w-12 pl-1 inline-block text-right">
-                          {row.LoomId === 11 ?
-                            Math.floor(row.ReceivedDhoties * 1.89) - row.ReceivedDhoties :
+                          {(row.LoomId === 11 || row.LoomId === 33) ?
+                            Math.floor(row.TotalMeters / 1.89) - row.ReceivedDhoties :
                             Math.floor(row.TotalMeters / 1.93) - row.ReceivedDhoties
                           }
                         </span>

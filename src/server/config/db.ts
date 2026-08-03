@@ -10,6 +10,10 @@ const pool = mysql.createPool({
     port: Number(process.env.DB_PORT ?? 3306),
     waitForConnections: true,
     connectionLimit: 10,
+    maxIdle: 10, // Maximum number of idle connections
+    idleTimeout: 60000, // Idle connections timeout in milliseconds (1 minute)
+    enableKeepAlive: true, // Keep connection active
+    keepAliveInitialDelay: 10000, // Delay before sending keep-alive packets (10s)
     ssl: isCloudDb ? { rejectUnauthorized: false, minVersion: 'TLSv1.2' } : undefined,
 });
 

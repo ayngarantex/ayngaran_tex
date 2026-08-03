@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ExpensesRow } from '@/app/lib/types';
-import { formatDateToLocal, productType } from "@/app/lib/utils";
+import { formatDateToLocal, expenseTypeOptions } from "@/app/lib/utils";
 import { Button } from "../button";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 interface ProductsProps {
   invProducts: any;
@@ -11,7 +12,7 @@ interface ProductsProps {
 
 export default function ProductForm({ invProducts, setInvProducts, edit = false }: ProductsProps) {
   const [selectedProducts, setSelectedProducts] = useState<ExpensesRow[]>(
-    [{ pId: 0, date: "", reason: "", type: "", amount: 0 }]
+    [{ pId: 0, date: "", reason: "", type: "", otherType: "", amount: 0 }]
   );
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
             date: formatDateToLocal(row.Date),
             reason: row.Reason,
             type: row.Type,
+            otherType: row.otherType,
             amount: row.Amount
           }
         )
@@ -50,7 +52,7 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
     e.preventDefault();
     setSelectedProducts((prev) => [
       ...prev,
-      { pId: rowIndex, date: "", reason: "", type: "", amount: 0 },
+      { pId: rowIndex, date: "", reason: "", type: "", otherType: "", amount: 0 },
     ]);
   };
 
@@ -102,18 +104,44 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
             />
 
             {/* Price */}
-            <input
-              type="text"
-              value={row.type || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "type", e.target.value)
-              }
-              className="border p-2 rounded"
-              placeholder="Type"
-            />
+            <div className="w-50">
+              <select
+                id="other Type"
+                name="other TypeId"
+                onChange={(e) => {
+                  handleChange(rowIndex, "type", e.target.value)
+                }}
+                className="border p-2.5 rounded"
+                defaultValue={row.type}
+              >
+                <option value="" disabled>
+                  Select a Type
+                </option>
+                {expenseTypeOptions()?.map((row: any) => (
+                  <option
+                    key={row}
+                    value={row}
+                  >
+                    {row}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {row.type === "Others" && (
+              <input
+                type="text"
+                value={row.otherType || ""}
+                onChange={(e) =>
+                  handleChange(rowIndex, "otherType", e.target.value)
+                }
+                className="border p-2 rounded w-100"
+                placeholder="Type"
+              />
+            )}
 
             {/* Price */}
-            <input
+            < input
               type="number"
               step="any"
               value={row.amount || ""}
@@ -136,12 +164,15 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
             )}
           </div>
         ))
-        : null}
+        : null
+      }
 
       {/* Add Product Button */}
-      {!edit ?
-        <Button type="button" color={'blue'} onClick={(e) => addProduct(e, selectedProducts?.length)}>+ Add Product</Button>
-        : null}
-    </div>
+      {
+        !edit ?
+          <Button type="button" color={'blue'} onClick={(e) => addProduct(e, selectedProducts?.length)}>+ Add Product</Button>
+          : null
+      }
+    </div >
   );
 }

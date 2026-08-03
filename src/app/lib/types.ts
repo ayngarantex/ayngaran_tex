@@ -67,6 +67,7 @@ export interface ExpensesRow {
   reason: string;
   type: string,
   amount: number,
+  otherType: string,
 }
 
 export interface FinancialyearNewProps {

@@ -22,7 +22,7 @@ export default function ProductForm({ yrnProducts, setYrnProducts }: YarnProps) 
           pId: rowIndex,
           count: row.Count,
           color: row.Color,
-          varient: row.Varient,
+          varient: row.Varient || "",
           bag: row.Bag,
           quantity: row.Quantity,
           price: row.Price

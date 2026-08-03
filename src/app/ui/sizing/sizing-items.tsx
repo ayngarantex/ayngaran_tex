@@ -172,7 +172,7 @@ export default function SizingItems({ yarnGiven, setYarnGiven }: SizingItemProps
                 name="yarnBalance"
                 type="text"
                 placeholder="yarnBalance"
-                value={row?.yarnBalance}
+                value={row?.yarnBalance || ""}
                 readOnly
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
               />
