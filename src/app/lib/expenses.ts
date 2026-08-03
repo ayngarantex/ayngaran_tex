@@ -77,3 +77,46 @@ export const fetchExpenseById = async (id: number) => {
     return [];
   }
 };
+
+export const createExpenses = async (expensesData: any[]) => {
+  try {
+    let count = 0;
+    for (const exp of expensesData) {
+      const [res]: any = await db.query(
+        `INSERT INTO expenses (Date, Reason, Type, otherType, Amount) VALUES (?, ?, ?, ?, ?)`,
+        [exp.date || null, exp.reason || null, exp.type || null, exp.otherType || null, exp.amount || 0]
+      );
+      if (res.affectedRows > 0) count++;
+    }
+    return { count };
+  } catch (error) {
+    console.error("createExpenses error:", error);
+    return { count: 0 };
+  }
+};
+
+export const updateExpense = async (id: number, data: any) => {
+  try {
+    const [res]: any = await db.query(
+      `UPDATE expenses SET Date = ?, Reason = ?, Type = ?, otherType = ?, Amount = ? WHERE ExpenseId = ?`,
+      [data.Date || null, data.Reason || null, data.Type || null, data.otherType || null, data.Amount || 0, id]
+    );
+    return { ExpenseId: id };
+  } catch (error) {
+    console.error("updateExpense error:", error);
+    return null;
+  }
+};
+
+export const deleteExpense = async (id: number) => {
+  try {
+    const [res]: any = await db.query(
+      `DELETE FROM expenses WHERE ExpenseId = ?`,
+      [id]
+    );
+    return { success: res.affectedRows > 0 };
+  } catch (error) {
+    console.error("deleteExpense error:", error);
+    return { success: false };
+  }
+};

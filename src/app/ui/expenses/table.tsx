@@ -41,7 +41,7 @@ export default function ExpenseTable({ expenses }: { expenses: any }) {
                     {exp?.Reason}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    {exp?.Type}
+                    {exp?.Type === "Others" && exp?.otherType ? `Others (${exp.otherType})` : (exp?.Type || '-')}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-right">
                     {exp?.Amount ? formatCurrency(exp.Amount) : ''}
