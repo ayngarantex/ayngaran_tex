@@ -13,7 +13,7 @@ export default function Form() {
 
   const handleSubmit = async () => {
     const jsonBody = JSON.stringify({
-      expensesData: invProducts,
+      expensesData: invProducts.filter(e => e.type !== ""),
     })
 
     const res = await fetch('/api/expenses', {

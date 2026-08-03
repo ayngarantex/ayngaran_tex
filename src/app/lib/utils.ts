@@ -273,3 +273,9 @@ export const formatDateToLocalNew = (
 ) => {
   return formatDateToLocal(dateStr, locale);
 };
+
+export const expenseTypeOptions = () => {
+  return [
+    'Yarn', 'Wages', 'Sizing', 'Transction Charges', 'Transaction charges', 'Purchase', 'Transport', 'Loan', 'Cheet', 'Comission', 'Others'
+  ];
+};

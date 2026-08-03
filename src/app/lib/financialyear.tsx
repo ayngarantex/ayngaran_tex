@@ -16,13 +16,16 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
     const paramStartDate = searchParams.get('startDate');
     const paramEndDate = searchParams.get('endDate');
 
+    const currentFy = getFinancialYear(new Date());
     const initialFy = paramStartDate && paramEndDate 
         ? getFinancialYear(paramStartDate)
-        : "All";
+        : currentFy;
+
+    const [startYearSplit, endYearSplit] = initialFy.split("-").map(String);
 
     const [financialYear, setFinancialYear] = useState<string>(initialFy);
-    const [startDate, setStartDate] = useState<string>(paramStartDate || "");
-    const [endDate, setEndDate] = useState<string>(paramEndDate || "");
+    const [startDate, setStartDate] = useState<string>(paramStartDate || (initialFy !== "All" ? `${startYearSplit}-04-01` : ""));
+    const [endDate, setEndDate] = useState<string>(paramEndDate || (initialFy !== "All" ? `${endYearSplit}-03-31` : ""));
     const [billType, setBillType] = useState<string>(searchParams.get('billType') || "");
     const [orderByColumn, setOrderByColumn] = useState<string>(searchParams.get('orderBy') || "");
     const [loomName, setLoomName] = useState<string>(searchParams.get('loomName') || "");

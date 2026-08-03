@@ -12,10 +12,10 @@ import { currentDate, formatDateToLocal } from '@/app/lib/utils';
 import { updateYarn } from '@/app/api/node/yarns';
 
 export default function EditForm({
-  invoice,
+  yarns,
   suppliers
 }: {
-  invoice: any;
+  yarns: any;
   suppliers: SupplierField[];
 }) {
   const router = useRouter();
@@ -45,26 +45,26 @@ export default function EditForm({
 
   // Pre-fill state from invoice data
   useEffect(() => {
-    const supplier = suppliers.find(c => Number(c.SupplierId) === Number(invoice?.SupplierId)) || null;
+    const supplier = suppliers.find(c => Number(c.SupplierId) === Number(yarns?.SupplierId)) || null;
     setSelectedSupplier(supplier);
 
-    setSupplierId(invoice?.SupplierId);
-    setInvoiceNumber(invoice?.InvoiceNumber);
-    setInvoiceDate(formatDateToLocal(invoice?.InvoiceDate))
-    setBeforeTax(invoice?.BeforeTax);
-    setTaxPercentage(invoice?.TaxPercentage);
-    setCgstAmount(invoice?.Cgst);
-    setSgstAmount(invoice?.Sgst);
-    setIgstAmount(invoice?.Igst);
-    setAfterTax(invoice?.AfterTax);
-    setBillType(invoice?.BillType);
-    setRoundOff(invoice?.RoundOff);
-    setInvoiceAmount(invoice?.InvoiceAmount);
-    setPaidAmount(invoice?.PaidAmount);
+    setSupplierId(yarns?.SupplierId);
+    setInvoiceNumber(yarns?.InvoiceNumber);
+    setInvoiceDate(formatDateToLocal(yarns?.InvoiceDate))
+    setBeforeTax(yarns?.BeforeTax);
+    setTaxPercentage(yarns?.TaxPercentage);
+    setCgstAmount(yarns?.Cgst);
+    setSgstAmount(yarns?.Sgst);
+    setIgstAmount(yarns?.Igst);
+    setAfterTax(yarns?.AfterTax);
+    setBillType(yarns?.BillType);
+    setRoundOff(yarns?.RoundOff);
+    setInvoiceAmount(yarns?.InvoiceAmount);
+    setPaidAmount(yarns?.PaidAmount);
 
-    setYrnProducts(invoice.yarn_details || []);
-    setYrnPayments(invoice.yarn_payment_details || []);
-  }, [invoice, suppliers]);
+    setYrnProducts(yarns.yarn_details || []);
+    setYrnPayments(yarns.yarn_payment_details || []);
+  }, [yarns, suppliers]);
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const Id = Number(e.target.value);
@@ -75,12 +75,12 @@ export default function EditForm({
   };
 
   const invoiceProductData = useMemo(() => {
-    return invoice?.yarn_details ?? [];
-  }, [invoice?.yarn_details]);
+    return yarns?.yarn_details ?? [];
+  }, [yarns?.yarn_details]);
 
   const invoicePaymentData = useMemo(() => {
-    return invoice?.yarn_payment_details ?? [];
-  }, [invoice?.yarn_payment_details]);
+    return yarns?.yarn_payment_details ?? [];
+  }, [yarns?.yarn_payment_details]);
 
   const handleSubmit = async () => {
     if (submitLoading) return;
@@ -88,9 +88,9 @@ export default function EditForm({
     let payments = yrnPayments;
 
     const invoiceData = {
-      YarnId: invoice.YarnId,
+      YarnId: yarns.YarnId,
       SupplierId: selectedSupplier?.SupplierId,
-      InvoiceNumber: invoiceNumber,
+      yarnsNumber: invoiceNumber,
       InvoiceDate: invoiceDate,
       BeforeTax: beforeTax,
       TaxPercentage: taxPercentage,
@@ -254,7 +254,7 @@ export default function EditForm({
                   id="invoice"
                   name="invoice"
                   type="text"
-                  value={invoiceNumber}
+                  value={invoiceNumber || ''}
                   placeholder="Enter Invoice"
                   className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 uppercase"
                   onChange={(e) => {
@@ -472,7 +472,7 @@ export default function EditForm({
                 name="roundOff"
                 type="text"
                 placeholder="Enter round off"
-                value={roundOff}
+                value={roundOff || 0}
                 onChange={(e) =>
                   setRoundOff(e.target.value)
                 }

@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const token = jwt.sign(
       { userId: user.Id, role: user.UserType }, 
       JWT_SECRET,
-      { expiresIn: "1h" } 
+      { expiresIn: "30d" } 
     );
 
     // Set HttpOnly cookie
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     cookieStore.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
     });
 
