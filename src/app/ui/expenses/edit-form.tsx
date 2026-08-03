@@ -23,6 +23,7 @@ export default function EditForm({
       Reason: invProducts?.[0].reason,
       Type: invProducts?.[0]?.type || '',
       Amount: invProducts?.[0].amount,
+      otherType: invProducts?.[0]?.otherType || '',
     }
     const jsonBody = JSON.stringify({
       ExpenseId: expenses?.[0]?.ExpenseId,

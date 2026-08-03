@@ -184,7 +184,13 @@ export const getWarpSummary = async (
         L.LoomId,
         MAX(T.ReceivedWeight) AS ReceivedWeight,
         MAX(T.ReceivedDhoties) AS ReceivedDhoties,
-        MAX(T.IsCompleted) AS IsCompleted
+        MAX(T.IsCompleted) AS IsCompleted,
+        MAX(T.MaxDcId) AS MaxDcId,
+        MAX(T.Dc) AS Dc,
+        MAX(T.Date) AS Date,
+        MAX(T.Piece) AS Piece,
+        MAX(T.Count) AS Count,
+        MAX(T.Weight) AS Weight
     FROM sizing_warp_details SWD     
     LEFT JOIN loom_details L         
         ON SWD.LoomId = L.LoomId     
@@ -194,13 +200,33 @@ export const getWarpSummary = async (
         ON S.SupplierId = Sup.SupplierId     
     LEFT JOIN (         
         SELECT 
-            SizingId,
-            LoomId,
-            ROUND(COALESCE(SUM(Weight), 0), 2) AS ReceivedWeight,
-            ROUND(COALESCE(SUM(Count), 0), 2) AS ReceivedDhoties,
-            MAX(IsCompleted) AS IsCompleted
-        FROM sizing_summary_details SSD                 
-        GROUP BY SizingId, LoomId  
+            Totals.SizingId,
+            Totals.LoomId,
+            Totals.ReceivedWeight,
+            Totals.ReceivedDhoties,
+            Latest.IsCompleted,
+            Latest.MaxDcId,
+            Latest.Dc,
+            Latest.Date,
+            Latest.Piece,
+            Latest.Weight,
+            Latest.Count
+        FROM (
+            SELECT SizingId, LoomId, 
+                   ROUND(COALESCE(SUM(Weight), 0), 2) AS ReceivedWeight, 
+                   ROUND(COALESCE(SUM(Count), 0), 2) AS ReceivedDhoties
+            FROM sizing_summary_details
+            GROUP BY SizingId, LoomId
+        ) Totals
+        LEFT JOIN (
+            SELECT SSD.SizingId, SSD.LoomId, SSD.DcId AS MaxDcId, SSD.Dc, SSD.Date, SSD.Piece, SSD.Weight, SSD.Count, SSD.IsCompleted
+            FROM sizing_summary_details SSD
+            JOIN (
+                SELECT SizingId, LoomId, MAX(DcId) AS MaxDcId
+                FROM sizing_summary_details
+                GROUP BY SizingId, LoomId
+            ) MaxSSD ON SSD.DcId = MaxSSD.MaxDcId
+        ) Latest ON Totals.SizingId = Latest.SizingId AND Totals.LoomId = Latest.LoomId
     ) AS T
         ON S.SizingId = T.SizingId AND L.LoomId = T.LoomId  
         WHERE 1=1
@@ -243,6 +269,12 @@ export const getWarpSummary = async (
         ReceivedWeight: row.ReceivedWeight || 0,
         ReceivedDhoties: row.ReceivedDhoties || 0,
         IsCompleted: row.IsCompleted || 0,
+        MaxDcId: row.MaxDcId || null,
+        Dc: row.Dc || '',
+        Date: row.Date || '',
+        Count: row.Count || 0,
+        Weight: row.Weight || 0,
+        Piece: row.Piece || 0,
     }));
 };
 
