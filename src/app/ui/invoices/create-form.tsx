@@ -49,6 +49,7 @@ export default function Form({
   );
   const [invoiceType, setInvoiceType] = useState("Tax Invoice");
   const [ewayBillNumber, setEwayBillNumber] = useState("");
+  const [deliveryNote, setDeliveryNote] = useState("");
 
   const [products, setProducts] = useState<ProductField[]>([]);
   const [invProducts, setInvProducts] = useState<ProductRow[]>([]);
@@ -94,6 +95,7 @@ export default function Form({
         InvoiceType: billType === 'gst' ? invoiceType : '',
         EwayBillNumber: ewayBillNumber,
         InvoiceDate: invoiceDate,
+        DeliveryNote: deliveryNote,
         BeforeTax: Number(beforeTax.toFixed(2)),
         TaxPercentage: taxPercentage,
         Cgst: selectedCustomer?.State === 'TamilNadu' ? Number(cgstAmount.toFixed(2)) : 0,
@@ -354,6 +356,27 @@ export default function Form({
                   onChange={(e) => {
                     setEwayBillNumber(e.target.value)
                   }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4 w-1/5">
+            <label htmlFor="Delivery Note" className="mb-2 block text-sm font-medium">
+              Delivery Note
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="deliveryNote"
+                  name="deliveryNote"
+                  type="text"
+                  placeholder="Enter Delivery Note"
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                  onChange={(e) => {
+                    setDeliveryNote(e.target.value)
+                  }}
+                  value={deliveryNote}
                 />
               </div>
             </div>

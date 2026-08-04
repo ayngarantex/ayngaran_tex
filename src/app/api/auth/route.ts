@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user.Id, role: user.UserType }, 
+      { userId: user.Id, role: user.UserType, superadmin: user.superadmin === 1 || user.superadmin === true }, 
       JWT_SECRET,
       { expiresIn: "30d" } 
     );
@@ -55,8 +55,18 @@ export async function POST(req: Request) {
       path: '/',
     });
 
-    return NextResponse.json({ token, userName: user.UserName, userType: user.UserType });
+    return NextResponse.json({ token, userName: user.UserName, userType: user.UserType, superadmin: user.superadmin === 1 || user.superadmin === true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Login Failed" }, { status: 500 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete('token');
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Logout Failed" }, { status: 500 });
   }
 }

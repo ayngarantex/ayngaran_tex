@@ -7,7 +7,7 @@ export function proxy(request: NextRequest) {
 
   // We only gate paths starting with /admin
   if (pathname.startsWith('/admin')) {
-    const isPublicAdminPath = pathname === '/admin/login' || pathname === '/admin/register';
+    const isPublicAdminPath = pathname === '/admin/login';
 
     // If a token is not present and trying to access a protected admin route, redirect to login
     if (!token && !isPublicAdminPath) {

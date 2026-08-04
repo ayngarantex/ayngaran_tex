@@ -3,6 +3,7 @@ import { ExpensesRow } from '@/app/lib/types';
 import { formatDateToLocal, expenseTypeOptions } from "@/app/lib/utils";
 import { Button } from "../button";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
+import SearchDropdown from '../search-dropdown';
 
 interface ProductsProps {
   invProducts: any;
@@ -14,6 +15,11 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
   const [selectedProducts, setSelectedProducts] = useState<ExpensesRow[]>(
     [{ pId: 0, date: "", reason: "", type: "", otherType: "", amount: 0 }]
   );
+
+  const dropdownItems = expenseTypeOptions()?.map((type: string) => ({
+    id: type,
+    label: type,
+  })) || [];
 
   useEffect(() => {
     if (invProducts?.length) {
@@ -105,27 +111,16 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
 
             {/* Price */}
             <div className="w-50">
-              <select
-                id="other Type"
-                name="other TypeId"
-                onChange={(e) => {
-                  handleChange(rowIndex, "type", e.target.value)
+              <SearchDropdown
+                items={dropdownItems}
+                onSelect={(item) => {
+                  handleChange(rowIndex, "type", item ? String(item.id) : "")
                 }}
-                className="border p-2.5 rounded"
-                defaultValue={row.type}
-              >
-                <option value="" disabled>
-                  Select a Type
-                </option>
-                {expenseTypeOptions()?.map((row: any) => (
-                  <option
-                    key={row}
-                    value={row}
-                  >
-                    {row}
-                  </option>
-                ))}
-              </select>
+                value={row.type}
+                placeholder="Select a Type"
+                hideLabel={true}
+                showUserIcon={false}
+              />
             </div>
 
             {row.type === "Others" && (

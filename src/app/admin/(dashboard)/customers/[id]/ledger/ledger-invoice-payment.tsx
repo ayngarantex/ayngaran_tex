@@ -159,6 +159,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                             }
                                                         </Link>
                                                     </div>
+                                                    {invoice.DeliveryNote}
 
                                                     {Number(hoverInvoiceId) === Number(invoice.InvoiceId) && (
                                                         <div className="absolute mt-2 w-1/3 border-2 border-gray-200 rounded-lg bg-white shadow-lg p-3 z-50 overflow-y-auto top-100 left-100">
