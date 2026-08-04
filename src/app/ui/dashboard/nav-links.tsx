@@ -29,13 +29,12 @@ const links = [
   { name: 'Sizing', href: '/admin/sizing', icon: AdjustmentsVerticalIcon },
   { name: 'Warp', href: '/admin/warp', icon: MapIcon },
   { name: 'Expenses', href: '/admin/expenses', icon: CurrencyRupeeIcon },
-  { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon },
-  { name: 'Beem', href: '/admin/beem', icon: DocumentDuplicateIcon },
+  { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon }
 ];
 
 export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -47,15 +46,16 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
         try {
           const payloadBase64 = cookieValue.split('.')[1];
           const decodedPayload = JSON.parse(atob(payloadBase64));
-          setIsSuperAdmin(!!decodedPayload.superadmin);
+          const userRole = decodedPayload.role || decodedPayload.userType;
+          setIsAdmin(userRole === 'admin');
         } catch (e) {
-          setIsSuperAdmin(false);
+          setIsAdmin(false);
         }
       }
     }
   }, []);
 
-  const visibleLinks = isSuperAdmin
+  const visibleLinks = isAdmin
     ? [...links, { name: 'Register User', href: '/admin/register', icon: UserPlusIcon }]
     : links;
 

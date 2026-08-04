@@ -15,7 +15,8 @@ export default async function RegisterPage() {
 
   try {
     const decoded: any = jwt.verify(token, JWT_SECRET);
-    if (!decoded || !decoded.superadmin) {
+    const userRole = decoded?.role || decoded?.userType;
+    if (!decoded || userRole !== 'admin') {
       redirect('/admin/invoices');
     }
   } catch (error) {
