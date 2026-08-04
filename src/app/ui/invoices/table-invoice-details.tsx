@@ -52,7 +52,10 @@ export default function TableInvoiceDetails({
                     </span>
                 </div>
                 {invoice?.EwayBillNumber ?
-                    <p className='pt-1'>{invoice?.EwayBillNumber}</p>
+                    <p className='pt-1 text-xs text-gray-500'>Eway No: {invoice?.EwayBillNumber}</p>
+                    : null}
+                {invoice?.DeliveryNote ?
+                    <p className='pt-0.5 text-xs text-gray-500'>Note: {invoice?.DeliveryNote}</p>
                     : null}
             </td>
             <td className="whitespace-nowrap px-3 py-3 col-date">

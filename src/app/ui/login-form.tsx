@@ -113,24 +113,12 @@ export default function LoginForm() {
           </div>
         </div>
 
-        <Button type="submit" className="mt-6 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center gap-2" disabled={isSubmitting}>
-          {isSubmitting ? 'Logging in...' : 'Log in'} <ArrowRightIcon className="h-5 w-5" />
+        <Button type="submit" className="mt-6 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium items-center  gap-2" disabled={isSubmitting}>
+          <div className='flex w-full justify-center'>
+            {isSubmitting ? 'Logging in...' : 'Log in'} <ArrowRightIcon className="h-5 w-5" />
+          </div>
         </Button>
-
-        <div className="mt-6 text-center border-t border-gray-200 pt-4">
-          <p className="text-xs text-gray-500">
-            Don't have an account?{' '}
-            <Link
-              href="/admin/register"
-              className="font-semibold text-blue-600 hover:text-blue-800 underline"
-            >
-              Register here
-            </Link>
-
-          </p>
-        </div>
       </div>
     </form>
   );
 }
-

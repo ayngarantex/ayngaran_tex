@@ -12,7 +12,12 @@ export default function SideNav() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth', { method: 'DELETE' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
     document.cookie = 'token=; Max-Age=0; path=/;';
     router.push('/admin/login');
   };

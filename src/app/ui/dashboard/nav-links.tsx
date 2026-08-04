@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   UserGroupIcon,
   HomeIcon,
@@ -10,7 +11,8 @@ import {
   BuildingStorefrontIcon,
   BanknotesIcon,
   MapIcon,
-  AdjustmentsVerticalIcon
+  AdjustmentsVerticalIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -33,10 +35,33 @@ const links = [
 
 export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+      if (cookieValue) {
+        try {
+          const payloadBase64 = cookieValue.split('.')[1];
+          const decodedPayload = JSON.parse(atob(payloadBase64));
+          setIsSuperAdmin(!!decodedPayload.superadmin);
+        } catch (e) {
+          setIsSuperAdmin(false);
+        }
+      }
+    }
+  }, []);
+
+  const visibleLinks = isSuperAdmin
+    ? [...links, { name: 'Register User', href: '/admin/register', icon: UserPlusIcon }]
+    : links;
 
   return (
     <>
-      {links.map((link) => {
+      {visibleLinks.map((link) => {
         const LinkIcon = link.icon;
         const isActive = pathname === link.href;
         return (

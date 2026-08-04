@@ -96,6 +96,7 @@ export const getInvoices = async (
             GstNumber: row.GstNumber,
             IsCancel: row.IsCancel,
             CancelReason: row.CancelReason,
+            DeliveryNote: row.DeliveryNote,
 
             invoice_details: details.map((d: any) => ({
                 InvoiceDetailId: d.InvoiceDetailId,
@@ -226,8 +227,8 @@ export const createInvoice = async (invoiceData: any) => {
         const customerId = Number(invoiceData.CustomerId) > 0 ? Number(invoiceData.CustomerId) : null;
 
         const [result]: any = await conn.query(
-            "INSERT INTO invoice (InvoiceNumber, InvoiceDate, InvoiceType, CustomerId, EwayBillNumber, BillType, BeforeTax, TaxPercentage, Cgst, Sgst, Igst, AfterTax, RoundOff, Discount, InvoiceAmount, ReceivedAmount, IsCancel, CancelReason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason]
+            "INSERT INTO invoice (InvoiceNumber, InvoiceDate, InvoiceType, CustomerId, EwayBillNumber, BillType, BeforeTax, TaxPercentage, Cgst, Sgst, Igst, AfterTax, RoundOff, Discount, InvoiceAmount, ReceivedAmount, IsCancel, CancelReason, DeliveryNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.DeliveryNote]
         );
 
         const invoiceId = result.insertId;
@@ -292,7 +293,8 @@ export const getInvoice = async (id: any) => {
 
         let detailsQuery = `SELECT *, ID.Type AS Type FROM invoice_details ID 
             LEFT JOIN products P ON ID.ItemId = P.Id
-            WHERE ID.InvoiceId = ?`;
+            WHERE ID.InvoiceId = ?
+            ORDER BY ID.InvoiceDetailId ASC`;
 
         const [details]: any = await conn.query(detailsQuery, [Number(id)]);
 
@@ -331,8 +333,8 @@ export const updateInvoice = async (invoiceData: any) => {
         const invId = Number(invoiceData.InvoiceId || invoiceData.id);
 
         await conn.query(
-            "UPDATE invoice SET InvoiceNumber = ?, InvoiceDate = ?, InvoiceType = ?, CustomerId = ?, EwayBillNumber = ?, BillType = ?, BeforeTax = ?, TaxPercentage = ?, Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, Discount = ?, InvoiceAmount = ?, ReceivedAmount = ?, IsCancel = ?, CancelReason = ? WHERE InvoiceId = ?",
-            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invId]
+            "UPDATE invoice SET InvoiceNumber = ?, InvoiceDate = ?, InvoiceType = ?, CustomerId = ?, EwayBillNumber = ?, BillType = ?, BeforeTax = ?, TaxPercentage = ?, Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, Discount = ?, InvoiceAmount = ?, ReceivedAmount = ?, IsCancel = ?, CancelReason = ?, DeliveryNote = ? WHERE InvoiceId = ?",
+            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.DeliveryNote, invId]
         );
 
         await conn.query(
