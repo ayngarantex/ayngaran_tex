@@ -1,7 +1,7 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getInvoices, getInvoicesCount, getInvoicesTotal, getInvoice, getLastInvoiceNumber, createInvoice as createInvoiceRepo, updateInvoice as updateInvoiceRepo, deleteInvoice as deleteInvoiceRepo, getCustomerInvoices, getCustomerPayments } from "@/server/repositories/invoiceRepositories";
+import { getInvoices, getInvoicesCount, getInvoicesTotal, getInvoice, getLastInvoiceNumber, createInvoice as createInvoiceRepo, updateInvoice as updateInvoiceRepo, deleteInvoice as deleteInvoiceRepo, getCustomerInvoices, getCustomerPayments, getInvoicesForPeriod, getInvoiceDetailsForPeriod } from "@/server/repositories/invoiceRepositories";
 
 export const fetchInvoices = async (
     query: string,
@@ -131,5 +131,19 @@ export const fetchCustomerPayments = async (id: any, startDate: string, endDate:
     } catch (err) {
         console.error("fetchCustomerPayments Error:", err);
         return [];
+    }
+};
+
+export const fetchGstr1Data = async (startDate: string, endDate: string) => {
+    try {
+        const invoices = await getInvoicesForPeriod(startDate, endDate);
+        const details = await getInvoiceDetailsForPeriod(startDate, endDate);
+        return {
+            invoices: JSON.parse(JSON.stringify(invoices)),
+            details: JSON.parse(JSON.stringify(details))
+        };
+    } catch (err) {
+        console.error("fetchGstr1Data Error:", err);
+        return { invoices: [], details: [] };
     }
 };

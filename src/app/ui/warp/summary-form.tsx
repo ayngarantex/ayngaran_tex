@@ -24,10 +24,10 @@ export default function EditForm({
     let filteredProducts: any = [];
     if (summaryProducts?.length) {
       summaryProducts.forEach((row: any) => {
-        if (row.Date && row.Dc) {
+        if (row.Date) {
           filteredProducts.push({
             DcId: row.DcId ? String(row.DcId) : undefined,
-            Dc: Number(row.Dc),
+            Dc: Number(row.Dc || 0),
             Date: formatDateToLocalNew(row.Date),
             Piece: Number(row.Piece || 0),
             Count: String(row.Count || ""),
@@ -315,7 +315,7 @@ function PieceReceivedDetails({ summaryProducts, setSummaryProducts }: PieceRece
                 }
                 className="border p-2 rounded w-[15%] text-sm"
                 placeholder="Wt"
-              />
+              />{((Number(row.Weight) / Number(row.Count)).toFixed(2))}
 
               {/* Remove Button */}
               <button

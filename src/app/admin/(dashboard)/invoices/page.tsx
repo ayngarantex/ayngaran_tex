@@ -1,6 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
-import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices } from '@/app/ui/invoices/buttons';
+import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices, ExportGstr1 } from '@/app/ui/invoices/buttons';
 import Table from '@/app/ui/invoices/table';
 import Financialyear from '@/app/lib/financialyear';
 import { formatCurrency, pageLimit } from '@/app/lib/utils';
@@ -79,7 +79,10 @@ export default async function Page(props: {
           </div>
         </div>
         {!printMode && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 text-wrap flex-wrap">
+            <div className='no-print'>
+              <ExportGstr1 />
+            </div>
             <div className='no-print'>
               <ExportInvoices query={query} billType={billType} orderBy={orderBy} />
             </div>

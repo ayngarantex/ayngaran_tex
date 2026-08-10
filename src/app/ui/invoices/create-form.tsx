@@ -7,7 +7,6 @@ import { useEffect, useState, useMemo } from 'react';
 import ProductForm from './products-form';
 import SearchDropdown from '@/app/ui/search-dropdown';
 import PaymentForm from './payment-form';
-import { redirect } from 'next/navigation';
 import { currentDate, invoiceTypeOptions } from '@/app/lib/utils';
 import ReturnProducts from './return-products';
 import { createInvoice } from '@/app/api/node/invoice';
@@ -47,7 +46,7 @@ export default function Form({
   const [invoiceDate, setInvoiceDate] = useState(
     currentDate()
   );
-  const [invoiceType, setInvoiceType] = useState("Tax Invoice");
+  const [invoiceType, setInvoiceType] = useState("B2B");
   const [ewayBillNumber, setEwayBillNumber] = useState("");
   const [deliveryNote, setDeliveryNote] = useState("");
 
