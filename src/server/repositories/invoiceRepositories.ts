@@ -543,3 +543,39 @@ export const getCustomerPayments = async (CustomerId: any, startDate: string | n
         conn.release();
     }
 };
+
+export const getInvoicesForPeriod = async (startDate: string, endDate: string) => {
+    const conn = await db.getConnection();
+    try {
+        const [rows]: any = await conn.query(
+            `SELECT I.*, C.CustomerName, C.GstNumber, C.State, C.Address
+             FROM invoice I
+             LEFT JOIN customers C ON I.CustomerId = C.CustomerId
+             WHERE DATE(I.InvoiceDate) BETWEEN ? AND ?
+             ORDER BY I.InvoiceDate ASC, I.InvoiceNumber ASC`,
+            [startDate, endDate]
+        );
+        return rows;
+    } finally {
+        conn.release();
+    }
+};
+
+export const getInvoiceDetailsForPeriod = async (startDate: string, endDate: string) => {
+    const conn = await db.getConnection();
+    try {
+        const [rows]: any = await conn.query(
+            `SELECT ID.*, P.HSNCode, P.Name AS ItemName, I.InvoiceDate, I.InvoiceNumber, I.BillType, I.TaxPercentage, C.State
+             FROM invoice_details ID
+             LEFT JOIN invoice I ON ID.InvoiceId = I.InvoiceId
+             LEFT JOIN products P ON ID.ItemId = P.Id
+             LEFT JOIN customers C ON I.CustomerId = C.CustomerId
+             WHERE DATE(I.InvoiceDate) BETWEEN ? AND ?
+               AND I.IsCancel = 0`,
+            [startDate, endDate]
+        );
+        return rows;
+    } finally {
+        conn.release();
+    }
+};

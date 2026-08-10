@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PrintInvoice, UpdateInvoice, DeleteInvoice, DownloadInvoice } from '@/app/ui/invoices/buttons';
-import { formatCurrency, formatDateNew, getFinancialYearShortNew } from '@/app/lib/utils';
+import { formatCurrency, formatDateNew, getFinancialYearShortNew, invoiceTypeOptions } from '@/app/lib/utils';
 import InvoiceStatus from './status';
 import Link from 'next/link';
 
@@ -43,14 +43,17 @@ export default function TableInvoiceDetails({
             <td className="whitespace-nowrap py-3 pl-6 pr-3 col-billNumber">
                 <div className="flex items-center">
                     <span className=''>
-                        {invoice?.InvoiceType === 'Tax Invoice' ?
-                            getFinancialYearShortNew(invoice.InvoiceDate) + '/AT/' + invoice?.InvoiceNumber.toString().padStart(2, '0')
-                            : invoice.InvoiceType === 'Credit Note' ?
-                                getFinancialYearShortNew(invoice.InvoiceDate) + '/AT-C/' + invoice?.InvoiceNumber.toString().padStart(2, '0')
+                        {invoice.InvoiceType === 'Credit Note'
+                            ? getFinancialYearShortNew(invoice.InvoiceDate) + '/AT-C/' + invoice?.InvoiceNumber.toString().padStart(2, '0')
+                            : invoiceTypeOptions().map((option: any) => option).includes(invoice.InvoiceType) ?
+                                getFinancialYearShortNew(invoice.InvoiceDate) + '/AT/' + invoice?.InvoiceNumber.toString().padStart(2, '0')
                                 : 'S-DC/' + invoice?.InvoiceNumber.toString().padStart(2, '0')
                         }
                     </span>
                 </div>
+                {invoice?.InvoiceType && (
+                    <p className='pt-1 text-xs'>{invoice?.InvoiceType}</p>
+                )}
                 {invoice?.EwayBillNumber ?
                     <p className='pt-1 text-xs text-gray-500'>Eway No: {invoice?.EwayBillNumber}</p>
                     : null}

@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { deleteInvoice, fetchInvoices } from '@/app/api/node/invoice';
+import { deleteInvoice, fetchInvoices, fetchGstr1Data } from '@/app/api/node/invoice';
 import { PencilIcon, PlusIcon, TrashIcon, PrinterIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getFinancialYearShortNew, formatDateNew } from '@/app/lib/utils';
+import { getFinancialYearShortNew, formatDateNew, invoiceTypeOptions } from '@/app/lib/utils';
 
 export function CreateInvoice() {
   return (
@@ -73,10 +73,9 @@ export function DownloadInvoice({ invoice }: { invoice: any }) {
 
       let fileName = `invoice_${invoice.InvoiceId}.pdf`;
       if (invoice?.InvoiceNumber) {
-        const formattedNum = invoice.InvoiceType === 'Tax Invoice'
-          ? `${getFinancialYearShortNew(invoice.InvoiceDate)}_AT_${String(invoice.InvoiceNumber).padStart(2, '0')}`
-          : invoice.InvoiceType === 'Credit Note'
-            ? `${getFinancialYearShortNew(invoice.InvoiceDate)}_AT-C_${String(invoice.InvoiceNumber).padStart(2, '0')}`
+        const formattedNum = invoice.InvoiceType === 'Credit Note'
+          ? `${getFinancialYearShortNew(invoice.InvoiceDate)}_AT-C_${String(invoice.InvoiceNumber).padStart(2, '0')}` : invoiceTypeOptions().map((option: any) => option).includes(invoice.InvoiceType)
+            ? `${getFinancialYearShortNew(invoice.InvoiceDate)}_AT_${String(invoice.InvoiceNumber).padStart(2, '0')}`
             : `S-DC_${String(invoice.InvoiceNumber).padStart(2, '0')}`;
         fileName = `${formattedNum}.pdf`;
       }
@@ -450,6 +449,477 @@ export function ExportInvoices({ query, billType, orderBy }: { query: string, bi
                   </>
                 ) : (
                   'Download CSV'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export function ExportGstr1() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(String(currentYear));
+
+  const years = Array.from({ length: 7 }, (_, i) => String(currentYear - 3 + i));
+  const months = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const startDate = `${selectedYear}-${selectedMonth}-01`;
+      const lastDay = new Date(Number(selectedYear), Number(selectedMonth), 0).getDate();
+      const endDate = `${selectedYear}-${selectedMonth}-${String(lastDay).padStart(2, '0')}`;
+
+      // Call the Server Action to get raw data
+      const { invoices, details } = await fetchGstr1Data(startDate, endDate);
+
+      // Helper function to format invoice numbers exactly as printed
+      const formatInvoiceNumber = (inv: any) => {
+        const isCreditNote = inv.InvoiceType === 'Credit Note';
+        const dateObj = new Date(inv.InvoiceDate);
+        const year = dateObj.getFullYear();
+        const shortYr = year.toString().slice(-2);
+        const nextYrShort = (year + 1).toString().slice(-2);
+        const prevYrShort = (year - 1).toString().slice(-2);
+        const isAprilOrLater = (dateObj.getMonth() + 1) >= 4;
+        const fy = isAprilOrLater ? `${shortYr}-${nextYrShort}` : `${prevYrShort}-${shortYr}`;
+        const numStr = String(inv.InvoiceNumber).padStart(2, '0');
+        return isCreditNote ? `${fy}/AT-C/${numStr}` : `${fy}/AT/${numStr}`;
+      };
+
+      // Construct GSTR-1 JSON schema
+      const gstinSupplier = "33AYWPV5842M1ZD"; // hardcoded supplier GSTIN
+      const fp = `${selectedMonth}${selectedYear}`;
+
+      const b2bMap = new Map();
+      const cdnrMap = new Map();
+      const b2csMap = new Map();
+
+      // 1. Group regular invoices by Customer GSTIN (B2B)
+      for (const inv of invoices) {
+        if (inv.BillType !== 'gst') continue;
+
+        const isCreditNote = inv.InvoiceType === 'Credit Note';
+        const hasGst = inv.GstNumber && inv.GstNumber.trim().length === 15;
+
+        const dateObj = new Date(inv.InvoiceDate);
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const year = dateObj.getFullYear();
+        const idt = `${day}-${month}-${year}`;
+
+        const inum = formatInvoiceNumber(inv);
+        const val = Number(inv.InvoiceAmount);
+
+        // Map state name to state code
+        const stateMapping: Record<string, string> = {
+          'TamilNadu': '33',
+          'Kerala': '32',
+          'Karnataka': '29'
+        };
+        const pos = hasGst ? inv.GstNumber.substring(0, 2) : (stateMapping[inv.State] || '33');
+
+        if (hasGst) {
+          const ctin = inv.GstNumber.toUpperCase();
+
+          const itm_det: any = {
+            rt: Number(inv.TaxPercentage || 5),
+            txval: Number(inv.BeforeTax || 0),
+            csamt: 0
+          };
+
+          const isLocal = pos === '33';
+          if (isLocal) {
+            itm_det.camt = Number(inv.Cgst || 0);
+            itm_det.samt = Number(inv.Sgst || 0);
+          } else {
+            itm_det.iamt = Number(inv.Igst || 0);
+          }
+
+          if (isCreditNote) {
+            if (!cdnrMap.has(ctin)) {
+              cdnrMap.set(ctin, { ctin, cname: inv.CustomerName || "", nt: [] });
+            }
+            cdnrMap.get(ctin).nt.push({
+              ntty: 'C',
+              nt_num: inum,
+              nt_dt: idt,
+              val: val,
+              inum: inum,
+              idt: idt,
+              supplierRecipientName: "",
+              rchrg: 'N',
+              diff_percent: null,
+              itms: [
+                {
+                  num: Number(inv.TaxPercentage || 5) * 100 + 1,
+                  itm_det: itm_det
+                }
+              ]
+            });
+          } else {
+            if (!b2bMap.has(ctin)) {
+              b2bMap.set(ctin, { ctin, cname: inv.CustomerName || "", inv: [] });
+            }
+            b2bMap.get(ctin).inv.push({
+              inum: inum,
+              idt: idt,
+              val: val,
+              pos: pos,
+              supplierRecipientName: "",
+              rchrg: 'N',
+              diff_percent: null,
+              inv_typ: 'R',
+              itms: [
+                {
+                  num: Number(inv.TaxPercentage || 5) * 100 + 1,
+                  itm_det: itm_det
+                }
+              ]
+            });
+          }
+        } else {
+          // B2C Small
+          const rate = Number(inv.TaxPercentage || 5);
+          const b2csKey = `${pos}_${rate}`;
+          if (!b2csMap.has(b2csKey)) {
+            b2csMap.set(b2csKey, {
+              sply_ty: pos === '33' ? 'INTRA' : 'INTER',
+              pos: pos,
+              typ: 'OE',
+              rt: rate,
+              txval: 0,
+              iamt: 0,
+              camt: 0,
+              samt: 0,
+              csamt: 0,
+              diff_percent: null
+            });
+          }
+          const b2csItem = b2csMap.get(b2csKey);
+          b2csItem.txval += Number(inv.BeforeTax || 0);
+          b2csItem.iamt += Number(inv.Igst || 0);
+          b2csItem.camt += Number(inv.Cgst || 0);
+          b2csItem.samt += Number(inv.Sgst || 0);
+        }
+      }
+
+      const b2bList = Array.from(b2bMap.values());
+      const cdnrList = Array.from(cdnrMap.values());
+      const b2csList = Array.from(b2csMap.values()).map((item: any) => ({
+        ...item,
+        txval: Number(item.txval.toFixed(2)),
+        iamt: Number(item.iamt.toFixed(2)),
+        camt: Number(item.camt.toFixed(2)),
+        samt: Number(item.samt.toFixed(2))
+      }));
+
+      // 2. Group details for HSN summary (split into hsn_b2b and hsn_b2c)
+      const hsnB2bMap = new Map();
+      const hsnB2cMap = new Map();
+
+      for (const detail of details) {
+        if (detail.BillType !== 'gst') continue;
+
+        const hsn = detail.HSNCode || '5208';
+        const rate = Number(detail.TaxPercentage || 5);
+        const key = `${hsn}_${rate}`;
+
+        const hasGst = detail.GstNumber && detail.GstNumber.trim().length === 15;
+        const targetMap = hasGst ? hsnB2bMap : hsnB2cMap;
+
+        if (!targetMap.has(key)) {
+          targetMap.set(key, {
+            hsn_sc: hsn,
+            desc: detail.ItemName || 'Fabric',
+            uqc: 'MTR',
+            qty: 0,
+            txval: 0,
+            rt: rate,
+            iamt: 0,
+            camt: 0,
+            samt: 0
+          });
+        }
+
+        const hsnItem = targetMap.get(key);
+        hsnItem.qty += Number(detail.Quantity || 0);
+        hsnItem.txval += Number(detail.Total || 0);
+
+        const taxFactor = rate / 100;
+        const itemTotalTax = Number(detail.Total || 0) * taxFactor;
+
+        const isLocal = detail.State === 'TamilNadu';
+        if (isLocal) {
+          hsnItem.camt += Number((itemTotalTax / 2).toFixed(2));
+          hsnItem.samt += Number((itemTotalTax / 2).toFixed(2));
+        } else {
+          hsnItem.iamt += Number(itemTotalTax.toFixed(2));
+        }
+      }
+
+      let hsnB2bNum = 1;
+      const hsnB2bList = Array.from(hsnB2bMap.values()).map((item: any) => ({
+        num: hsnB2bNum++,
+        hsn_sc: item.hsn_sc,
+        desc: item.desc,
+        uqc: item.uqc,
+        qty: Number(item.qty.toFixed(2)),
+        txval: Number(item.txval.toFixed(2)),
+        rt: item.rt,
+        iamt: Number(item.iamt.toFixed(2)),
+        camt: Number(item.camt.toFixed(2)),
+        samt: Number(item.samt.toFixed(2))
+      }));
+
+      let hsnB2cNum = 1;
+      const hsnB2cList = Array.from(hsnB2cMap.values()).map((item: any) => ({
+        num: hsnB2cNum++,
+        hsn_sc: item.hsn_sc,
+        desc: item.desc,
+        uqc: item.uqc,
+        qty: Number(item.qty.toFixed(2)),
+        txval: Number(item.txval.toFixed(2)),
+        rt: item.rt,
+        iamt: Number(item.iamt.toFixed(2)),
+        camt: Number(item.camt.toFixed(2)),
+        samt: Number(item.samt.toFixed(2))
+      }));
+
+      // 3. Document issues (12 categories)
+      const docDetList = [];
+      for (let i = 1; i <= 12; i++) {
+        if (i === 1) {
+          const regularInvoices = invoices.filter((inv: any) => inv.BillType === 'gst' && inv.InvoiceType === 'Tax Invoice');
+          if (regularInvoices.length > 0) {
+            const sorted = [...regularInvoices].sort((a: any, b: any) => Number(a.InvoiceNumber) - Number(b.InvoiceNumber));
+            const minFormatted = formatInvoiceNumber(sorted[0]);
+            const maxFormatted = formatInvoiceNumber(sorted[sorted.length - 1]);
+            const total = regularInvoices.length;
+            const cancelled = regularInvoices.filter((inv: any) => inv.IsCancel === 1).length;
+
+            docDetList.push({
+              docs: [
+                {
+                  num: 1,
+                  from: minFormatted,
+                  to: maxFormatted,
+                  totnum: total,
+                  cancel: cancelled,
+                  net_issue: total - cancelled
+                }
+              ],
+              doc_num: 1
+            });
+          }
+        } else if (i === 5) {
+          const creditNotes = invoices.filter((inv: any) => inv.BillType === 'gst' && inv.InvoiceType === 'Credit Note');
+          if (creditNotes.length > 0) {
+            const sorted = [...creditNotes].sort((a: any, b: any) => Number(a.InvoiceNumber) - Number(b.InvoiceNumber));
+            const minFormatted = formatInvoiceNumber(sorted[0]);
+            const maxFormatted = formatInvoiceNumber(sorted[sorted.length - 1]);
+            const total = creditNotes.length;
+            const cancelled = creditNotes.filter((inv: any) => inv.IsCancel === 1).length;
+
+            docDetList.push({
+              docs: [
+                {
+                  num: 1,
+                  from: minFormatted,
+                  to: maxFormatted,
+                  totnum: total,
+                  cancel: cancelled,
+                  net_issue: total - cancelled
+                }
+              ],
+              doc_num: 5
+            });
+          }
+        }
+      }
+
+      const gstr1Json: any = {
+        gstin: gstinSupplier,
+        fp: fp,
+        version: "GST3.2.4",
+        hash: "hash",
+        b2b: b2bList,
+        b2ba: [],
+        b2cl: [],
+        b2cla: [],
+        b2cs: b2csList,
+        b2csa: [],
+        nil: {
+          inv: []
+        },
+        exp: [],
+        expa: [],
+        hsnSac: [],
+        cdnra: [],
+        at: [],
+        ata: [],
+        cdnr: cdnrList,
+        cdnur: [],
+        cdnura: [],
+        atadj: [],
+        atadja: [],
+        doc_issue: {
+          doc_det: docDetList
+        },
+        hsn: {
+          hsn_b2b: hsnB2bList,
+          hsn_b2c: hsnB2cList
+        },
+        supeco: {
+          clttx: [],
+          paytx: []
+        },
+        supecoa: {
+          clttxa: [],
+          paytxa: []
+        },
+        ecom: {
+          b2b: [],
+          b2c: [],
+          urp2b: [],
+          urp2c: []
+        },
+        ecoma: {
+          b2ba: [],
+          b2ca: [],
+          urp2ba: [],
+          urp2ca: []
+        }
+      };
+
+      // Trigger file download
+      const jsonContent = JSON.stringify(gstr1Json);
+      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `returns_${selectedMonth}${selectedYear}_R1_${gstinSupplier}_offline.json`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setIsOpen(false);
+    } catch (err) {
+      console.error("GSTR-1 generation failed:", err);
+      alert("Failed to export GSTR-1 return file. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="flex h-10 items-center rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 no-print cursor-pointer"
+        title="Export GSTR-1 Return"
+      >
+        <span className="hidden md:block">Export GSTR-1</span>
+        <ArrowDownTrayIcon className="h-5 md:ml-2 w-5 text-white" />
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs no-print">
+          <div className="w-[450px] bg-white rounded-xl shadow-2xl p-6 border border-gray-100 flex flex-col gap-4">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export GSTR-1 Return File
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">Select Month</label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-indigo-500 bg-white"
+                >
+                  {months.map(m => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">Select Year</label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-indigo-500 bg-white"
+                >
+                  {years.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={exporting}
+                className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                {exporting ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating...
+                  </>
+                ) : (
+                  'Export JSON'
                 )}
               </button>
             </div>

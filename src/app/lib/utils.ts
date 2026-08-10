@@ -249,7 +249,7 @@ export const getFinancialYearShort = (dateStr: any) => {
 };
 
 export const invoiceTypeOptions = () => {
-  return ['Tax Invoice', 'Credit Note', 'Job WOrk'];
+  return ['B2B', 'B2C', 'Job Work', 'Credit Note', "Tax Invoice"];
 };
 
 export const getFinancialYearShortNew = (dateStr: any) => {

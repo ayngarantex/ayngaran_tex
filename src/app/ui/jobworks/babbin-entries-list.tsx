@@ -120,6 +120,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                             <th scope="col" className="px-4 py-3 font-bold text-lg text-right">Received Babbin</th>
                             <th scope="col" className="px-4 py-3 font-bold text-lg text-right">Given Weight</th>
                             <th scope="col" className="px-4 py-3 font-bold text-lg text-right">Received Weight</th>
+                            <th scope="col" className="px-4 py-3 font-bold text-lg text-right">Return Weight</th>
                             <th scope="col" className="px-4 py-3 font-bold text-lg text-right">Edit</th>
                         </tr>
                     </thead>

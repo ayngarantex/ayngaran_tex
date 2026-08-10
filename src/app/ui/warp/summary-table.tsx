@@ -74,7 +74,7 @@ export default function WarpSummaryTable({
                     </td>
                     <td className="whitespace-nowrap py-4 pl-6 pr-3 font-medium text-gray-700">
                       {row.Color || "-"}
-                      {row?.Dc && (
+                      {row?.Date && (
                         <div className="space-y-0.5">
                           <div className="whitespace-nowrap">
                             <span className="font-semibold text-slate-900">{row.Dc} - {row?.Date ? formatDate(row.Date) : ''} - {row.Count} Unit @ {row?.Weight ? row.Weight + ' kgs' : ''}</span>

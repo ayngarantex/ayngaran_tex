@@ -483,7 +483,6 @@ export default function EditForm({
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-green-300 text-gray-600 focus:ring-2"
                   onChange={(e) => {
                     setBillType('gst')
-                    setInvoiceType('Tax Invoice')
                   }}
                 />
                 <label
