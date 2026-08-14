@@ -27,30 +27,30 @@ export function UpdateExpenses({ id }: { id: string }) {
 }
 
 export function DeleteExpense({ id }: { id: number }) {
-    const handleDelete = async () => {
-      const expensesData = {
-        ExpenseId: id,
-      };
-  
-      const jsonBody = JSON.stringify({
-        expensesData
-      });
-  
-      const res = await fetch(`/api/expenses`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: jsonBody,
-      });
-  
-      redirect('/admin/expenses');
-    }
-  
-    return (
-      <>
-        <button type="button" onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100">
-          <span className="sr-only">Delete</span>
-          <TrashIcon className="w-5" />
-        </button>
-      </>
-    );
+  const handleDelete = async () => {
+    const expensesData = {
+      ExpenseId: id,
+    };
+
+    const jsonBody = JSON.stringify({
+      expensesData
+    });
+
+    const res = await fetch(`/api/expenses`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: jsonBody,
+    });
+
+    redirect('/admin/expenses');
+  }
+
+  return (
+    <>
+      <button type="button" onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100">
+        <span className="sr-only">Delete</span>
+        <TrashIcon className="w-5" />
+      </button>
+    </>
+  );
 }

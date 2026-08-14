@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { ExpensesRow } from '@/app/lib/types';
 import { formatDateToLocal, expenseTypeOptions } from "@/app/lib/utils";
 import { Button } from "../button";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
 import SearchDropdown from '../search-dropdown';
 
 interface ProductsProps {
@@ -13,7 +12,7 @@ interface ProductsProps {
 
 export default function ProductForm({ invProducts, setInvProducts, edit = false }: ProductsProps) {
   const [selectedProducts, setSelectedProducts] = useState<ExpensesRow[]>(
-    [{ pId: 0, date: "", reason: "", type: "", otherType: "", amount: 0 }]
+    [{ pId: 0, date: "", reason: "", type: "", otherType: "", amount: 0, paidBy: "Office" }]
   );
 
   const dropdownItems = expenseTypeOptions()?.map((type: string) => ({
@@ -33,7 +32,8 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
             reason: row.Reason,
             type: row.Type,
             otherType: row.otherType,
-            amount: row.Amount
+            amount: row.Amount,
+            paidBy: row.PaidBy
           }
         )
         pId = rowIndex + 1
@@ -58,7 +58,7 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
     e.preventDefault();
     setSelectedProducts((prev) => [
       ...prev,
-      { pId: rowIndex, date: "", reason: "", type: "", otherType: "", amount: 0 },
+      { pId: rowIndex, date: "", reason: "", type: "", otherType: "", amount: 0, paidBy: "" },
     ]);
   };
 
@@ -135,6 +135,16 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
               />
             )}
 
+            {/* <input
+              type="text"
+              value={row.paidBy || ""}
+              onChange={(e) =>
+                handleChange(rowIndex, "paidBy", e.target.value)
+              }
+              className="border p-2 rounded w-100"
+              placeholder="Paid By"
+            /> */}
+
             {/* Price */}
             < input
               type="number"
@@ -146,6 +156,23 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
               className="border p-2 rounded"
               placeholder="Amount"
             />
+
+
+
+            <select
+              id={`paidBy_${rowIndex}`}
+              name={`paidBy_${rowIndex}`}
+              onChange={(e) => {
+                handleChange(rowIndex, "paidBy", e.target.value)
+              }}
+              className="peer block w-40 cursor-pointer rounded-md border border-gray-200 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
+              value={row.paidBy}
+            >
+              <option value="">Select a Paid By</option>
+              <option key={"Office"} value={"Office"}>Office</option>
+              <option key={"Prakash"} value={"Prakash"}>Prakash</option>
+              <option key={"Govinth"} value={"Govinth"}>Govinth</option>
+            </select>
 
             {/* Remove Button */}
             {!edit && (

@@ -109,7 +109,7 @@ export default async function Page(props: {
                 Received
               </label>
               <div className="relative pl-4 tex-2xl w-40 text-right text-blue-600 text-lg text-center">
-                {formatCurrency(invoiceTotalDetatils?.TotalReceivedAmount || 0)}
+                {formatCurrency(Number(parseFloat(invoiceTotalDetatils?.TotalReceivedAmount || 0).toFixed(2)))}
               </div>
             </div>
             <div className="w-full flex justify-center">

@@ -5,6 +5,7 @@ import * as nodeSuppliers from '@/app/api/node/supplier';
 import * as nodeLooms from '@/app/api/node/looms';
 import * as nodeSizing from '@/app/api/node/sizing';
 import * as nodeYarns from '@/app/api/node/yarns';
+import * as nodePurchases from '@/app/api/node/purchases';
 
 export const fetchInvoices = nodeInvoice.fetchInvoices;
 export const fetchInvoicesCount = nodeInvoice.fetchInvoicesCount;
@@ -55,3 +56,8 @@ export const fetchLoomEntriesByLoomId = async (...args: any[]) => [];
 export const fetchSizingWarpDetailsByLoomId = async (...args: any[]) => [];
 export const getWarpDetailsBySizingId = async (...args: any[]) => [];
 export const fetchEntryById = async (...args: any[]) => [];
+
+export const fetchPurchases = nodePurchases.fetchPurchases;
+export const fetchPurchasePages = nodePurchases.fetchPurchasePages;
+export const fetchPurchaseById = nodePurchases.fetchPurchaseById;
+export const fetchPurchasesDetails = nodePurchases.fetchPurchasesDetails;

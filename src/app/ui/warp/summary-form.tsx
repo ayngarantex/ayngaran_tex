@@ -315,7 +315,7 @@ function PieceReceivedDetails({ summaryProducts, setSummaryProducts }: PieceRece
                 }
                 className="border p-2 rounded w-[15%] text-sm"
                 placeholder="Wt"
-              />{((Number(row.Weight) / Number(row.Count)).toFixed(2))}
+              />{((Number(row.Weight) / Number(row.Count)).toFixed(3))}
 
               {/* Remove Button */}
               <button

@@ -12,7 +12,8 @@ import {
   BanknotesIcon,
   MapIcon,
   AdjustmentsVerticalIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -27,8 +28,10 @@ const links = [
   { name: 'Suppliers', href: '/admin/suppliers', icon: BuildingStorefrontIcon },
   { name: 'Yarns', href: '/admin/yarns', icon: NumberedListIcon },
   { name: 'Sizing', href: '/admin/sizing', icon: AdjustmentsVerticalIcon },
+  { name: 'Purchases', href: '/admin/purchases', icon: ShoppingBagIcon },
   { name: 'Warp', href: '/admin/warp', icon: MapIcon },
   { name: 'Expenses', href: '/admin/expenses', icon: CurrencyRupeeIcon },
+  { name: 'Investments', href: '/admin/investments', icon: BanknotesIcon },
   { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon }
 ];
 

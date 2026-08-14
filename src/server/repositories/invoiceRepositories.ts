@@ -212,7 +212,7 @@ export const getLastInvoiceNumber = async (billType: string | null) => {
     } else {
         query += ` WHERE BillType != 'gst' `;
     }
-    query += ` ORDER BY InvoiceDate DESC, InvoiceId DESC LIMIT 1`;
+    query += ` ORDER BY InvoiceId DESC, InvoiceDate DESC LIMIT 1`;
 
     const [rows]: any = await db.query(query);
     return rows[0]?.InvoiceNumber;

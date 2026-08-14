@@ -52,6 +52,7 @@ export default function EditForm({
   const [deliveryNote, setDeliveryNote] = useState("");
   const [customerId, setCustomerId] = useState(0)
 
+  const [returnProducts, SetReturnProducts] = useState(false);
   const [products, setProducts] = useState<ProductField[]>([]);
   const [invProducts, setInvProducts] = useState<ProductRow[]>([]);
   const [invPayments, setInvPayments] = useState<PaymentRow[]>([]);
@@ -370,6 +371,7 @@ export default function EditForm({
                   id="invoiceType"
                   name="invoiceType"
                   onChange={(e) => {
+                    alert(e.target.value)
                     setInvoiceType(e.target.value)
                   }}
                   className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
@@ -439,11 +441,22 @@ export default function EditForm({
           setInvProducts={setInvProducts}
         />
 
-        <ReturnProducts
-          retProducts={returnProductData}
-          products={products}
-          setRetProducts={setRetProducts}
-        />
+
+        <div className='flex flex-wrap mt-6'>
+          <div className="relative cursor-pointer rounded-md bg-blue-600 hover:bg-blue-700 py-2 px-4 text-sm font-semibold text-white" onClick={() => {
+            SetReturnProducts(!returnProducts)
+          }}>
+            {returnProducts ? 'Hide' : 'Show'} Return Products
+          </div>
+        </div>
+
+        {(returnProducts || invoice?.invoice_return_details?.length) ?
+          <ReturnProducts
+            retProducts={returnProductData}
+            products={products}
+            setRetProducts={setRetProducts}
+          />
+          : null}
 
         <div className='flex flex-wrap mt-6'>
           <div className="mb-4 w-1/4">
