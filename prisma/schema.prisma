@@ -142,7 +142,7 @@ model yarn_details {
   Color        String? @db.VarChar(20)
   Varient      String? @db.VarChar(20)
   Bag          String? @db.VarChar(10)
-  Quantity     Int?
+  Quantity     Float?
   Price        Float?  @db.Float
   Total        Float?  @db.Float
   yarns        yarns?  @relation(fields: [YarnId], references: [YarnId], onDelete: NoAction, onUpdate: NoAction, map: "YarnProductId")
