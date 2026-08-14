@@ -147,10 +147,11 @@ export default function ProductForm({ yrnProducts, setYrnProducts }: YarnProps) 
 
             {/* Quantity */}
             <input
-              type="text"
+              type="number"
+              step="0.001"
               value={row.quantity || ""}
               onChange={(e) =>
-                handleChange(rowIndex, "quantity", Number(e.target.value))
+                handleChange(rowIndex, "quantity", parseFloat(e.target.value) || 0)
               }
               className="border p-2 rounded"
               placeholder="Qty"

@@ -291,7 +291,7 @@ export default function EditForm({
                   name="beforeTax"
                   type="text"
                   disabled
-                  value={beforeTax || 0}
+                  value={(beforeTax || 0).toFixed(2)}
                   className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
                 />
               </div>
@@ -382,7 +382,7 @@ export default function EditForm({
                         name="cgst"
                         type="text"
                         disabled
-                        value={cgstAmount}
+                        value={(cgstAmount || 0).toFixed(2)}
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
                       />
                     </div>
@@ -400,7 +400,7 @@ export default function EditForm({
                         name="sgst"
                         type="text"
                         disabled
-                        value={sgstAmount}
+                        value={(sgstAmount || 0).toFixed(2)}
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
                       />
                     </div>
@@ -419,7 +419,7 @@ export default function EditForm({
                       name="igst"
                       type="text"
                       disabled
-                      value={igstAmount}
+                      value={(igstAmount || 0).toFixed(2)}
                       className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
                     />
                   </div>
@@ -440,7 +440,7 @@ export default function EditForm({
                 name="afterTax"
                 type="text"
                 disabled
-                value={afterTax || 0}
+                value={(afterTax || 0).toFixed(2)}
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
               />
             </div>
