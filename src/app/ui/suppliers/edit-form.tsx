@@ -12,6 +12,7 @@ export default function EditForm({
 }: {
   supplier: any;
 }) {
+  console.log("supplier", supplier)
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [supplierName, setSupplierName] = useState("");
@@ -85,7 +86,7 @@ export default function EditForm({
                 id="name"
                 name="name"
                 type="text"
-                value={supplierName}
+                value={supplierName || ""}
                 onChange={(e) => {
                   setSupplierName(e.target.value)
                 }}

@@ -106,3 +106,79 @@ export const getYarnChartDetails = async (
     return rows;
 };
 
+export const getSizingSalesDetails = async (
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = `SELECT SUM(S.InvoiceAmount) AS totalInvoiceAmount, SUM(S.ReceivedAmount) AS totalPaidAmount, SUM(S.InvoiceAmount - S.ReceivedAmount) AS totalPendingAmount FROM sizing S WHERE 1=1`;
+    let params: any[] = [];
+
+    if (startDate && endDate) {
+        sql += ` AND S.InvoiceDate >= ? AND S.InvoiceDate <= ?`;
+        params.push(startDate, endDate);
+    }
+
+    if (billType) {
+        sql += ` AND S.BillType = ?`;
+        params.push(billType);
+    }
+
+    const [rows]: any = await db.query(sql, params);
+    return rows?.[0] || { totalInvoiceAmount: 0, totalPaidAmount: 0, totalPendingAmount: 0 };
+};
+
+export const getPurchasesDetails = async (
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = `SELECT SUM(P.InvoiceAmount) AS totalInvoiceAmount, SUM(P.PaidAmount) AS totalPaidAmount, SUM(P.InvoiceAmount - P.PaidAmount) AS totalPendingAmount FROM purchases P WHERE 1=1`;
+    let params: any[] = [];
+
+    if (startDate && endDate) {
+        sql += ` AND P.InvoiceDate >= ? AND P.InvoiceDate <= ?`;
+        params.push(startDate, endDate);
+    }
+
+    if (billType) {
+        sql += ` AND P.BillType = ?`;
+        params.push(billType);
+    }
+
+    const [rows]: any = await db.query(sql, params);
+    return rows?.[0] || { totalInvoiceAmount: 0, totalPaidAmount: 0, totalPendingAmount: 0 };
+};
+
+export const getExpensesDetails = async (
+    startDate: string | null,
+    endDate: string | null
+) => {
+    let sql = `SELECT SUM(Amount) AS totalAmount FROM expenses WHERE 1=1`;
+    let params: any[] = [];
+
+    if (startDate && endDate) {
+        sql += ` AND Date >= ? AND Date <= ?`;
+        params.push(startDate, endDate);
+    }
+
+    const [rows]: any = await db.query(sql, params);
+    return rows?.[0] || { totalAmount: 0 };
+};
+
+export const getInvestmentsDetails = async (
+    startDate: string | null,
+    endDate: string | null
+) => {
+    let sql = `SELECT SUM(Amount) AS totalAmount FROM investments WHERE 1=1`;
+    let params: any[] = [];
+
+    if (startDate && endDate) {
+        sql += ` AND Date >= ? AND Date <= ?`;
+        params.push(startDate, endDate);
+    }
+
+    const [rows]: any = await db.query(sql, params);
+    return rows?.[0] || { totalAmount: 0 };
+};
+

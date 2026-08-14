@@ -132,6 +132,7 @@ model suppliers {
   Type          String?  @db.VarChar(45)
   sizing        sizing[]
   yarns         yarns[]
+  purchases     purchases[]
 }
 
 model yarn_details {
@@ -256,6 +257,7 @@ model expenses {
   Date      DateTime? @db.Date
   Type      String?   @db.VarChar(255)
   Amount    Float?    @db.Float
+  otherType String?   @db.VarChar(255)
 }
 
 model user {
@@ -345,4 +347,60 @@ model product_stocks {
   EntryDate DateTime @db.Date
   Notes     String?  @db.Text
   products  products @relation(fields: [ProductId], references: [Id], onDelete: Cascade)
+}
+
+model purchases {
+  PurchaseId               Int                        @id @unique(map: "PurchaseId_UNIQUE") @default(autoincrement())
+  SupplierId               Int?
+  InvoiceNumber            String?                    @db.VarChar(45)
+  InvoiceDate              DateTime?                  @db.Date
+  BeforeTax                Float?                     @db.Float
+  BillType                 String?                    @db.VarChar(10)
+  TaxPercentage            Float?                     @db.Float
+  Cgst                     Float?                     @db.Float
+  Sgst                     Float?                     @db.Float
+  Igst                     Float?                     @db.Float
+  AfterTax                 Float?                     @db.Float
+  RoundOff                 String?                    @db.VarChar(10)
+  InvoiceAmount            Float?                     @db.Float
+  PaidAmount               Float?                     @db.Float
+  purchase_details         purchase_details[]
+  purchase_payment_details purchase_payment_details[]
+  suppliers                suppliers?                 @relation(fields: [SupplierId], references: [SupplierId], onDelete: NoAction, onUpdate: NoAction, map: "SupplierId_Purchase")
+
+  @@index([SupplierId], map: "SupplierId_Purchase_idx")
+}
+
+model purchase_details {
+  PurchaseDetailId Int        @id @unique(map: "PurchaseDetailId_UNIQUE") @default(autoincrement())
+  PurchaseId       Int
+  ItemName         String?    @db.VarChar(100)
+  Price            Float      @db.Float
+  Quantity         Float      @db.Float
+  Total            Float      @db.Float
+  QuantityType     String?    @db.VarChar(45)
+  purchases        purchases  @relation(fields: [PurchaseId], references: [PurchaseId], onDelete: Cascade, onUpdate: NoAction, map: "PurchaseIdKey")
+
+  @@index([PurchaseId], map: "PurchaseIdKey_idx")
+}
+
+model purchase_payment_details {
+  Id         Int        @id @default(autoincrement())
+  PurchaseId Int?
+  Date       DateTime?  @db.Date
+  Amount     String?    @db.VarChar(45)
+  Type       String?    @db.VarChar(45)
+  ReceivedBy String?    @db.VarChar(45)
+  purchases  purchases? @relation(fields: [PurchaseId], references: [PurchaseId], onDelete: Cascade, onUpdate: NoAction, map: "PurchasePaymentId")
+
+  @@index([PurchaseId], map: "PurchasePaymentId_idx")
+}
+
+model investments {
+  InvestmentId Int       @id @default(autoincrement())
+  InvestorName String?   @db.VarChar(255)
+  Date         DateTime? @db.Date
+  Amount       Float?    @db.Float
+  Type         String?   @db.VarChar(255)
+  Notes        String?   @db.LongText
 }

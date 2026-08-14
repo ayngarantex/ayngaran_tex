@@ -276,6 +276,6 @@ export const formatDateToLocalNew = (
 
 export const expenseTypeOptions = () => {
   return [
-    'Yarn', 'Wages', 'Sizing', 'Transction Charges', 'Transaction charges', 'Purchase', 'Transport', 'Loan', 'Cheet', 'Comission', 'Gst Charges', 'Stationary', 'Bill', 'Others'
+    'Yarn', 'Wages', 'Sizing', 'Transaction Charges', 'Purchase', 'Transport', 'Loan', 'Cheet', 'Comission', 'Gst Charges', 'Stationary', 'Bill', 'Others'
   ];
 };

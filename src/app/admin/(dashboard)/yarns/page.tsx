@@ -48,30 +48,18 @@ export default async function Page(props: {
         </div>
         <CreateYarn />
       </div>
-      <div className="flex justify-between px-4 py-5 mt-5 bg-blue-300 rounded-lg self-center">
-        <div className="w-full flex">
-          <label htmlFor="mobile" className="block text-sm self-center font-bold">
-            Purchased
-          </label>
-          <div className="relative pl-4 tex-2xl w-40 text-right text-blue-600 text-lg text-center">
-            {formatCurrency(yarnsPurchaseDetatils?.totalInvoiceAmount || 0)}
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Purchased</span>
+          <h2 className="text-2xl font-bold text-slate-900 mt-1">{formatCurrency(yarnsPurchaseDetatils?.totalInvoiceAmount || 0)}</h2>
         </div>
-        <div className="w-full flex justify-center">
-          <label htmlFor="mobile" className="block text-sm self-center font-bold">
-            Paid
-          </label>
-          <div className="relative pl-4 tex-2xl w-40 text-right text-blue-600 text-lg text-center">
-            {formatCurrency(yarnsPurchaseDetatils?.totalPaid || 0)}
-          </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Paid</span>
+          <h2 className="text-2xl font-bold text-teal-600 mt-1">{formatCurrency(yarnsPurchaseDetatils?.totalPaid || 0)}</h2>
         </div>
-        <div className="w-full flex justify-end">
-          <label htmlFor="mobile" className="block text-sm self-center font-bold">
-            Balance
-          </label>
-          <div className="relative pl-4 tex-2xl w-40 text-right text-red-600 text-lg text-center">
-            {formatCurrency(yarnsPurchaseDetatils?.balance || 0)}
-          </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Outstanding Balance</span>
+          <h2 className="text-2xl font-bold text-red-600 mt-1">{formatCurrency(yarnsPurchaseDetatils?.balance || 0)}</h2>
         </div>
       </div>
       {/* <Suspense key={query + currentPage} fallback={<yarnsTableSkeleton />}> */}

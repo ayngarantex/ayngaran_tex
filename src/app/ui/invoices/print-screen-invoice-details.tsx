@@ -65,7 +65,7 @@ export default function PrintScreenInvoiceDetails({
                     </div>
                 </div>
                 <p className='py-1 bg-blue-200 flex justify-center text-xl border-t mt-2'>
-                    {invoice?.BillType === 'gst' ? (invoice?.InvoiceType || 'Tax Invoice') : 'Delivery Chalan | Not for Sale'}
+                    {invoice?.BillType === 'gst' ? 'Tax Invoice' : 'Delivery Chalan | Not for Sale'}
                 </p>
                 <div className='flex flex-wrap border-t'>
                     <div className='px-4 py-4 w-2/5 border-r'>

@@ -8,7 +8,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
     return (
         <main>
-            <Form supplier={supplier?.[0] || {}} />
+            <Form supplier={supplier || {}} />
         </main>
     );
 }

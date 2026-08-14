@@ -5,7 +5,6 @@ import { productType } from "@/app/lib/utils";
 import { Button } from "../button";
 import SearchDropdown from "../search-dropdown";
 import { fetchProductsWithCode } from "@/app/api/node/customers";
-import { convertSegmentPathToStaticExportFilename } from "next/dist/shared/lib/segment-cache/segment-value-encoding";
 
 interface ProductsProps {
   customerId: any;
@@ -18,7 +17,6 @@ export default function ProductForm({ customerId, products, invProducts, setInvP
   const [selectedProducts, setSelectedProducts] = useState<ProductRow[]>(
     [{ pId: 0, product: 0, productName: '', quantity: 0, quantityType: "", price: 0, type: 'Folded' }]
   );
-  const [productDetails, setProductDetails] = useState<any>([]);
 
   const dropdownProducts = useMemo(() => {
     return (products || []).map((p) => ({

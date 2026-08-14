@@ -55,6 +55,7 @@ export default function Form({
   const [invPayments, setInvPayments] = useState<PaymentRow[]>([]);
   const [retProducts, setRetProducts] = useState<ProductRow[]>([]);
 
+  const [returnProducts, SetReturnProducts] = useState(false);
   const [customerId, setCustomerId] = useState(0)
   const [beforeTax, setBeforeTax] = useState(0);
   const [taxPercentage, setTaxPercentage] = useState(5);
@@ -390,11 +391,20 @@ export default function Form({
               products={products}
               setInvProducts={setInvProducts}
             />
-            <ReturnProducts
-              retProducts={[]}
-              products={products}
-              setRetProducts={setRetProducts}
-            />
+            <div className='flex flex-wrap mt-6'>
+              <div className="relative cursor-pointer rounded-md bg-blue-600 hover:bg-blue-700 py-2 px-4 text-sm font-semibold text-white" onClick={() => {
+                SetReturnProducts(!returnProducts)
+              }}>
+                {returnProducts ? 'Hide' : 'Show'} Return Products
+              </div>
+            </div>
+            {returnProducts ?
+              <ReturnProducts
+                retProducts={[]}
+                products={products}
+                setRetProducts={setRetProducts}
+              />
+              : null}
           </>
         )}
 

@@ -546,8 +546,11 @@ export function ExportGstr1() {
           const ctin = inv.GstNumber.toUpperCase();
 
           const itm_det: any = {
-            rt: Number(inv.TaxPercentage || 5),
             txval: Number(inv.BeforeTax || 0),
+            rt: Number(inv.TaxPercentage || 5),
+            iamt: 0,
+            camt: 0,
+            samt: 0,
             csamt: 0
           };
 
@@ -561,7 +564,7 @@ export function ExportGstr1() {
 
           if (isCreditNote) {
             if (!cdnrMap.has(ctin)) {
-              cdnrMap.set(ctin, { ctin, cname: inv.CustomerName || "", nt: [] });
+              cdnrMap.set(ctin, { ctin, nt: [] });
             }
             cdnrMap.get(ctin).nt.push({
               ntty: 'C',
@@ -570,32 +573,28 @@ export function ExportGstr1() {
               val: val,
               inum: inum,
               idt: idt,
-              supplierRecipientName: "",
               rchrg: 'N',
-              diff_percent: null,
               itms: [
                 {
-                  num: Number(inv.TaxPercentage || 5) * 100 + 1,
+                  num: 1,
                   itm_det: itm_det
                 }
               ]
             });
           } else {
             if (!b2bMap.has(ctin)) {
-              b2bMap.set(ctin, { ctin, cname: inv.CustomerName || "", inv: [] });
+              b2bMap.set(ctin, { ctin, inv: [] });
             }
             b2bMap.get(ctin).inv.push({
               inum: inum,
               idt: idt,
               val: val,
               pos: pos,
-              supplierRecipientName: "",
               rchrg: 'N',
-              diff_percent: null,
               inv_typ: 'R',
               itms: [
                 {
-                  num: Number(inv.TaxPercentage || 5) * 100 + 1,
+                  num: 1,
                   itm_det: itm_det
                 }
               ]
@@ -607,16 +606,15 @@ export function ExportGstr1() {
           const b2csKey = `${pos}_${rate}`;
           if (!b2csMap.has(b2csKey)) {
             b2csMap.set(b2csKey, {
-              sply_ty: pos === '33' ? 'INTRA' : 'INTER',
-              pos: pos,
               typ: 'OE',
+              sply_ty: pos === '33' ? 'INTRA' : 'INTER',
               rt: rate,
+              pos: pos,
               txval: 0,
               iamt: 0,
               camt: 0,
               samt: 0,
-              csamt: 0,
-              diff_percent: null
+              csamt: 0
             });
           }
           const b2csItem = b2csMap.get(b2csKey);
@@ -685,28 +683,28 @@ export function ExportGstr1() {
       const hsnB2bList = Array.from(hsnB2bMap.values()).map((item: any) => ({
         num: hsnB2bNum++,
         hsn_sc: item.hsn_sc,
-        desc: item.desc,
-        uqc: item.uqc,
-        qty: Number(item.qty.toFixed(2)),
         txval: Number(item.txval.toFixed(2)),
-        rt: item.rt,
         iamt: Number(item.iamt.toFixed(2)),
         camt: Number(item.camt.toFixed(2)),
-        samt: Number(item.samt.toFixed(2))
+        samt: Number(item.samt.toFixed(2)),
+        csamt: 0,
+        uqc: item.uqc,
+        qty: Number(item.qty.toFixed(2)),
+        rt: item.rt
       }));
 
       let hsnB2cNum = 1;
       const hsnB2cList = Array.from(hsnB2cMap.values()).map((item: any) => ({
         num: hsnB2cNum++,
         hsn_sc: item.hsn_sc,
-        desc: item.desc,
-        uqc: item.uqc,
-        qty: Number(item.qty.toFixed(2)),
         txval: Number(item.txval.toFixed(2)),
-        rt: item.rt,
         iamt: Number(item.iamt.toFixed(2)),
         camt: Number(item.camt.toFixed(2)),
-        samt: Number(item.samt.toFixed(2))
+        samt: Number(item.samt.toFixed(2)),
+        csamt: 0,
+        uqc: item.uqc,
+        qty: Number(item.qty.toFixed(2)),
+        rt: item.rt
       }));
 
       // 3. Document issues (12 categories)
@@ -761,59 +759,33 @@ export function ExportGstr1() {
         }
       }
 
+      const nilInv = [
+        { sply_ty: "INTRB2B", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 },
+        { sply_ty: "INTRAB2B", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 },
+        { sply_ty: "INTRB2C", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 },
+        { sply_ty: "INTRAB2C", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 }
+      ];
+
       const gstr1Json: any = {
         gstin: gstinSupplier,
         fp: fp,
-        version: "GST3.2.4",
-        hash: "hash",
         b2b: b2bList,
-        b2ba: [],
-        b2cl: [],
-        b2cla: [],
         b2cs: b2csList,
-        b2csa: [],
         nil: {
-          inv: []
-        },
-        exp: [],
-        expa: [],
-        hsnSac: [],
-        cdnra: [],
-        at: [],
-        ata: [],
-        cdnr: cdnrList,
-        cdnur: [],
-        cdnura: [],
-        atadj: [],
-        atadja: [],
-        doc_issue: {
-          doc_det: docDetList
+          inv: nilInv
         },
         hsn: {
           hsn_b2b: hsnB2bList,
           hsn_b2c: hsnB2cList
         },
-        supeco: {
-          clttx: [],
-          paytx: []
-        },
-        supecoa: {
-          clttxa: [],
-          paytxa: []
-        },
-        ecom: {
-          b2b: [],
-          b2c: [],
-          urp2b: [],
-          urp2c: []
-        },
-        ecoma: {
-          b2ba: [],
-          b2ca: [],
-          urp2ba: [],
-          urp2ca: []
+        doc_issue: {
+          doc_det: docDetList
         }
       };
+
+      if (cdnrList.length > 0) {
+        gstr1Json.cdnr = cdnrList;
+      }
 
       // Trigger file download
       const jsonContent = JSON.stringify(gstr1Json);
