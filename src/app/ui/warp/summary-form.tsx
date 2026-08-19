@@ -138,8 +138,8 @@ export default function EditForm({
               key={`selP0`}
               className="flex gap-3 items-center mb-2 w-full"
             >
-              <p className='font-semibold text-lg w-full'>Meter <span className='text-blue-600 font-medium'>({(totalMeters || 0).toFixed(2)})</span></p>
-              <p className='font-semibold text-lg w-full'>Weight <span className='text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
+              <p className='font-semibold text-lg w-1/2'>Meter <span className='text-blue-600 font-medium'>({(totalMeters || 0).toFixed(2)})</span></p>
+              <p className='font-semibold text-lg w-1/2'>Weight <span className='text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
             </div>
             {summaryDetails?.warp_detail?.length ?
               summaryDetails?.warp_detail.map((row: any, rowIndex: number) => (
@@ -160,7 +160,7 @@ export default function EditForm({
                   <input
                     type="text"
                     value={row.Meters || ""}
-                    className="border p-2 rounded w-full bg-gray-50 text-gray-700"
+                    className="border p-2 rounded w-1/2 bg-gray-50 text-gray-700"
                     readOnly
                   />
 
@@ -168,7 +168,7 @@ export default function EditForm({
                   <input
                     type="text"
                     value={row.Weight || ""}
-                    className="border p-2 rounded w-full bg-gray-50 text-gray-700"
+                    className="border p-2 rounded w-1/2 bg-gray-50 text-gray-700"
                     readOnly
                   />
                 </div>

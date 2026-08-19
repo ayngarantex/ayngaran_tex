@@ -128,111 +128,152 @@ export default function ProductForm({ customerId, products, invProducts, setInvP
     <div className="p-4 border rounded-lg mt-4">
       <h2 className="text-xl font-bold mb-4">Add Products</h2>
 
-      {selectedProducts?.length ?
-        selectedProducts.map((row, rowIndex: number) => (
-          <div
-            key={`selP_${rowIndex}`}
-            className="flex gap-3 items-center mb-2"
-          >
-            <p className="w-16">{rowIndex + 1}</p>
-            <SearchDropdown
-              items={dropdownProducts}
-              onSelect={(item) => handleProductSelect(row.pId, item)}
-              placeholder="Select Product"
-              value={products.find((p: any) => Number(p.Id) === Number(row.product))?.Name || ''}
-              hideLabel={true}
-              showUserIcon={false}
-              className="w-[300px]"
-            />
-            {products.find((p: any) => Number(p.Id) === Number(row.product))?.Name === "Custom" && (
-              <input
-                type="text"
-                value={row.productName || ""}
-                onChange={(e) => handleChange(rowIndex, "productName", e.target.value)}
-                className="border p-2 rounded"
-                placeholder="Product Name"
-              />
-            )}
-            <select
-              value={row.type}
-              onChange={(e) => handleProductTypeSelect(row.pId, e.target.value)}
-              className="border p-2 rounded col-span-2 w-[150px]"
+      <div className="space-y-4">
+        {selectedProducts?.length ?
+          selectedProducts.map((row, rowIndex: number) => (
+            <div
+              key={`selP_${rowIndex}`}
+              className="flex flex-col md:flex-row gap-3 md:items-center border border-slate-200 md:border-none p-4 md:p-0 rounded-xl md:rounded-none mb-4 md:mb-2 bg-white md:bg-transparent shadow-xs md:shadow-none"
             >
-              <option value="">Select Type</option>
-              {productType()?.map((type: string) => (
-                <option
-                  key={type}
-                  value={type}
+              {/* Mobile Header */}
+              <div className="flex justify-between items-center md:hidden border-b border-slate-100 pb-2 mb-1">
+                <span className="font-bold text-sm text-indigo-600">Product #{rowIndex + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => removeProduct(rowIndex)}
+                  className="text-red-500 text-xs font-semibold hover:text-red-700 transition-colors"
                 >
-                  {type}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={row.quantityType || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "quantityType", e.target.value)
-              }
-              className="border p-2 rounded w-30"
-              placeholder="Qty Type"
-            />
+                  Remove
+                </button>
+              </div>
 
-            {/* Quantity */}
-            <input
-              type="text"
-              value={row.quantity || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "quantity", Number(e.target.value))
-              }
-              className="border p-2 rounded w-30"
-              placeholder="Qty"
-            />
+              {/* Desktop Index */}
+              <p className="w-8 hidden md:block text-slate-500 font-semibold">{rowIndex + 1}</p>
 
-            {/* Price */}
-            <input
-              type="number"
-              step="any"
-              value={row.price || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "price", Number(e.target.value))
-              }
-              className="border p-2 rounded"
-              placeholder="Price"
-            />
+              {/* Input fields wrapper */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-row gap-3 items-end md:items-center w-full">
+                {/* Product Select */}
+                <div className="w-full md:w-[250px] lg:w-[300px] flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Select Product</span>
+                  <SearchDropdown
+                    items={dropdownProducts}
+                    onSelect={(item) => handleProductSelect(row.pId, item)}
+                    placeholder="Select Product"
+                    value={products.find((p: any) => Number(p.Id) === Number(row.product))?.Name || ''}
+                    hideLabel={true}
+                    showUserIcon={false}
+                    className="w-full"
+                  />
+                </div>
 
-            {/* Amount */}
-            <div className="font-semibold">
-              ₹{(row.quantity * row.price).toFixed(2)}
+                {/* Custom Product Name */}
+                {products.find((p: any) => Number(p.Id) === Number(row.product))?.Name === "Custom" && (
+                  <div className="w-full md:w-auto flex flex-col">
+                    <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Product Name</span>
+                    <input
+                      type="text"
+                      value={row.productName || ""}
+                      onChange={(e) => handleChange(rowIndex, "productName", e.target.value)}
+                      className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                      placeholder="Product Name"
+                    />
+                  </div>
+                )}
+
+                {/* Type Select */}
+                <div className="w-full md:w-[130px] lg:w-[150px] flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Type</span>
+                  <select
+                    value={row.type}
+                    onChange={(e) => handleProductTypeSelect(row.pId, e.target.value)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                  >
+                    <option value="">Select Type</option>
+                    {productType()?.map((type: string) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Qty Type */}
+                <div className="w-full md:w-20 lg:w-24 flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Qty Type</span>
+                  <input
+                    type="text"
+                    value={row.quantityType || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "quantityType", e.target.value)
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Qty Type"
+                  />
+                </div>
+
+                {/* Quantity */}
+                <div className="w-full md:w-20 lg:w-24 flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Qty</span>
+                  <input
+                    type="text"
+                    value={row.quantity || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "quantity", Number(e.target.value))
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Qty"
+                  />
+                </div>
+
+                {/* Price */}
+                <div className="w-full md:w-24 lg:w-28 flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Price</span>
+                  <input
+                    type="number"
+                    step="any"
+                    value={row.price || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "price", Number(e.target.value))
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Price"
+                  />
+                </div>
+
+                {/* Amount */}
+                <div className="w-full md:w-28 lg:w-32 flex flex-col justify-end md:justify-center">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Amount</span>
+                  <div className="font-bold text-slate-700 bg-slate-50 border border-slate-100 p-2 rounded-lg md:p-0 md:bg-transparent md:border-none text-sm">
+                    ₹{(row.quantity * row.price).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Remove Button */}
+              <div className="hidden md:block">
+                <button
+                  type="button"
+                  onClick={() => removeProduct(rowIndex)}
+                  className="text-red-500 text-sm hover:text-red-700 font-semibold underline transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-
-            {/* Remove Button */}
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => removeProduct(rowIndex)}
-                className="text-red-500 text-sm underline"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        ))
-        : null}
+          ))
+          : null}
+      </div>
 
       {/* Add Product Button */}
-      <Button type="button" color={'blue'} onClick={(e) => addProduct(e, selectedProducts?.length)}>+ Add Product</Button>
+      <div className="mt-6 flex flex-wrap gap-4 justify-between items-center">
+        <Button type="button" color={'blue'} onClick={(e) => addProduct(e, selectedProducts?.length)}>+ Add Product</Button>
 
-      {/* Total */}
-      <div className="mt-4 flex justify-end">
-        <div className="font-bold text-lg mr-8 self-center">
-          Total
-        </div>
-        <div className="border border-gray-300 rounded-lg bg-gray-100 p-2 flex">
-          <div className="font-bold text-lg mr-8">
+        {/* Total */}
+        <div className="border border-gray-300 rounded-lg bg-gray-100 p-2 flex gap-4">
+          <div className="font-bold text-base md:text-lg">
             Qty: {totalQuantity}
           </div>
-          <div className="font-bold text-lg">
+          <div className="font-bold text-base md:text-lg text-indigo-700">
             Amt: ₹{totalAmount?.toFixed(2)}
           </div>
         </div>

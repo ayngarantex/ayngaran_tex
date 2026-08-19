@@ -74,10 +74,17 @@ export default function ProductForm({ yrnProducts, setYrnProducts }: YarnProps) 
     setSelectedProducts(withUpdatedId);
   };
 
-  const totalAmount = selectedProducts?.length && selectedProducts.reduce(
-    (sum, row) => sum + row.quantity * row.price,
-    0
-  );
+  const totalAmount = selectedProducts?.length
+    ? selectedProducts.reduce((sum, row) => sum + (Number(row.quantity) || 0) * (Number(row.price) || 0), 0)
+    : 0;
+
+  const totalQuantity = selectedProducts?.length
+    ? selectedProducts.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0)
+    : 0;
+
+  const totalBags = selectedProducts?.length
+    ? selectedProducts.reduce((sum, row) => sum + (Number(row.bag) || 0), 0)
+    : 0;
 
   useEffect(() => {
     setYrnProducts(selectedProducts);
@@ -87,110 +94,160 @@ export default function ProductForm({ yrnProducts, setYrnProducts }: YarnProps) 
     <div className="p-4 border rounded-lg mt-4">
       <h2 className="text-xl font-bold mb-4">Add Products</h2>
 
-      {selectedProducts?.length ?
-        selectedProducts.map((row, rowIndex: number) => (
-          <div
-            key={`selP_${rowIndex}`}
-            className="flex gap-3 items-center mb-2"
-          >
-            <p className="w-16">{rowIndex + 1}</p>
-            {/* Product Select */}
-            <select
-              value={row.count}
-              onChange={(e) => handleChange(rowIndex, "count", e.target.value)}
-              className="border p-2 rounded col-span-2 w-[300px]"
+      <div className="space-y-4">
+        {selectedProducts?.length ?
+          selectedProducts.map((row, rowIndex: number) => (
+            <div
+              key={`selP_${rowIndex}`}
+              className="flex flex-col md:flex-row gap-3 md:items-center border border-slate-200 md:border-none p-4 md:p-0 rounded-xl md:rounded-none mb-4 md:mb-2 bg-white md:bg-transparent shadow-xs md:shadow-none"
             >
-              <option value="">Count</option>
-              {yarnCountList()?.map((count: string) => (
-                <option
-                  key={count}
-                  value={count}
+              {/* Mobile Header */}
+              <div className="flex justify-between items-center md:hidden border-b border-slate-100 pb-2 mb-1">
+                <span className="font-bold text-sm text-indigo-600">Yarn #{rowIndex + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => removeProduct(rowIndex)}
+                  className="text-red-500 text-xs font-semibold hover:text-red-700 transition-colors"
                 >
-                  {count}
-                </option>
-              ))}
-            </select>
+                  Remove
+                </button>
+              </div>
 
-            <input
-              type="text"
-              value={row.color || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "color", e.target.value)
-              }
-              className="border p-2 rounded"
-              placeholder="color"
-            />
+              {/* Desktop Index */}
+              <p className="w-8 hidden md:block text-slate-500 font-semibold">{rowIndex + 1}</p>
 
-            <select
-              value={row.varient}
-              onChange={(e) => handleChange(rowIndex, "varient", e.target.value)}
-              className="border p-2 rounded col-span-2 w-[300px]"
-            >
-              <option value="">Select Varient</option>
-              <option value="Silver">Silver</option>
-              <option value="Gold">Gold</option>
-              <option value="Platinum">Platinum</option>
-              <option value="Diamond">Diamond</option>
-            </select>
+              {/* Input fields wrapper */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-row gap-3 items-end md:items-center w-full">
+                {/* Product Select */}
+                <div className="w-full md:w-[250px] lg:w-[300px] flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Count</span>
+                  <select
+                    value={row.count}
+                    onChange={(e) => handleChange(rowIndex, "count", e.target.value)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                  >
+                    <option value="">Count</option>
+                    {yarnCountList()?.map((count: string) => (
+                      <option key={count} value={count}>
+                        {count}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* Bag */}
-            <input
-              type="text"
-              value={row.bag || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "bag", e.target.value)
-              }
-              className="border p-2 rounded"
-              placeholder="bag"
-            />
+                {/* Color */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Color</span>
+                  <input
+                    type="text"
+                    value={row.color || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "color", e.target.value)
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Color"
+                  />
+                </div>
 
+                {/* Varient Select */}
+                <div className="w-full md:w-[250px] lg:w-[300px] flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Varient</span>
+                  <select
+                    value={row.varient}
+                    onChange={(e) => handleChange(rowIndex, "varient", e.target.value)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                  >
+                    <option value="">Select Varient</option>
+                    <option value="Silver">Silver</option>
+                    <option value="Gold">Gold</option>
+                    <option value="Platinum">Platinum</option>
+                    <option value="Diamond">Diamond</option>
+                  </select>
+                </div>
 
-            {/* Quantity */}
-            <input
-              type="number"
-              step="0.001"
-              value={row.quantity || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "quantity", parseFloat(e.target.value) || 0)
-              }
-              className="border p-2 rounded"
-              placeholder="Qty"
-            />
+                {/* Bag */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Bag</span>
+                  <input
+                    type="text"
+                    value={row.bag || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "bag", e.target.value)
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Bag"
+                  />
+                </div>
 
-            {/* Price */}
-            <input
-              type="text"
-              value={row.price || ""}
-              onChange={(e) =>
-                handleChange(rowIndex, "price", e.target.value)
-              }
-              className="border p-2 rounded"
-              placeholder="Price"
-            />
+                {/* Quantity */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Qty</span>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={row.quantity || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "quantity", parseFloat(e.target.value) || 0)
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Qty"
+                  />
+                </div>
 
-            {/* Amount */}
-            <div className="font-semibold w-32">
-              ₹{(row.quantity * row.price).toFixed(2) || 0}
+                {/* Price */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Price</span>
+                  <input
+                    type="text"
+                    value={row.price || ""}
+                    onChange={(e) =>
+                      handleChange(rowIndex, "price", e.target.value)
+                    }
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Price"
+                  />
+                </div>
+
+                {/* Amount */}
+                <div className="w-full md:w-32 flex flex-col justify-end md:justify-center">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Amount</span>
+                  <div className="font-bold text-slate-700 bg-slate-50 border border-slate-100 p-2 rounded-lg md:p-0 md:bg-transparent md:border-none text-sm">
+                    ₹{(row.quantity * row.price).toFixed(2) || 0}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Remove Button */}
+              <div className="hidden md:block">
+                <button
+                  type="button"
+                  onClick={() => removeProduct(rowIndex)}
+                  className="text-red-500 text-sm hover:text-red-700 font-semibold underline transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-
-            {/* Remove Button */}
-            <button
-              type="button"
-              onClick={() => removeProduct(rowIndex)}
-              className="text-red-500 text-sm underline"
-            >
-              Remove
-            </button>
-          </div>
-        ))
-        : null}
+          ))
+          : null}
+      </div>
 
       {/* Add Product Button */}
-      <Button type="button" color={'blue'} onClick={(e) => addProduct(e, selectedProducts?.length)}>+ Add Product</Button>
+      <div className="mt-6 flex flex-wrap gap-4 justify-between items-center">
+        <Button type="button" color={'blue'} onClick={(e) => addProduct(e, selectedProducts?.length)}>+ Add Product</Button>
 
-      {/* Total */}
-      <div className="mt-4 font-bold text-lg">
-        Total: ₹{totalAmount?.toFixed(2)}
+        {/* Total */}
+        <div className="border border-gray-300 rounded-lg bg-gray-100 p-2 flex gap-4">
+          <div className="font-bold text-base md:text-lg">
+            Bags: {totalBags}
+          </div>
+          <div className="font-bold text-base md:text-lg">
+            Weight: {totalQuantity.toFixed(3)} kg
+          </div>
+          <div className="font-bold text-base md:text-lg text-indigo-700">
+            Amt: ₹{totalAmount?.toFixed(2)}
+          </div>
+        </div>
       </div>
     </div>
   );
