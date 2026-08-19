@@ -17,7 +17,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
     const paramEndDate = searchParams.get('endDate');
 
     const currentFy = getFinancialYear(new Date());
-    const initialFy = paramStartDate && paramEndDate 
+    const initialFy = paramStartDate && paramEndDate
         ? getFinancialYear(paramStartDate)
         : currentFy;
 

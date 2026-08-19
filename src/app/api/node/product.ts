@@ -3,7 +3,7 @@
 import { pageLimit } from "@/app/lib/utils";
 import { getProducts, getProductCount, getProductById, getProductTotals, createProduct as createProductRepo, updateProduct as updateProductRepo, deleteProduct as deleteProductRepo } from "@/server/repositories/productRepositories";
 
-export const fetchNodeProducts = async (
+export const fetchProducts = async (
     query: string,
     currentPage: number
 ) => {
@@ -11,12 +11,12 @@ export const fetchNodeProducts = async (
         const rows = await getProducts(query || null, currentPage || 1, pageLimit);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
-        console.error("fetchNodeProducts Error:", err);
+        console.error("fetchProducts Error:", err);
         return [];
     }
 };
 
-export const fetchNodeProductTotals = async (
+export const fetchProductTotals = async (
     query: string,
     productId: string
 ) => {
@@ -24,34 +24,34 @@ export const fetchNodeProductTotals = async (
         const totals = await getProductTotals(query || null, productId || null);
         return JSON.parse(JSON.stringify(totals));
     } catch (err) {
-        console.error("fetchNodeProductTotals Error:", err);
+        console.error("fetchProductTotals Error:", err);
         return { TotalStock: 0, SoldCount: 0, AvailableStock: 0 };
     }
 };
 
-export const fetchNodeProductCount = async (
+export const fetchProductCount = async (
     query: string
 ) => {
     try {
         const count = await getProductCount(query || null);
         return count || 0;
     } catch (err) {
-        console.error("fetchNodeProductCount Error:", err);
+        console.error("fetchProductCount Error:", err);
         return 0;
     }
 };
 
-export const fetchNodeProductById = async (id: string) => {
+export const fetchProductById = async (id: string) => {
     try {
         const data = await getProductById(id);
         return data ? JSON.parse(JSON.stringify(data)) : null;
     } catch (err) {
-        console.error("fetchNodeProductById Error:", err);
+        console.error("fetchProductById Error:", err);
         return null;
     }
 };
 
-export const createNodeProduct = async (productData: any) => {
+export const createProduct = async (productData: any) => {
     const res = await createProductRepo(
         productData.Name,
         productData.Type || null,

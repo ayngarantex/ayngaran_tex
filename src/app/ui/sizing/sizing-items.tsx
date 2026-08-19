@@ -106,7 +106,7 @@ export default function SizingItems({ yarnGiven, setYarnGiven }: SizingItemProps
       >
         <p className="w-16">S No</p>
 
-        <div className='flex flex-wrap'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
           <div className="w-40 pl-3">Color</div>
           <div className="w-40 pl-3">Yarn Sent</div>
           <div className="w-40 pl-3">Yarn Used</div>
@@ -121,7 +121,7 @@ export default function SizingItems({ yarnGiven, setYarnGiven }: SizingItemProps
         >
           <p className="w-16">{rowIndex + 1}</p>
 
-          <div className='flex flex-wrap'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
             <div className="w-40 pl-3">
               <input
                 id="color"

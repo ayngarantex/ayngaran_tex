@@ -28,7 +28,7 @@ export const getProducts = async (search: string | null, page: number | null, li
         }
     }
 
-    sql += " GROUP BY P.Id ORDER BY AvailableStock DESC";
+    sql += " GROUP BY P.Id ORDER BY AvailableStock DESC, SoldCount DESC";
 
     if (page && limit) {
         sql += " LIMIT ? OFFSET ?";

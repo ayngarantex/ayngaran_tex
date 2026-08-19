@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-import { createNodeProduct } from '@/app/api/node/product';
+import { createProduct } from '@/app/api/node/product';
 
 export default function Form() {
   const [productName, setProductName] = useState("");
@@ -65,7 +65,7 @@ export default function Form() {
       WashCare: washCare
     };
 
-    const res = await createNodeProduct(productData);
+    const res = await createProduct(productData);
 
     if (res) {
       window.location.href = '/admin/products';
@@ -76,7 +76,7 @@ export default function Form() {
     <form className="max-w-4xl">
       <div className="rounded-lg bg-blue-50 p-6 md:p-8 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
+
           {/* Left Column - Product Specifications */}
           <div className="flex flex-col gap-5">
             <div>

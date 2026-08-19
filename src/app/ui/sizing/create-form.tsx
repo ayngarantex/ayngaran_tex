@@ -218,8 +218,8 @@ export default function Form({
     <form>
       <div className="rounded-md bg-blue-50 p-4 md:p-6">
         {/* Customer Select */}
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/3">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Choose Supplier
             </label>
@@ -249,12 +249,12 @@ export default function Form({
 
               <Link
                 href="/admin/suppliers/create"
-                className="flex h-10 items-center rounded-lg bg-blue-400 px-4 text-2xl font-medium text-white ml-4">
+                className="flex h-10 items-center rounded-lg bg-blue-400 px-4 text-2xl font-medium text-white">
                 +
               </Link>
             </div>
           </div>
-          <div className="mb-4 w-1/4 ml-8">
+          <div className="mb-4 w-full">
             <label htmlFor="gstNumber" className="mb-2 block text-sm font-medium">
               GST Number
             </label>
@@ -272,9 +272,9 @@ export default function Form({
           </div>
         </div>
 
-        <div className='flex flex-wrap'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
           {/* Invoice Number */}
-          <div className="mb-4 w-1/4">
+          <div className="mb-4 w-full">
             <label htmlFor="invoice" className="mb-2 block text-sm font-medium">
               Invoice Number
             </label>
@@ -294,7 +294,7 @@ export default function Form({
             </div>
           </div>
 
-          <div className="mb-8 w-1/4 ml-8">
+          <div className="mb-8 w-full">
             <label htmlFor="invoice date" className="mb-2 block text-sm font-medium">
               Invoice Date
             </label>
@@ -316,8 +316,8 @@ export default function Form({
           </div>
         </div>
 
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Yarn Details
             </label>
@@ -344,7 +344,7 @@ export default function Form({
               <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
             </div>
           </div>
-          <div className="mb-8 w-1/4 ml-8">
+          <div className="mb-8 w-full">
             <label htmlFor="warpType" className="mb-2 block text-sm font-medium">
               Warp Type
             </label>
@@ -365,20 +365,20 @@ export default function Form({
         </div>
         {selectedYarns ?
           <div className='bg-blue-300 rounded-lg p-4 my-4'>
-            <div className='flex flex-wrap'>
-              <div className="mb-4 w-1/4">
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+              <div className="mb-4 w-full">
                 <label htmlFor="color" className="mb-2 block text-sm font-medium">
                   Supplier
                 </label>
                 <div className="relative mt-2">{selectedYarns?.InvoiceNumber}</div>
               </div>
-              <div className="mb-4 w-1/4 ml-8">
+              <div className="mb-4 w-full">
                 <label htmlFor="color" className="mb-2 block text-sm font-medium">
                   Invoice Number
                 </label>
                 <div className="relative mt-2">{selectedYarns?.InvoiceNumber}</div>
               </div>
-              <div className="mb-4 w-1/4 ml-8">
+              <div className="mb-4 w-full">
                 <label htmlFor="color" className="mb-2 block text-sm font-medium">
                   Invoice Date
                 </label>
@@ -391,37 +391,37 @@ export default function Form({
                   key={`selP_${rowIndex}`}
                   className="flex gap-5 bg-blue-100 items-center mb-2 rounded-md p-3"
                 >
-                  <div className='w-1/6'>
+                  <div className='w-full'>
                     <label htmlFor="color" className="mb-2 block text-lg font-medium">
                       Count
                     </label>
                     <div className="relative mt-4">{row?.Count}</div>
                   </div>
-                  <div className='w-1/6'>
+                  <div className='w-full'>
                     <label htmlFor="color" className="mb-2 block text-lg font-medium">
                       Color
                     </label>
                     <div className="relative mt-4">{row?.Color}</div>
                   </div>
-                  <div className='w-1/6'>
+                  <div className='w-full'>
                     <label htmlFor="color" className="mb-2 block text-lg font-medium">
                       Bag
                     </label>
                     <div className="relative mt-4">{row?.Bag}</div>
                   </div>
-                  <div className='w-1/6'>
+                  <div className='w-full'>
                     <label htmlFor="color" className="mb-2 block text-lg font-medium">
                       Quantity
                     </label>
                     <div className="relative mt-4">{row?.Quantity}</div>
                   </div>
-                  <div className='w-1/6'>
+                  <div className='w-full'>
                     <label htmlFor="color" className="mb-2 block text-lg font-medium">
                       Price
                     </label>
                     <div className="relative mt-4">{row?.Price}</div>
                   </div>
-                  <div className='w-1/6'>
+                  <div className='w-full'>
                     <label htmlFor="color" className="mb-2 block text-lg font-medium">
                       Total
                     </label>
@@ -444,8 +444,8 @@ export default function Form({
           looms={looms}
         />
 
-        <div className='flex flex-wrap mt-4'>
-          <div className="mb-4 w-1/5">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4'>
+          <div className="mb-4 w-full">
             <label htmlFor="color" className="mb-2 block text-sm font-medium">
               Warp Color
             </label>
@@ -463,7 +463,7 @@ export default function Form({
               />
             </div>
           </div>
-          <div className="mb-4 w-1/5 pl-6">
+          <div className="mb-4 w-full pl-6">
             <label htmlFor="meters" className="mb-2 block text-sm font-medium">
               Meters
             </label>
@@ -482,8 +482,8 @@ export default function Form({
           </div>
         </div>
 
-        <div className='flex flex-wrap mt-4'>
-          <div className="mb-4 w-1/5">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4'>
+          <div className="mb-4 w-full">
             <label htmlFor="color" className="mb-2 block text-sm font-medium">
               Yarn Sent
             </label>
@@ -500,7 +500,7 @@ export default function Form({
               />
             </div>
           </div>
-          <div className="mb-4 w-1/5 pl-6">
+          <div className="mb-4 w-full pl-6">
             <label htmlFor="balance" className="mb-2 block text-sm font-medium">
               Yarn Balance
             </label>
@@ -518,8 +518,8 @@ export default function Form({
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap mt-4'>
-          <div className="mb-4 w-1/5">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4'>
+          <div className="mb-4 w-full">
             <label htmlFor="used" className="mb-2 block text-sm font-medium">
               Yarn Used
             </label>
@@ -536,7 +536,7 @@ export default function Form({
               />
             </div>
           </div>
-          <div className="mb-4 w-1/5 pl-6">
+          <div className="mb-4 w-full pl-6">
             <label htmlFor="price" className="mb-2 block text-sm font-medium">
               Price
             </label>
@@ -557,8 +557,8 @@ export default function Form({
           </div>
         </div>
 
-        <div className='flex flex-wrap mt-6'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="transport" className="mb-2 block text-sm font-medium">
               Transport
             </label>
@@ -581,8 +581,8 @@ export default function Form({
           </div>
         </div>
 
-        <div className='flex flex-wrap mt-6'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="beforeTax" className="mb-2 block text-sm font-medium">
               Before Tax
             </label>
@@ -623,7 +623,7 @@ export default function Form({
                 />
                 <label
                   htmlFor="gst"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
                 >
                   Gst
                 </label>
@@ -642,7 +642,7 @@ export default function Form({
                 />
                 <label
                   htmlFor="normal"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
                 >
                   Normal
                 </label>
@@ -651,8 +651,8 @@ export default function Form({
           </div>
         </fieldset>
         {billType === 'gst' ?
-          <div className='flex flex-wrap pt-6'>
-            <div className="w-1/4">
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-6'>
+            <div className="w-full">
               <label htmlFor="tax percentage" className="mb-2 block text-sm font-medium">
                 Tax Percentage
               </label>
@@ -674,7 +674,7 @@ export default function Form({
             </div>
             {selectedSupplier?.State === 'TamilNadu' ?
               <>
-                <div className="mb-4 w-1/8 ml-8">
+                <div className="mb-4 w-full">
                   <label htmlFor="cgst" className="mb-2 block text-sm font-medium">
                     CGST ({cgstPercentage})%
                   </label>
@@ -692,7 +692,7 @@ export default function Form({
                   </div>
                 </div>
 
-                <div className="mb-4 w-1/8 ml-8">
+                <div className="mb-4 w-full">
                   <label htmlFor="cgst" className="mb-2 block text-sm font-medium">
                     SGST ({sgstPercentage})%
                   </label>
@@ -711,7 +711,7 @@ export default function Form({
                 </div>
               </>
               :
-              <div className="mb-4 w-1/8 ml-8">
+              <div className="mb-4 w-full">
                 <label htmlFor="igst" className="mb-2 block text-sm font-medium">
                   IGST ({igstPercentage})%
                 </label>
@@ -732,7 +732,7 @@ export default function Form({
           </div>
           : null}
 
-        <div className="mt-4 w-1/4">
+        <div className="mt-4 w-full">
           <label htmlFor="afterTax" className="mb-2 block text-sm font-medium">
             After Tax Amount
           </label>
@@ -750,7 +750,7 @@ export default function Form({
           </div>
         </div>
 
-        <div className="mt-4 w-1/4">
+        <div className="mt-4 w-full">
           <label htmlFor="roundOff" className="mb-2 block text-sm font-medium">
             Round Off
           </label>
@@ -772,7 +772,7 @@ export default function Form({
           </div>
         </div>
 
-        <div className="mt-4 w-1/4">
+        <div className="mt-4 w-full">
           <label htmlFor="invoiceAmount" className="mb-2 block text-sm font-medium">
             Invoice Amount
           </label>

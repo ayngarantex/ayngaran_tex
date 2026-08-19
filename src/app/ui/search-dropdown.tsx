@@ -107,7 +107,7 @@ export default function SearchDropdown({
                 {createLink && (
                     <Link
                         href={createLink}
-                        className="flex h-10 items-center rounded-lg bg-blue-400 px-4 text-2xl font-medium text-white ml-4"
+                        className="flex h-10 items-center rounded-lg bg-blue-400 px-4 text-2xl font-medium text-white"
                     >
                         +
                     </Link>

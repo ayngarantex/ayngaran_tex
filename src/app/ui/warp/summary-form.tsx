@@ -66,8 +66,8 @@ export default function EditForm({
     <form>
       <div className="rounded-md bg-blue-50 p-4 md:p-6">
         {/* Customer Select */}
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/6">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="color" className="mb-2 block text-sm font-medium">
               Date
             </label>
@@ -77,7 +77,7 @@ export default function EditForm({
               )}
             </div>
           </div>
-          <div className="mb-4 w-1/6">
+          <div className="mb-4 w-full">
             <label htmlFor="color" className="mb-2 block text-sm font-medium">
               Color
             </label>
@@ -86,7 +86,7 @@ export default function EditForm({
             </div>
           </div>
 
-          {/* <div className="mb-8 w-1/6 ml-8">
+          {/* <div className="mb-8 w-full">
             <label htmlFor="invoice meters" className="mb-2 block text-sm font-medium">
               Warp
             </label>
@@ -95,7 +95,7 @@ export default function EditForm({
             </div>
           </div>
 
-          <div className="mb-8 w-1/6 ml-8">
+          <div className="mb-8 w-full">
             <label htmlFor="invoice meters" className="mb-2 block text-sm font-medium">
               Meters
             </label>
@@ -104,7 +104,7 @@ export default function EditForm({
             </div>
             </div> */}
 
-          {/* <div className="mb-4 w-1/6 ml-8">
+          {/* <div className="mb-4 w-full">
             <label htmlFor="weight" className="mb-2 block text-sm font-medium">
               Weight
             </label>
@@ -132,14 +132,14 @@ export default function EditForm({
         </div>
 
         <div className="flex gap-6 mt-4">
-          <div className="border rounded-lg mb-4 p-4 w-1/3 bg-white">
+          <div className="border rounded-lg mb-4 p-4 w-full bg-white">
             <h1 className={`text-2xl mb-4`}>Warp Details ({totalWarps})</h1>
             <div
               key={`selP0`}
               className="flex gap-3 items-center mb-2 w-full"
             >
-              <p className='font-semibold text-lg w-1/3'>Meter <span className='text-blue-600 font-medium'>({(totalMeters || 0).toFixed(2)})</span></p>
-              <p className='font-semibold text-lg w-1/3'>Weight <span className='text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
+              <p className='font-semibold text-lg w-full'>Meter <span className='text-blue-600 font-medium'>({(totalMeters || 0).toFixed(2)})</span></p>
+              <p className='font-semibold text-lg w-full'>Weight <span className='text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
             </div>
             {summaryDetails?.warp_detail?.length ?
               summaryDetails?.warp_detail.map((row: any, rowIndex: number) => (
@@ -152,7 +152,7 @@ export default function EditForm({
                   {/* <input
                     type="text"
                     value={row.Color || ""}
-                    className="border p-2 rounded w-1/3 bg-gray-50 text-gray-700"
+                    className="border p-2 rounded w-full bg-gray-50 text-gray-700"
                     readOnly
                   /> */}
 
@@ -160,7 +160,7 @@ export default function EditForm({
                   <input
                     type="text"
                     value={row.Meters || ""}
-                    className="border p-2 rounded w-1/3 bg-gray-50 text-gray-700"
+                    className="border p-2 rounded w-full bg-gray-50 text-gray-700"
                     readOnly
                   />
 
@@ -168,7 +168,7 @@ export default function EditForm({
                   <input
                     type="text"
                     value={row.Weight || ""}
-                    className="border p-2 rounded w-1/3 bg-gray-50 text-gray-700"
+                    className="border p-2 rounded w-full bg-gray-50 text-gray-700"
                     readOnly
                   />
                 </div>

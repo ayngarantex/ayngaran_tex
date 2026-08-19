@@ -1,4 +1,4 @@
-import { fetchNodeProductById } from '@/app/api/node/product';
+import { fetchProductById } from '@/app/api/node/product';
 import { fetchStockEntryById } from '@/app/api/node/stock';
 import StockEditForm from '@/app/ui/products/StockEditForm';
 
@@ -9,7 +9,7 @@ export default async function Page(props: {
     const productId = params.id;
     const entryId = Number(params.entryId);
 
-    const product = await fetchNodeProductById(productId);
+    const product = await fetchProductById(productId);
     const entry = await fetchStockEntryById(entryId);
 
     return (

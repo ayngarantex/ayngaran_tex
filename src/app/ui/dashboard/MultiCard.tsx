@@ -14,6 +14,9 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
   const [investmentsVal, setInvestmentsVal] = useState<any>({});
 
   const [hasMounted, setHasMounted] = useState(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+
+  // Form states for calculator modal
   const [indusind, setIndusind] = useState(0);
   const [hdfc, setHdfc] = useState(0);
   const [canarabank, setCanarabank] = useState(0);
@@ -27,9 +30,7 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
   const [denom20, setDenom20] = useState(0);
   const [denom10, setDenom10] = useState(0);
 
-  // load from localStorage on mount
-  useEffect(() => {
-    setHasMounted(true);
+  const fetchLocalStorageCash = () => {
     try {
       const stored = localStorage.getItem('ayngaran_cash_in_hand');
       if (stored) {
@@ -50,6 +51,12 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
     } catch (e) {
       console.error("Error reading cash in hand:", e);
     }
+  };
+
+  // load from localStorage on mount
+  useEffect(() => {
+    setHasMounted(true);
+    fetchLocalStorageCash();
   }, []);
 
   const cashDenomTotal = (denom500 * 500) + (denom200 * 200) + (denom100 * 100) + (denom50 * 50) + (denom20 * 20) + (denom10 * 10);
@@ -65,7 +72,7 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
           sizingData(startDate, endDate, billType),
           purchaseData(startDate, endDate, billType),
           expensesTotalData(startDate, endDate),
-          investmentsTotalData(startDate, endDate)
+          investmentsTotalData("", "")
         ]);
 
         setSalesVal(sales);
@@ -93,6 +100,24 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
 
   const netBalanceFlow = Number(totalInvest) + Number(receivedInvoice) - (Number(yarnPaid) + Number(sizingPaid) + Number(purchasePaid) + Number(expensesAmt));
 
+  const handleSave = () => {
+    const dataToStore = {
+      indusind,
+      hdfc,
+      canarabank,
+      check,
+      govinth,
+      denom500,
+      denom200,
+      denom100,
+      denom50,
+      denom20,
+      denom10
+    };
+    localStorage.setItem('ayngaran_cash_in_hand', JSON.stringify(dataToStore));
+    setIsCalculatorOpen(false);
+  };
+
   return (
     <div className="space-y-8 mb-8">
       {/* ==================== BLOCK 1: Capital & Cash Ledger ==================== */}
@@ -104,18 +129,25 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
           {/* 1. Total Investments */}
           <InvestmentCard total={totalInvest} />
 
-          {/* 2. Cash In Hand Card */}
+          {/* 2. Cash In Hand Card with Calculator trigger */}
           <CashInHandCard
             total={totalCash}
             cash={hasMounted ? cashDenomTotal : 0}
             bank={hasMounted ? bankTotal : 0}
+            onOpenCalculator={() => {
+              // Ensure we load fresh values before opening modal
+              fetchLocalStorageCash();
+              setIsCalculatorOpen(true);
+            }}
           />
 
           {/* 3. Expenses Card */}
           <ExpenseCard total={expensesAmt} />
 
-          {/* 4. Net Calculated Flow Summary Card */}
-          <NetFlowCard netFlow={netBalanceFlow} />
+          {!billType && !startDate && (
+            /* 4. Net Calculated Flow Summary Card */
+            <NetFlowCard netFlow={netBalanceFlow} />
+          )}
         </div>
       </div>
 
@@ -158,6 +190,240 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
           />
         </div>
       </div>
+
+      {/* Cash Calculator Popup Modal */}
+      {isCalculatorOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs no-print p-4 overflow-y-auto">
+          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-slate-50 rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Company Cash in Hand Calculator
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsCalculatorOpen(false)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-lg hover:bg-gray-150 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left Column: Bank Accounts & Hand Holdings */}
+              <div>
+                <h3 className="text-md font-bold text-gray-700 mb-4 pb-1 border-b border-slate-100">Bank Accounts & Hand Holdings</h3>
+                <div className="space-y-3.5">
+                  <div className="flex justify-between items-center gap-4">
+                    <label className="text-sm font-semibold text-gray-600 w-full">Prakash Indusind</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={indusind || ''}
+                      onChange={(e) => setIndusind(Math.max(0, Number(e.target.value)))}
+                      className="w-2/3 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Enter balance"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center gap-4">
+                    <label className="text-sm font-semibold text-gray-600 w-full">HDFC Bank</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={hdfc || ''}
+                      onChange={(e) => setHdfc(Math.max(0, Number(e.target.value)))}
+                      className="w-2/3 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Enter balance"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center gap-4">
+                    <label className="text-sm font-semibold text-gray-600 w-full">Canara Bank</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={canarabank || ''}
+                      onChange={(e) => setCanarabank(Math.max(0, Number(e.target.value)))}
+                      className="w-2/3 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Enter balance"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center gap-4">
+                    <label className="text-sm font-semibold text-gray-600 w-full">Prakash hand (Cash)</label>
+                    <div className="w-2/3 bg-slate-100 text-slate-800 font-bold border border-slate-200 rounded-lg p-2 text-sm">
+                      {formatCurrency(cashDenomTotal)}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center gap-4">
+                    <label className="text-sm font-semibold text-gray-600 w-full">Govinth</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={govinth || ''}
+                      onChange={(e) => setGovinth(Math.max(0, Number(e.target.value)))}
+                      className="w-2/3 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Enter amount"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center gap-4">
+                    <label className="text-sm font-semibold text-gray-600 w-full">Checks in Hand</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={check || ''}
+                      onChange={(e) => setCheck(Math.max(0, Number(e.target.value)))}
+                      className="w-2/3 border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Enter checks value"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Cash Denominations */}
+              <div>
+                <h3 className="text-md font-bold text-gray-700 mb-4 pb-1 border-b border-slate-100">Cash Denomination Breakdown</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-3 items-center">
+                    <span className="text-sm font-bold text-gray-600 text-right">₹ 500</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={denom500 || ''}
+                      onChange={(e) => setDenom500(Math.max(0, Math.floor(Number(e.target.value))))}
+                      className="border border-gray-300 rounded-lg p-1.5 text-center text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Count"
+                    />
+                    <span className="text-sm font-bold text-slate-700 bg-slate-50 border p-1.5 rounded-lg text-right">
+                      {formatCurrency(denom500 * 500)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 items-center">
+                    <span className="text-sm font-bold text-gray-600 text-right">₹ 200</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={denom200 || ''}
+                      onChange={(e) => setDenom200(Math.max(0, Math.floor(Number(e.target.value))))}
+                      className="border border-gray-300 rounded-lg p-1.5 text-center text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Count"
+                    />
+                    <span className="text-sm font-bold text-slate-700 bg-slate-50 border p-1.5 rounded-lg text-right">
+                      {formatCurrency(denom200 * 200)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 items-center">
+                    <span className="text-sm font-bold text-gray-600 text-right">₹ 100</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={denom100 || ''}
+                      onChange={(e) => setDenom100(Math.max(0, Math.floor(Number(e.target.value))))}
+                      className="border border-gray-300 rounded-lg p-1.5 text-center text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Count"
+                    />
+                    <span className="text-sm font-bold text-slate-700 bg-slate-50 border p-1.5 rounded-lg text-right">
+                      {formatCurrency(denom100 * 100)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 items-center">
+                    <span className="text-sm font-bold text-gray-600 text-right">₹ 50</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={denom50 || ''}
+                      onChange={(e) => setDenom50(Math.max(0, Math.floor(Number(e.target.value))))}
+                      className="border border-gray-300 rounded-lg p-1.5 text-center text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Count"
+                    />
+                    <span className="text-sm font-bold text-slate-700 bg-slate-50 border p-1.5 rounded-lg text-right">
+                      {formatCurrency(denom50 * 50)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 items-center">
+                    <span className="text-sm font-bold text-gray-600 text-right">₹ 20</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={denom20 || ''}
+                      onChange={(e) => setDenom20(Math.max(0, Math.floor(Number(e.target.value))))}
+                      className="border border-gray-300 rounded-lg p-1.5 text-center text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Count"
+                    />
+                    <span className="text-sm font-bold text-slate-700 bg-slate-50 border p-1.5 rounded-lg text-right">
+                      {formatCurrency(denom20 * 20)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 items-center">
+                    <span className="text-sm font-bold text-gray-600 text-right">₹ 10</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={denom10 || ''}
+                      onChange={(e) => setDenom10(Math.max(0, Math.floor(Number(e.target.value))))}
+                      className="border border-gray-300 rounded-lg p-1.5 text-center text-sm outline-none focus:border-teal-500 bg-white"
+                      placeholder="Count"
+                    />
+                    <span className="text-sm font-bold text-slate-700 bg-slate-50 border p-1.5 rounded-lg text-right">
+                      {formatCurrency(denom10 * 10)}
+                    </span>
+                  </div>
+
+                  <div className="mt-8 p-4 bg-emerald-50 rounded-xl border border-emerald-150 flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center text-sm text-emerald-800 font-bold">
+                      <span>Total Denominations Count:</span>
+                      <span>{denom500 + denom200 + denom100 + denom50 + denom20 + denom10} notes</span>
+                    </div>
+                    <div className="flex justify-between items-center text-md text-emerald-900 font-black border-t border-emerald-200/40 pt-1.5">
+                      <span>Total Denomination Cash:</span>
+                      <span>{formatCurrency(cashDenomTotal)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer / Summary */}
+            <div className="px-6 py-4 bg-slate-50 rounded-b-2xl border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex gap-6 text-sm">
+                <span className="text-slate-600">Cash: <strong className="text-slate-800 font-bold">{formatCurrency(cashDenomTotal)}</strong></span>
+                <span className="text-slate-600">Bank & staff: <strong className="text-slate-800 font-bold">{formatCurrency(bankTotal)}</strong></span>
+                <span className="text-slate-700 font-bold">Grand Total: <strong className="text-teal-700 text-base font-black">{formatCurrency(totalCashInHand)}</strong></span>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCalculatorOpen(false)}
+                  className="px-5 py-2 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-100 border border-gray-300 rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="px-6 py-2 text-sm font-bold text-white bg-teal-600 hover:bg-teal-750 rounded-xl shadow-md transition-colors cursor-pointer"
+                >
+                  Save Cash Balance
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -167,7 +433,7 @@ export function InvestmentCard({ total }: { total: number }) {
     <div className="rounded-xl bg-blue-50 p-2 shadow-sm flex flex-col justify-between min-h-[180px]">
       <div className="flex p-4">
         <ArrowTrendingUpIcon className="h-5 w-5 text-gray-700" />
-        <h3 className="ml-2 text-sm font-medium">Investments</h3>
+        <h3 className="text-sm font-medium">Investments</h3>
       </div>
       <div className="bg-white p-4 flex-1 flex flex-col justify-center items-center rounded-lg">
         <span className="text-xs text-gray-500 uppercase font-semibold">Total Invested</span>
@@ -182,7 +448,7 @@ export function ExpenseCard({ total }: { total: number }) {
     <div className="rounded-xl bg-blue-50 p-2 shadow-sm flex flex-col justify-between min-h-[180px]">
       <div className="flex p-4">
         <BanknotesIcon className="h-5 w-5 text-gray-700" />
-        <h3 className="ml-2 text-sm font-medium">Expenses</h3>
+        <h3 className="text-sm font-medium">Expenses</h3>
       </div>
       <div className="bg-white p-4 flex-1 flex flex-col justify-center items-center rounded-lg">
         <span className="text-xs text-gray-500 uppercase font-semibold">Total Expenses</span>
@@ -192,12 +458,23 @@ export function ExpenseCard({ total }: { total: number }) {
   );
 }
 
-export function CashInHandCard({ total, cash, bank }: { total: number; cash: number; bank: number }) {
+export function CashInHandCard({ total, cash, bank, onOpenCalculator }: { total: number; cash: number; bank: number; onOpenCalculator: () => void }) {
   return (
     <div className="rounded-xl bg-blue-50 p-2 shadow-sm flex flex-col justify-between min-h-[180px]">
-      <div className="flex p-4">
-        <BanknotesIcon className="h-5 w-5 text-gray-700" />
-        <h3 className="ml-2 text-sm font-medium">Cash in Hand</h3>
+      <div className="flex p-4 justify-between items-center w-full">
+        <div className="flex items-center">
+          <BanknotesIcon className="h-5 w-5 text-gray-700" />
+          <h3 className="text-sm font-medium">Cash in Hand</h3>
+        </div>
+        <button
+          onClick={onOpenCalculator}
+          className="bg-white hover:bg-slate-100 text-teal-800 rounded-lg px-2.5 py-1 text-xs font-bold transition-all flex items-center gap-1 border border-slate-200 shadow-xs cursor-pointer"
+        >
+          <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          Calculator
+        </button>
       </div>
       <div className="bg-white p-4 flex-1 flex flex-col justify-between rounded-lg">
         <div className="flex flex-col items-center justify-center flex-1">
@@ -218,7 +495,7 @@ export function NetFlowCard({ netFlow }: { netFlow: number }) {
     <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2 shadow-lg flex flex-col justify-between min-h-[180px] text-white">
       <div className="flex p-4">
         <ShieldCheckIcon className="h-5 w-5 text-emerald-100" />
-        <h3 className="ml-2 text-sm font-medium text-emerald-50">Business Net Capital</h3>
+        <h3 className="text-sm font-medium text-emerald-50">Business Net Capital</h3>
       </div>
       <div className="bg-white/10 backdrop-blur-xs p-4 flex-1 flex flex-col justify-between rounded-lg">
         <div className="flex flex-col items-center justify-center flex-1">
@@ -248,7 +525,7 @@ export function CardNew({
     <div className="rounded-xl bg-blue-50 p-2 shadow-sm flex flex-col justify-between min-h-[180px]">
       <div className="flex p-4">
         <CubeIcon className="h-5 w-5 text-gray-700" />
-        <h3 className="ml-2 text-sm font-medium">{title}</h3>
+        <h3 className="text-sm font-medium">{title}</h3>
       </div>
       <div className="bg-white rounded-lg flex-1 flex flex-col justify-between p-3">
         <div className="flex justify-between text-sm py-1 border-b border-gray-100">

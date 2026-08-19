@@ -57,7 +57,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
     });
 
     const givenTypes = ['Warp', 'Weft', 'Babbin', 'Kuri Cone', 'Closed Positive'];
-    const receivedTypes = ['Vesti', 'Return Cone', 'Closed Negative', 'Wast Percentage'];
+    const receivedTypes = ['Vesti', 'Vesti (Warp Summary)', 'Return Cone', 'Closed Negative', 'Wast Percentage'];
 
     const totalGivenWeight = filteredEntries.reduce((sum, e) => {
         if (givenTypes.includes(e.Type)) return sum + (Number(e.Weight) || 0);
@@ -139,7 +139,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                                     Sizing Id {entry.sizingId}
                                                 </Link>
                                             </span>
-                                        ) : entry.Type === 'Vesti' || entry.Type === 'Return Cone' || entry.Type === 'Babbin Return' || entry.Type === 'Wast Percentage' ? (
+                                        ) : entry.Type === 'Vesti' || entry.Type === 'Vesti (Warp Summary)' || entry.Type === 'Return Cone' || entry.Type === 'Babbin Return' || entry.Type === 'Wast Percentage' ? (
                                             <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-base font-medium text-red-800">
                                                 {entry.Type}
                                             </span>
@@ -170,10 +170,10 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                                 ) : (
                                                     <ul className="text-base space-y-1">
                                                         {warpDetails.map((warp: any, index: number) => (
-                                                            <li key={index} className="pb-2 border-b border-gray-200 mb-2">
-                                                                <span className="w-1/3 pr-4"><span className="font-semibold">Meter:</span> {warp.Meters}</span>
-                                                                <span className="w-1/3 pr-4"><span className="font-semibold">Weight:</span> {warp.Weight}</span>
-                                                                <span className="w-1/3 pr-4"><span className="font-semibold">Color:</span> {warp.Color}</span>
+                                                            <li key={entry.id + ' ' + index} className="pb-2 border-b border-gray-200 mb-2">
+                                                                <span className="w-full pr-4"><span className="font-semibold">Meter:</span> {warp.Meters}</span>
+                                                                <span className="w-full pr-4"><span className="font-semibold">Weight:</span> {warp.Weight}</span>
+                                                                <span className="w-full pr-4"><span className="font-semibold">Color:</span> {warp.Color}</span>
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -187,7 +187,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                     </td>
 
                                     <td className={`px-4 py-3 whitespace-nowrap text-right ${entry.Type === 'Closed Negative' ? 'text-orange-600 font-bold' : 'text-red-600 font-medium'} text-base `}>
-                                        {entry.Type === 'Vesti' || entry.Type === 'Return Cone' || entry.Type === 'Closed Negative' || entry.Type === 'Wast Percentage' ? entry.Weight ? Number(entry.Weight).toFixed(3) : '-' : '-'}
+                                        {entry.Type === 'Vesti' || entry.Type === 'Vesti (Warp Summary)' || entry.Type === 'Return Cone' || entry.Type === 'Closed Negative' || entry.Type === 'Wast Percentage' ? entry.Weight ? Number(entry.Weight).toFixed(3) : '-' : '-'}
                                     </td>
 
                                     <td className={`px-4 py-3 whitespace-nowrap text-right font-semibold text-base ${balance >= 0 ? 'text-blue-700' : 'text-red-700'}`}>
@@ -195,10 +195,18 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                     </td>
 
                                     <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-indigo-600 text-base">
-                                        <Link className="cursor-pointer" href={`/admin/jobworks/${entry.id}/entries`}>
-                                            Edit { }
-                                        </Link>
-                                        <span onClick={() => handleDelete(entry.id)} className="text-red-600 ml-3 cursor-pointer">Delete</span>
+                                        {entry.isWarpSummary ? (
+                                            <Link className="cursor-pointer text-indigo-600 font-bold hover:underline" href={`/admin/warp/${entry.sizingId}/${entry.LoomId}/summary`}>
+                                                Edit (Warp Summary)
+                                            </Link>
+                                        ) : (
+                                            <>
+                                                <Link className="cursor-pointer" href={`/admin/jobworks/${entry.id}/entries`}>
+                                                    Edit
+                                                </Link>
+                                                <span onClick={() => handleDelete(Number(entry.id))} className="text-red-600 cursor-pointer">Delete</span>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             );

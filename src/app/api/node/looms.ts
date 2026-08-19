@@ -1,7 +1,7 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getLooms, getLoomCount, getLoomById, createLoom as createLoomRepo, updateLoom as updateLoomRepo, deleteLoom as deleteLoomRepo, getEntryById, createEntry as createEntryRepo, updateEntry as updateEntryRepo, deleteEntry as deleteEntryRepo, getLoomEntriesByLoomId, getSizingWarpDetailsByLoomId } from "@/server/repositories/loomRepositories";
+import { getLooms, getLoomCount, getLoomById, createLoom as createLoomRepo, updateLoom as updateLoomRepo, deleteLoom as deleteLoomRepo, getEntryById, createEntry as createEntryRepo, updateEntry as updateEntryRepo, deleteEntry as deleteEntryRepo, getLoomEntriesByLoomId, getSizingWarpDetailsByLoomId, getWarpSummaryEntriesByLoomId } from "@/server/repositories/loomRepositories";
 
 export const fetchLooms = async (
     query: string,
@@ -104,6 +104,16 @@ export const fetchSizingWarpDetailsByLoomId = async (loomId: number) => {
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchSizingWarpDetailsByLoomId Error:", err);
+        return [];
+    }
+};
+
+export const fetchWarpSummaryEntriesByLoomId = async (loomId: number) => {
+    try {
+        const rows = await getWarpSummaryEntriesByLoomId(loomId);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchWarpSummaryEntriesByLoomId Error:", err);
         return [];
     }
 };

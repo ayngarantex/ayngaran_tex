@@ -69,7 +69,7 @@ export default function InvestmentsContainer() {
       {/* Controls: Search, Date Filter, and Add Button */}
       <div className="mt-6 flex items-center justify-between gap-2 no-print">
         <div className="flex w-1/2">
-          <div className="w-1/3">
+          <div className="w-full">
             <SearchNew
               placeholder="Search investments..."
               onSearch={(val) => setQuery(val)}

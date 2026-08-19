@@ -1,6 +1,6 @@
 import { UpdateProduct, DeleteProduct } from '@/app/ui/products/buttons';
 // import { fetchProducts } from '@/app/lib/data'; //prisma query
-import { fetchNodeProducts } from '@/app/api/node/product'; //node query
+import { fetchProducts } from '@/app/api/node/product'; //node query
 import Link from 'next/link';
 
 export default async function ProductTable({
@@ -11,7 +11,7 @@ export default async function ProductTable({
   currentPage: number;
 }) {
   // const products = await fetchProducts(query, currentPage); //prisma query
-  const products = await fetchNodeProducts(query, currentPage) //node query
+  const products = await fetchProducts(query, currentPage) //node query
 
   return (
     <div className="mt-6 flow-root">

@@ -30,8 +30,8 @@ export default function Form() {
     <form>
       <div className="rounded-md bg-blue-50 p-4 md:p-6">
         {/* Customer Select */}
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="name" className="mb-2 block text-sm font-medium">
               Loom Name
             </label>
@@ -50,9 +50,9 @@ export default function Form() {
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap pt-8'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
           {/* Invoice Number */}
-          <div className="mb-4 w-1/4">
+          <div className="mb-4 w-full">
             <label htmlFor="address" className="mb-2 block text-sm font-medium">
               Address
             </label>
@@ -73,8 +73,8 @@ export default function Form() {
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap pt-8'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
+          <div className="mb-4 w-full">
             <label htmlFor="contact" className="mb-2 block text-sm font-medium">
               Contact Number
             </label>
@@ -94,8 +94,8 @@ export default function Form() {
           </div>
         </div>
 
-        <div className='flex flex-wrap pt-8'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
+          <div className="mb-4 w-full">
             <label htmlFor="count" className="mb-2 block text-sm font-medium">
               Total Looms
             </label>

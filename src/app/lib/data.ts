@@ -21,11 +21,11 @@ export const fetchCustomers = nodeCustomers.fetchCustomers;
 export const fetchCustomerPages = async (...args: any[]) => 1;
 export const fetchCustomerById = nodeCustomers.fetchCustomerById;
 
-export const fetchAllProducts = nodeProducts.fetchNodeProducts;
+export const fetchAllProducts = nodeProducts.fetchProducts;
 export const fetchProductsWithCode = nodeCustomers.fetchProductsWithCode;
-export const fetchProducts = nodeProducts.fetchNodeProducts;
+export const fetchProducts = nodeProducts.fetchProducts;
 export const fetchProductPages = async (...args: any[]) => 1;
-export const fetchProductById = nodeProducts.fetchNodeProductById;
+export const fetchProductById = nodeProducts.fetchProductById;
 
 export const fetchPaymentPages = async (...args: any[]) => [];
 export const fetchInvoiceByCustomerId = nodeInvoice.fetchCustomerInvoices;

@@ -24,10 +24,10 @@ export default async function InvoicesTable({
                   Customer
                 </th>
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6 col-gstNumber">
-                  Gst Number
+                  Amount & Tax
                 </th>
                 <th scope="col" className="px-3 py-5 font-bold col-amount">
-                  Amount
+                  Total
                 </th>
                 <th scope="col" className="px-3 py-5 font-bold col-received">
                   Received

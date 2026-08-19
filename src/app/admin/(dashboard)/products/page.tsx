@@ -2,7 +2,7 @@ import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
 import { CreateProduct } from '@/app/ui/products/buttons';
 import Table from '@/app/ui/products/table';
-import { fetchNodeProductCount, fetchNodeProductTotals } from '@/app/api/node/product'; //node query
+import { fetchProductCount, fetchProductTotals } from '@/app/api/node/product'; //node query
 import { pageLimit } from '@/app/lib/utils';
 import Link from 'next/link';
 // import { fetchAllProducts, fetchProductPages } from '@/app/lib/data'; //prisma query
@@ -17,10 +17,10 @@ export default async function Page(props: {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
-  const totalProducts = await fetchNodeProductCount(query); //node query
+  const totalProducts = await fetchProductCount(query); //node query
   const totalPages = Math.ceil(Number(totalProducts) / pageLimit); //node query
 
-  const totals = await fetchNodeProductTotals(query, "");
+  const totals = await fetchProductTotals(query, "");
 
   const totalStockSum = totals?.TotalStock || 0;
   const totalSoldSum = totals?.SoldCount || 0;

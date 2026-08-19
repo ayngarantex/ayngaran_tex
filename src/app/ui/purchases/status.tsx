@@ -17,12 +17,12 @@ export default function PurchaseStatus({ PaidAmount, InvoiceAmount, InvoiceDate 
       {!isPaid ? (
         <>
           Pending <span className='text-red-600 px-1'>({daysDiffNew(InvoiceDate)})</span>
-          <ClockIcon className="ml-1 w-4 text-gray-500" />
+          <ClockIcon className="w-4 text-gray-500" />
         </>
       ) : (
         <>
           Paid
-          <CheckIcon className="ml-1 w-4 text-white" />
+          <CheckIcon className="w-4 text-white" />
         </>
       )}
     </span>

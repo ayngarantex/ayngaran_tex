@@ -142,7 +142,7 @@ export default function ReturnProducts({ products, retProducts, setRetProducts }
               onChange={(e) =>
                 handleChange(rowIndex, "quantityType", e.target.value)
               }
-              className="border p-2 rounded w-30 ml-2"
+              className="border p-2 rounded w-30"
               placeholder="Qty Type"
             />
 
