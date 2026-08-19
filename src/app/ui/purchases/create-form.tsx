@@ -242,8 +242,8 @@ export default function Form({
           setProductsList={setProductsList}
         />
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6'>
-          <div className="mb-4 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div>
             <label htmlFor="beforeTax" className="mb-2 block text-base font-medium">
               Before Tax
             </label>
@@ -254,62 +254,64 @@ export default function Form({
                   name="beforeTax"
                   type="text"
                   disabled
+                  placeholder="Before Tax Amount"
                   value={(beforeTax || 0).toFixed(2)}
                   className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
                 />
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Invoice Status */}
-        <fieldset>
-          <legend className="mb-2 block text-base font-medium">
-            Bill Type
-          </legend>
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3 w-max">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <input
-                  id="gst"
-                  name="billType"
-                  type="radio"
-                  value="gst"
-                  checked={billType === "gst"}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-green-300 text-gray-600 focus:ring-2"
-                  onChange={(e) => {
-                    setBillType('gst')
-                  }}
-                />
-                <label
-                  htmlFor="gst"
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
-                >
-                  Gst
-                </label>
+          <div>
+            <fieldset>
+              <legend className="mb-2 block text-base font-medium">
+                Bill Type
+              </legend>
+              <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3 w-max">
+                <div className="flex gap-4">
+                  <div className="flex items-center">
+                    <input
+                      id="gst"
+                      name="billType"
+                      type="radio"
+                      value="gst"
+                      checked={billType === "gst"}
+                      className="h-4 w-4 cursor-pointer border-gray-300 bg-green-300 text-gray-600 focus:ring-2"
+                      onChange={(e) => {
+                        setBillType('gst')
+                      }}
+                    />
+                    <label
+                      htmlFor="gst"
+                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
+                    >
+                      Gst
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      id="normal"
+                      name="billType"
+                      type="radio"
+                      value="normal"
+                      checked={billType === "normal"}
+                      className="h-4 w-4 cursor-pointer border-gray-300 bg-blue-300 text-black focus:ring-2"
+                      onChange={(e) => {
+                        setBillType('normal')
+                      }}
+                    />
+                    <label
+                      htmlFor="normal"
+                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
+                    >
+                      Normal
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center">
-                <input
-                  id="normal"
-                  name="billType"
-                  type="radio"
-                  value="normal"
-                  checked={billType === "normal"}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-blue-300 text-black focus:ring-2"
-                  onChange={(e) => {
-                    setBillType('normal')
-                  }}
-                />
-                <label
-                  htmlFor="normal"
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
-                >
-                  Normal
-                </label>
-              </div>
-            </div>
+            </fieldset>
           </div>
-        </fieldset>
+        </div>
         {billType === 'gst' ?
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-6'>
             <div className="w-full">
@@ -392,59 +394,61 @@ export default function Form({
           </div>
           : null}
 
-        <div className="mt-4 w-full">
-          <label htmlFor="afterTax" className="mb-2 block text-base font-medium">
-            After Tax Amount
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="afterTax"
-                name="afterTax"
-                type="text"
-                disabled
-                value={(afterTax || 0).toFixed(2)}
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
-              />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+          <div>
+            <label htmlFor="afterTax" className="mb-2 block text-base font-medium">
+              After Tax Amount
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="afterTax"
+                  name="afterTax"
+                  type="text"
+                  disabled
+                  value={(afterTax || 0).toFixed(2)}
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-blue-100"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4 w-full">
-          <label htmlFor="roundOff" className="mb-2 block text-base font-medium">
-            Round Off
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="roundOff"
-                name="roundOff"
-                type="text"
-                placeholder="Enter round off"
-                value={roundOff}
-                onChange={(e) =>
-                  setRoundOff(e.target.value)
-                }
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-white"
-              />
+          <div>
+            <label htmlFor="roundOff" className="mb-2 block text-base font-medium">
+              Round Off
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="roundOff"
+                  name="roundOff"
+                  type="text"
+                  placeholder="Enter round off"
+                  value={roundOff}
+                  onChange={(e) =>
+                    setRoundOff(e.target.value)
+                  }
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-base outline-2 placeholder:text-gray-500 bg-white"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4 w-full">
-          <label htmlFor="invoiceAmount" className="mb-2 block text-base font-medium">
-            Invoice Amount
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="invoiceAmount"
-                name="invoiceAmount"
-                type="text"
-                disabled
-                value={invoiceAmount || 0}
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-lg outline-2 placeholder:text-gray-500 bg-blue-100 font-bold"
-              />
+          <div>
+            <label htmlFor="invoiceAmount" className="mb-2 block text-base font-medium">
+              Invoice Amount
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="invoiceAmount"
+                  name="invoiceAmount"
+                  type="text"
+                  disabled
+                  value={invoiceAmount || 0}
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-lg outline-2 placeholder:text-gray-500 bg-blue-100 font-bold"
+                />
+              </div>
             </div>
           </div>
         </div>

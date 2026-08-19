@@ -27,9 +27,16 @@
 
 html,
 body {
-  overflow-y: hidden !important;
   height: auto !important;
   min-height: 100% !important;
+}
+
+@media (min-width: 768px) {
+
+  html,
+  body {
+    overflow-y: hidden !important;
+  }
 }
 
 body {
@@ -93,4 +100,37 @@ body {
   .no-print {
     display: none !important;
   }
+}
+
+/* Unified, modern input, select, and textarea styling */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+select,
+textarea {
+  border-color: #4b5563 !important;
+  /* gray-600 */
+  border-width: 1px !important;
+  border-style: solid !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Unified focus states with interactive glow */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #3b82f6 !important;
+  /* blue-500 */
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(41, 120, 248, 0.4) !important;
 }

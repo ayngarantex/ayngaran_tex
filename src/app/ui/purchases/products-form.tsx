@@ -46,82 +46,121 @@ export default function ProductForm({ products, setProductsList }: ProductFormPr
   };
 
   const totalAmount = products?.length
-    ? products.reduce((sum, row) => sum + row.quantity * row.price, 0)
+    ? products.reduce((sum, row) => sum + (Number(row.quantity) || 0) * (Number(row.price) || 0), 0)
+    : 0;
+
+  const totalQuantity = products?.length
+    ? products.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0)
     : 0;
 
   return (
     <div className="p-4 border rounded-lg mt-4">
       <h2 className="text-xl font-bold mb-4">Add Products</h2>
 
-      {products?.length ? (
-        products.map((row, rowIndex: number) => (
-          <div
-            key={`selP_${rowIndex}`}
-            className="flex gap-3 items-center mb-2"
-          >
-            <p className="w-16">{rowIndex + 1}</p>
-
-            {/* Item Name */}
-            <input
-              type="text"
-              value={row.itemName || ""}
-              onChange={(e) => handleChange(rowIndex, "itemName", e.target.value)}
-              className="border p-2 rounded w-[300px]"
-              placeholder="Item Name (e.g. Dhoti 10x10, Box, Label)"
-              required
-            />
-
-            {/* Quantity */}
-            <input
-              type="text"
-              value={row.quantity || ""}
-              onChange={(e) => handleChange(rowIndex, "quantity", parseFloat(e.target.value) || 0)}
-              className="border p-2 rounded"
-              placeholder="Qty"
-              required
-            />
-
-            {/* Quantity Type */}
-            <select
-              value={row.quantityType || "pcs"}
-              onChange={(e) => handleChange(rowIndex, "quantityType", e.target.value)}
-              className="border p-2 rounded col-span-1"
+      <div className="space-y-4">
+        {products?.length ? (
+          products.map((row, rowIndex: number) => (
+            <div
+              key={`selP_${rowIndex}`}
+              className="flex flex-col md:flex-row gap-3 md:items-center border border-slate-200 md:border-none p-4 md:p-0 rounded-xl md:rounded-none mb-4 md:mb-2 bg-white md:bg-transparent shadow-xs md:shadow-none"
             >
-              <option value="pcs">pcs</option>
-              <option value="bags">bags</option>
-              <option value="kg">kg</option>
-              <option value="meters">meters</option>
-              <option value="box">box</option>
-            </select>
+              {/* Mobile Header */}
+              <div className="flex justify-between items-center md:hidden border-b border-slate-100 pb-2 mb-1">
+                <span className="font-bold text-sm text-indigo-600">Product #{rowIndex + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => removeProduct(rowIndex)}
+                  className="text-red-500 text-xs font-semibold hover:text-red-700 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
 
-            {/* Price */}
-            <input
-              type="text"
-              value={row.price || ""}
-              onChange={(e) => handleChange(rowIndex, "price", parseFloat(e.target.value) || 0)}
-              className="border p-2 rounded"
-              placeholder="Price"
-              required
-            />
+              {/* Desktop Index */}
+              <p className="w-8 hidden md:block text-slate-500 font-semibold">{rowIndex + 1}</p>
 
-            {/* Amount */}
-            <div className="font-semibold w-32">
-              ₹{(row.quantity * row.price).toFixed(2) || 0}
+              {/* Input fields wrapper */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-row gap-3 items-end md:items-center w-full">
+                {/* Item Name */}
+                <div className="w-full md:w-[250px] lg:w-[300px] flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Item Name</span>
+                  <input
+                    type="text"
+                    value={row.itemName || ""}
+                    onChange={(e) => handleChange(rowIndex, "itemName", e.target.value)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Item Name (e.g. Dhoti 10x10, Box, Label)"
+                    required
+                  />
+                </div>
+
+                {/* Quantity */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Qty</span>
+                  <input
+                    type="text"
+                    value={row.quantity || ""}
+                    onChange={(e) => handleChange(rowIndex, "quantity", parseFloat(e.target.value) || 0)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Qty"
+                    required
+                  />
+                </div>
+
+                {/* Quantity Type */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Qty Type</span>
+                  <select
+                    value={row.quantityType || "pcs"}
+                    onChange={(e) => handleChange(rowIndex, "quantityType", e.target.value)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                  >
+                    <option value="pcs">pcs</option>
+                    <option value="bags">bags</option>
+                    <option value="kg">kg</option>
+                    <option value="meters">meters</option>
+                    <option value="box">box</option>
+                  </select>
+                </div>
+
+                {/* Price */}
+                <div className="w-full md:w-auto flex flex-col">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Price</span>
+                  <input
+                    type="text"
+                    value={row.price || ""}
+                    onChange={(e) => handleChange(rowIndex, "price", parseFloat(e.target.value) || 0)}
+                    className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
+                    placeholder="Price"
+                    required
+                  />
+                </div>
+
+                {/* Amount */}
+                <div className="w-full md:w-32 flex flex-col justify-end md:justify-center">
+                  <span className="md:hidden text-xs font-bold text-slate-500 mb-1">Amount</span>
+                  <div className="font-bold text-slate-700 bg-slate-50 border border-slate-100 p-2 rounded-lg md:p-0 md:bg-transparent md:border-none text-sm">
+                    ₹{(row.quantity * row.price).toFixed(2) || 0}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Remove Button */}
+              <div className="hidden md:block">
+                <button
+                  type="button"
+                  onClick={() => removeProduct(rowIndex)}
+                  className="text-red-500 text-sm hover:text-red-700 font-semibold underline transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
+          ))
+        ) : null}
+      </div>
 
-            {/* Remove Button */}
-            <button
-              type="button"
-              onClick={() => removeProduct(rowIndex)}
-              className="text-red-500 text-sm underline"
-            >
-              Remove
-            </button>
-          </div>
-        ))
-      ) : null}
-
-      <div className="flex justify-between">
+      <div className="mt-6 flex flex-wrap gap-4 justify-between items-center">
         <Button
           type="button"
           color={'blue'}
@@ -130,8 +169,14 @@ export default function ProductForm({ products, setProductsList }: ProductFormPr
           + Add Product
         </Button>
 
-        <div className="mt-4 font-bold text-lg">
-          Total: ₹{totalAmount?.toFixed(2)}
+        {/* Total */}
+        <div className="border border-gray-300 rounded-lg bg-gray-100 p-2 flex gap-4">
+          <div className="font-bold text-base md:text-lg">
+            Qty: {totalQuantity}
+          </div>
+          <div className="font-bold text-base md:text-lg text-indigo-700">
+            Amt: ₹{totalAmount?.toFixed(2)}
+          </div>
         </div>
       </div>
     </div>

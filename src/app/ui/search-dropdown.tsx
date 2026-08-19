@@ -57,14 +57,14 @@ export default function SearchDropdown({
     );
 
     return (
-        <div className={className || (hideLabel ? "" : "mb-4")}>
+        <div className={className || (hideLabel ? "mb-4" : "")}>
             {!hideLabel && (
                 <label htmlFor="searchDropdownInput" className="mb-2 block text-sm font-medium">
                     {label}
                 </label>
             )}
-            <div className="flex">
-                <div className="relative flex-1" ref={ref}>
+            <div className="flex mr-3">
+                <div className={`relative flex-1 ${createLink ? 'mr-3' : ''}`} ref={ref}>
                     {showUserIcon && (
                         <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 z-10" />
                     )}
@@ -80,7 +80,7 @@ export default function SearchDropdown({
                             if (!e.target.value) onSelect(null);
                         }}
                         onFocus={() => setShowDropdown(true)}
-                        className={`peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 ${showUserIcon ? 'pl-10' : 'pl-3'} text-sm outline-2 placeholder:text-gray-500`}
+                        className={`peer block w-full cursor-pointer rounded-md border border-gray-200 bg-white py-2 ${showUserIcon ? 'pl-10' : 'pl-3'} text-sm outline-2 placeholder:text-gray-500`}
                     />
                     {showDropdown && (
                         <ul className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md border border-gray-400 shadow-lg text-sm bg-white">

@@ -53,21 +53,25 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
           return (
             <div key={product.Id}>
               {!index && (
-                <div className="mb-4 flex flex-wrap">
-                  <label className="mb-2 block w-60 text-sm font-medium">Product</label>
-                  <label className="mb-2 block text-sm font-medium w-full">Code</label>
-                  <label className="mb-2 block text-sm font-medium w-full pl-4">Last Purchase Price / Type</label>
-                  <label className="mb-2 block text-sm font-medium w-full pl-4">Total Purchase Qty</label>
+                <div className="hidden md:grid grid-cols-4 gap-6 mb-4 font-semibold text-sm text-gray-700 pb-2 border-b border-blue-200">
+                  <label>Product</label>
+                  <label>Code</label>
+                  <label>Last Purchase Price / Type</label>
+                  <label>Total Purchase Qty</label>
                 </div>
               )}
 
-              <div className="mb-4 flex flex-wrap">
-                <h2 className="mb-2 mr-2 w-60 self-center text-lg font-medium">
-                  {product.Name}
-                </h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-4 border-b border-blue-100 items-end">
+                <div>
+                  <label className="block md:hidden text-xs text-gray-500 font-bold mb-1 uppercase">Product</label>
+                  <h2 className="text-base font-bold text-gray-800 self-center">
+                    {product.Name}
+                  </h2>
+                </div>
 
-                <div className="mb-4 w-full">
-                  <div className="relative mt-2 rounded-md">
+                <div>
+                  <label className="block md:hidden text-xs text-gray-500 font-bold mb-1 uppercase">Code</label>
+                  <div className="relative rounded-md">
                     <input
                       type="text"
                       value={current?.code || ''}
@@ -77,8 +81,10 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
                     />
                   </div>
                 </div>
-                <div className="mb-4 w-full">
-                  <div className="relative mt-2 rounded-md pl-4">
+
+                <div>
+                  <label className="block md:hidden text-xs text-gray-500 font-bold mb-1 uppercase">Last Purchase Price / Type</label>
+                  <div className="relative rounded-md">
                     <input
                       type="text"
                       value={product.ProductPrice ? `${product.ProductPrice}  / ${product?.PurchaseType}` : 'No purchases yet'}
@@ -87,8 +93,10 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
                     />
                   </div>
                 </div>
-                <div className="mb-4 w-full">
-                  <div className="relative mt-2 rounded-md pl-4">
+
+                <div>
+                  <label className="block md:hidden text-xs text-gray-500 font-bold mb-1 uppercase">Total Purchase Qty</label>
+                  <div className="relative rounded-md">
                     <input
                       type="text"
                       value={product.ProductSoldQuantity ? `${product.ProductSoldQuantity}` : 'No purchases'}

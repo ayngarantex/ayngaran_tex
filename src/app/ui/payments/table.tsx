@@ -19,8 +19,8 @@ export default async function ProductTable({
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-blue-50 p-2 md:pt-0">
-          <table className="hidden min-w-full text-gray-900 md:table">
+        <div className="rounded-lg bg-blue-50 p-2 md:pt-0 overflow-x-auto w-full">
+          <table className="min-w-full text-gray-900">
             <thead className="rounded-lg text-left text-lg font-medium">
               <tr className='font-bold'>
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6">

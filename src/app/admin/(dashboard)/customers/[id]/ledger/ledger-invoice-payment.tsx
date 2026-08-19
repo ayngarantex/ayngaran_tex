@@ -47,7 +47,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                     Print
                 </Button>
             </div>
-            <div className='flex w-full mt-6 p-6 justify-between' id="" ref={printRef} >
+            <div className={`flex flex-col md:flex-row w-full mt-6 p-2 md:p-6 justify-between gap-6 ${printOption ? 'print-layout' : ''}`} id="" ref={printRef} >
                 {printOption ?
                     <>
                         <div className='flex flex-wrap w-full border-b mb-3'>
@@ -91,7 +91,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         </div>
                     </>
                     : null}
-                <div className={`${printOption ? 'w-full' : 'w-1/2 pr-5'}`}>
+                <div className={`${printOption ? 'w-full' : 'w-full md:w-1/2 md:pr-5'}`}>
                     <div className="flex w-full items-center justify-between">
                         <h1 className={`text-2xl`}>Invoice&nbsp;Details</h1>
                         {/* {printOption && (
@@ -103,7 +103,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         )} */}
                     </div>
                     <div className="mt-6">
-                        <div className="rounded-lg bg-blue-50 p-2 md:pt-0">
+                        <div className="rounded-lg bg-blue-50 p-2 md:pt-0 overflow-x-auto w-full">
                             <table className="min-w-full text-gray-900">
                                 <thead className="rounded-lg text-left text-sm font-normal">
                                     <tr className='font-bold'>
@@ -234,7 +234,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         </div>
                     )}
                 </div>
-                <div className={`${printOption ? 'w-full page-break' : 'w-1/2 pl-5'}`}>
+                <div className={`${printOption ? 'w-full page-break' : 'w-full md:w-1/2 md:pl-5 mt-6 md:mt-0'}`}>
                     <div className="flex w-full items-center">
                         <h1 className={`text-2xl`}>Payment&nbsp;Details</h1>
                         {/* {printOption && (
@@ -246,7 +246,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         )} */}
                     </div>
                     <div className="mt-6">
-                        <div className="rounded-lg bg-blue-50 p-2 md:pt-0">
+                        <div className="rounded-lg bg-blue-50 p-2 md:pt-0 overflow-x-auto w-full">
                             <table className="min-w-full text-gray-900">
                                 <thead className="rounded-lg text-left text-lg font-medium">
                                     <tr className='font-bold'>

@@ -43,9 +43,8 @@ export default function EditForm({
   return (
     <form>
       <div className="rounded-md bg-blue-50 p-4 md:p-6">
-        {/* Customer Select */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-          <div className="mb-4 w-full">
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+          <div>
             <label htmlFor="name" className="mb-2 block text-sm font-medium">
               Loom Name
             </label>
@@ -58,37 +57,13 @@ export default function EditForm({
                 onChange={(e) => {
                   setLoomName(e.target.value)
                 }}
-                placeholder="Product name"
+                placeholder="Loom name"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
               />
             </div>
           </div>
-        </div>
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
-          {/* Invoice Number */}
-          <div className="mb-4 w-full">
-            <label htmlFor="address" className="mb-2 block text-sm font-medium">
-              Address
-            </label>
-            <div className="relative mt-2 rounded-md">
-              <div className="relative">
-                <textarea
-                  id="address"
-                  name="address"
-                  rows={5}
-                  placeholder="Enter address"
-                  value={address}
-                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
-                  onChange={(e) => {
-                    setAddress(e.target.value)
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
-          <div className="mb-4 w-full">
+
+          <div>
             <label htmlFor="contact" className="mb-2 block text-sm font-medium">
               Contact Number
             </label>
@@ -106,10 +81,8 @@ export default function EditForm({
               />
             </div>
           </div>
-        </div>
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
-          <div className="mb-4 w-full">
+          <div>
             <label htmlFor="count" className="mb-2 block text-sm font-medium">
               Total Looms
             </label>
@@ -124,6 +97,25 @@ export default function EditForm({
                 }}
                 placeholder="Enter count"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 lg:col-span-4">
+            <label htmlFor="address" className="mb-2 block text-sm font-medium">
+              Address
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <textarea
+                id="address"
+                name="address"
+                rows={3}
+                placeholder="Enter address"
+                value={address}
+                className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
+                onChange={(e) => {
+                  setAddress(e.target.value)
+                }}
               />
             </div>
           </div>
