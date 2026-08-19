@@ -46,7 +46,6 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
         .find(row => row.startsWith('token='))
         ?.split('=')[1];
       if (cookieValue) {
-        console.log("cookieValue", cookieValue)
         try {
           const payloadBase64 = cookieValue.split('.')[1];
           const decodedPayload = JSON.parse(atob(payloadBase64));

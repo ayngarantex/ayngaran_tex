@@ -12,7 +12,6 @@ export default function EditForm({
 }: {
   supplier: any;
 }) {
-  console.log("supplier", supplier)
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [supplierName, setSupplierName] = useState("");

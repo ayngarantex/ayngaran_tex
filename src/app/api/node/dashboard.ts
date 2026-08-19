@@ -1,6 +1,6 @@
 "use server";
 
-import { getSalseDetails, getYarnSalesDetails, getSalesChartDetails, getYarnChartDetails, getSizingSalesDetails, getPurchasesDetails, getExpensesDetails, getInvestmentsDetails } from "@/server/repositories/dashboardRepositories";
+import { getSalseDetails, getYarnSalesDetails, getSalesChartDetails, getYarnChartDetails, getSizingSalesDetails, getPurchasesDetails, getExpensesDetails, getInvestmentsDetails, getCashInHandDetails, updateCashInHandDetails } from "@/server/repositories/dashboardRepositories";
 
 export const investmentsTotalData = async (
     startDate: string,
@@ -109,5 +109,37 @@ export const fetchYarnPurchaseDetails = async (
     } catch (err) {
         console.error("fetchYarnPurchaseDetails Error:", err);
         return [];
+    }
+};
+
+export const getCashInHand = async () => {
+    try {
+        const res = await getCashInHandDetails();
+        return JSON.parse(JSON.stringify(res));
+    } catch (err) {
+        console.error("getCashInHand Error:", err);
+        return {
+            indusind: 0,
+            hdfc: 0,
+            canarabank: 0,
+            check: 0,
+            govinth: 0,
+            denom500: 0,
+            denom200: 0,
+            denom100: 0,
+            denom50: 0,
+            denom20: 0,
+            denom10: 0
+        };
+    }
+};
+
+export const saveCashInHand = async (data: any) => {
+    try {
+        const res = await updateCashInHandDetails(data);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err) {
+        console.error("saveCashInHand Error:", err);
+        return { success: false };
     }
 };

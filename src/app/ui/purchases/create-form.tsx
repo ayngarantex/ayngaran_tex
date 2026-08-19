@@ -9,6 +9,7 @@ import PaymentForm, { PurchasePaymentRow } from './payment-form';
 import { useRouter } from 'next/navigation';
 import { currentDate } from '@/app/lib/utils';
 import { createPurchase } from '@/app/api/node/purchases';
+import { fetchAllProducts } from '@/app/api/node/product';
 
 export default function Form({
   suppliers
@@ -19,12 +20,22 @@ export default function Form({
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierField | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(currentDate());
+  
+  const [products, setProducts] = useState<any[]>([]);
   const [productsList, setProductsList] = useState<PurchaseProductRow[]>([
-    { pId: 0, itemName: "", quantity: 0, price: 0, quantityType: "pcs" }
+    { pId: 0, product: 0, itemName: "", quantity: 0, price: 0, quantityType: "pcs" }
   ]);
   const [paymentsList, setPaymentsList] = useState<PurchasePaymentRow[]>([
     { pId: 0, date: "date", amount: "", type: "Bank", to: "" }
   ]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const data = await fetchAllProducts();
+      setProducts(data);
+    };
+    loadProducts();
+  }, []);
 
   const [beforeTax, setBeforeTax] = useState(0);
   const [taxPercentage, setTaxPercentage] = useState(5);
@@ -238,7 +249,8 @@ export default function Form({
         </div>
 
         <ProductForm
-          products={productsList}
+          products={products}
+          productsList={productsList}
           setProductsList={setProductsList}
         />
 

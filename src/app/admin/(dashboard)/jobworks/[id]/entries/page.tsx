@@ -10,7 +10,6 @@ export default async function Page(props: {
     const Id = parseInt(params.id);
     const entry = await fetchEntryById(Id);
     const looms = await fetchLooms("", 0);
-    console.log("looms", looms)
 
     return (
         <main className="w-full">

@@ -182,3 +182,48 @@ export const getInvestmentsDetails = async (
     return rows?.[0] || { totalAmount: 0 };
 };
 
+export const getCashInHandDetails = async () => {
+    const [rows]: any = await db.query(`
+        SELECT indusind, hdfc, canarabank, \`check\`, govinth, denom500, denom200, denom100, denom50, denom20, denom10
+        FROM cash_in_hand
+        WHERE id = 1
+    `);
+    return rows?.[0] || {
+        indusind: 0,
+        hdfc: 0,
+        canarabank: 0,
+        check: 0,
+        govinth: 0,
+        denom500: 0,
+        denom200: 0,
+        denom100: 0,
+        denom50: 0,
+        denom20: 0,
+        denom10: 0
+    };
+};
+
+export const updateCashInHandDetails = async (data: any) => {
+    const sql = `
+        UPDATE cash_in_hand
+        SET indusind = ?, hdfc = ?, canarabank = ?, \`check\` = ?, govinth = ?,
+            denom500 = ?, denom200 = ?, denom100 = ?, denom50 = ?, denom20 = ?, denom10 = ?
+        WHERE id = 1
+    `;
+    const params = [
+        data.indusind || 0,
+        data.hdfc || 0,
+        data.canarabank || 0,
+        data.check || 0,
+        data.govinth || 0,
+        data.denom500 || 0,
+        data.denom200 || 0,
+        data.denom100 || 0,
+        data.denom50 || 0,
+        data.denom20 || 0,
+        data.denom10 || 0
+    ];
+    await db.query(sql, params);
+    return { success: true };
+};
+

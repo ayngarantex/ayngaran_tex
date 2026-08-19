@@ -1,6 +1,6 @@
 'use client';
 
-import { salseData, yarnSalesData, sizingData, purchaseData, expensesTotalData, investmentsTotalData } from '@/app/api/node/dashboard';
+import { salseData, yarnSalesData, sizingData, purchaseData, expensesTotalData, investmentsTotalData, getCashInHand, saveCashInHand } from '@/app/api/node/dashboard';
 import { formatCurrency } from '@/app/lib/utils';
 import { BanknotesIcon, ArrowTrendingUpIcon, ShieldCheckIcon, CubeIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
@@ -30,11 +30,10 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
   const [denom20, setDenom20] = useState(0);
   const [denom10, setDenom10] = useState(0);
 
-  const fetchLocalStorageCash = () => {
+  const fetchDBCash = async () => {
     try {
-      const stored = localStorage.getItem('ayngaran_cash_in_hand');
-      if (stored) {
-        const parsed = JSON.parse(stored);
+      const parsed = await getCashInHand();
+      if (parsed) {
         setIndusind(Number(parsed.indusind) || 0);
         setHdfc(Number(parsed.hdfc) || 0);
         setCanarabank(Number(parsed.canarabank) || 0);
@@ -53,10 +52,10 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
     }
   };
 
-  // load from localStorage on mount
+  // load from database on mount
   useEffect(() => {
     setHasMounted(true);
-    fetchLocalStorageCash();
+    fetchDBCash();
   }, []);
 
   const cashDenomTotal = (denom500 * 500) + (denom200 * 200) + (denom100 * 100) + (denom50 * 50) + (denom20 * 20) + (denom10 * 10);
@@ -100,7 +99,7 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
 
   const netBalanceFlow = Number(totalInvest) + Number(receivedInvoice) - (Number(yarnPaid) + Number(sizingPaid) + Number(purchasePaid) + Number(expensesAmt));
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const dataToStore = {
       indusind,
       hdfc,
@@ -114,7 +113,7 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
       denom20,
       denom10
     };
-    localStorage.setItem('ayngaran_cash_in_hand', JSON.stringify(dataToStore));
+    await saveCashInHand(dataToStore);
     setIsCalculatorOpen(false);
   };
 
@@ -136,7 +135,7 @@ export default function MultiCardWrapper({ startDate, endDate, billType }: { sta
             bank={hasMounted ? bankTotal : 0}
             onOpenCalculator={() => {
               // Ensure we load fresh values before opening modal
-              fetchLocalStorageCash();
+              fetchDBCash();
               setIsCalculatorOpen(true);
             }}
           />

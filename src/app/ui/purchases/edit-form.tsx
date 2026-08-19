@@ -9,6 +9,7 @@ import PaymentForm, { PurchasePaymentRow } from './payment-form';
 import { useRouter } from 'next/navigation';
 import { formatDateToLocal } from '@/app/lib/utils';
 import { updatePurchase } from '@/app/api/node/purchases';
+import { fetchAllProducts } from '@/app/api/node/product';
 
 export default function EditForm({
   purchase,
@@ -21,8 +22,18 @@ export default function EditForm({
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierField | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
+  
+  const [products, setProducts] = useState<any[]>([]);
   const [productsList, setProductsList] = useState<PurchaseProductRow[]>([]);
   const [paymentsList, setPaymentsList] = useState<PurchasePaymentRow[]>([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const data = await fetchAllProducts();
+      setProducts(data);
+    };
+    loadProducts();
+  }, []);
 
   const [beforeTax, setBeforeTax] = useState(0);
   const [taxPercentage, setTaxPercentage] = useState(5);
@@ -46,15 +57,20 @@ export default function EditForm({
       setInvoiceNumber(purchase.InvoiceNumber || "");
       setInvoiceDate(formatDateToLocal(purchase.InvoiceDate));
 
-      const mappedDetails = (purchase.purchase_details || []).map((row: any, rowIndex: number) => ({
-        pId: rowIndex,
-        itemName: row.ItemName || "",
-        quantity: Number(row.Quantity) || 0,
-        price: Number(row.Price) || 0,
-        quantityType: row.QuantityType || "pcs"
-      }));
+      const mappedDetails = (purchase.purchase_details || []).map((row: any, rowIndex: number) => {
+        const matchedProd = (products || []).find((p: any) => p.Name && row.ItemName && p.Name.toLowerCase() === row.ItemName.toLowerCase());
+        const customProd = (products || []).find((p: any) => p.Name === "Custom");
+        return {
+          pId: rowIndex,
+          product: matchedProd ? matchedProd.Id : (customProd ? customProd.Id : 59),
+          itemName: row.ItemName || "",
+          quantity: Number(row.Quantity) || 0,
+          price: Number(row.Price) || 0,
+          quantityType: row.QuantityType || "pcs"
+        };
+      });
       if (mappedDetails.length === 0) {
-        mappedDetails.push({ pId: 0, itemName: "", quantity: 0, price: 0, quantityType: "pcs" });
+        mappedDetails.push({ pId: 0, product: 0, itemName: "", quantity: 0, price: 0, quantityType: "pcs" });
       }
       setProductsList(mappedDetails);
 
@@ -79,7 +95,7 @@ export default function EditForm({
       setInvoiceAmount(Number(purchase.InvoiceAmount) || 0);
       setPaidAmount(Number(purchase.PaidAmount) || 0);
     }
-  }, [purchase, suppliers]);
+  }, [purchase, suppliers, products]);
 
   const handleSupplierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const supplierId = Number(e.target.value);
@@ -275,7 +291,8 @@ export default function EditForm({
         </div>
 
         <ProductForm
-          products={productsList}
+          products={products}
+          productsList={productsList}
           setProductsList={setProductsList}
         />
 

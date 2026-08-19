@@ -7,7 +7,6 @@ export default function WarpSummaryTable({
 }: {
   summary: any[];
 }) {
-  { console.log("summary", summary?.[1]) }
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
