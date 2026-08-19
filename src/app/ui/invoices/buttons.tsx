@@ -13,7 +13,7 @@ export function CreateInvoice() {
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
       <span className="hidden md:block">Create Invoice</span>{' '}
-      <PlusIcon className="h-5 md:ml-4" />
+      <PlusIcon className="h-5 md:" />
     </Link>
   );
 }
@@ -134,7 +134,7 @@ export function PrintInvoices({ query, startDate, endDate, billType, orderBy }: 
       title="Print List"
     >
       <span className="hidden md:block">Print List</span>
-      <PrinterIcon className="h-5 md:ml-2 w-5 text-gray-500" />
+      <PrinterIcon className="h-5 md: w-5 text-gray-500" />
     </button>
   );
 }
@@ -320,7 +320,7 @@ export function ExportInvoices({ query, billType, orderBy }: { query: string, bi
         title="Export to Excel"
       >
         <span className="hidden md:block">Export to Excel</span>
-        <svg className="h-5 w-5 md:ml-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg className="h-5 w-5 md: text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
       </button>
@@ -816,7 +816,7 @@ export function ExportGstr1() {
         title="Export GSTR-1 Return"
       >
         <span className="hidden md:block">Export GSTR-1</span>
-        <ArrowDownTrayIcon className="h-5 md:ml-2 w-5 text-white" />
+        <ArrowDownTrayIcon className="h-5 md: w-5 text-white" />
       </button>
 
       {isOpen && (

@@ -10,6 +10,7 @@ export default async function Page(props: {
     const Id = parseInt(params.id);
     const entry = await fetchEntryById(Id);
     const looms = await fetchLooms("", 0);
+    console.log("looms", looms)
 
     return (
         <main className="w-full">
@@ -25,7 +26,7 @@ export default async function Page(props: {
                 </Link>
             </div>
 
-            {looms.filter((e: any) => e.LoomId === entry?.LoomId.toString())[0].LoomName === 'Babbin Kannan' ?
+            {looms.filter((e: any) => e.LoomId === entry?.LoomId.toString())[0]?.LoomName === 'Babbin Kannan' ?
                 <BabbinEntryDetails looms={looms} entry={entry} />
                 :
                 <LoomEntryDetails looms={looms} entry={entry} />

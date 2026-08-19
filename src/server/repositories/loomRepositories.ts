@@ -133,3 +133,26 @@ export const getSizingWarpDetailsByLoomId = async (loomId: any) => {
 
     return formattedData;
 };
+
+export const getWarpSummaryEntriesByLoomId = async (loomId: any) => {
+    const [rows]: any = await db.query(
+        `SELECT SSD.*, S.Color as SizingColor
+         FROM sizing_summary_details SSD
+         LEFT JOIN sizing S ON SSD.SizingId = S.SizingId
+         WHERE SSD.LoomId = ? AND SSD.Date >= '2026-07-20' AND SSD.Weight IS NOT NULL
+         ORDER BY SSD.Date DESC`,
+        [Number(loomId)]
+    );
+
+    return rows.map((row: any) => ({
+        id: `summary-${row.DcId}`,
+        Type: 'Vesti (Warp Summary)',
+        LoomId: Number(loomId),
+        Date: row.Date || null,
+        Details: `DC: ${row.Dc}, Count: ${row.Count} Color: ${row.SizingColor || ''} (Sizing #${row.SizingId})`,
+        Weight: parseFloat(row.weight || row.Weight) || 0,
+        isSizingGroup: false,
+        isWarpSummary: true,
+        sizingId: row.SizingId,
+    }));
+};

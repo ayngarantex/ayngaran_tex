@@ -57,7 +57,7 @@ export function Card({
     <div className="rounded-xl bg-white p-2 shadow-xs border border-slate-200">
       <div className="flex p-4">
         {Icon ? <Icon className="h-5 w-5 text-slate-700" /> : null}
-        <h3 className="ml-2 text-sm font-medium text-slate-800">{title}</h3>
+        <h3 className="text-sm font-medium text-slate-800">{title}</h3>
       </div>
       <p
         className={`

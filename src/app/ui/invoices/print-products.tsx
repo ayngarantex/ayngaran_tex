@@ -172,7 +172,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
               <span className="text-sm pl-2">All Payment should be made by A/c Payess Cheque/Draft/RTGS</span>
             </p>
           </div>
-          <div className="flex flex-wrap justify-end border-l py-2" style={{ width: "200px" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-end border-l py-2" style={{ width: "200px" }}>
             <p className="w-full self-start text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
             <p className="w-full self-end text-center font-semibold text-sm">Authorized Signatory</p>
           </div>

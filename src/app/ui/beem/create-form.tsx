@@ -67,8 +67,8 @@ export default function Form({
     <form>
       <div className="rounded-md bg-blue-50 p-4 md:p-6">
         {/* Customer Select */}
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Loom
             </label>
@@ -99,7 +99,7 @@ export default function Form({
               <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
             </div>
           </div>
-          <div className="mb-4 w-1/4 ml-8">
+          <div className="mb-4 w-full">
             <label htmlFor="address" className="mb-2 block text-sm font-medium">
               No. Loom
             </label>
@@ -116,7 +116,7 @@ export default function Form({
               </div>
             </div>
           </div>
-          <div className="mb-4 w-1/4 ml-8">
+          <div className="mb-4 w-full">
             <label htmlFor="invoice date" className="mb-2 block text-sm font-medium">
               Date
             </label>
@@ -137,8 +137,8 @@ export default function Form({
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap pt-8'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
+          <div className="mb-4 w-full">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Loom
             </label>
@@ -163,9 +163,9 @@ export default function Form({
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap pt-8'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-8'>
           {/* Invoice Number */}
-          <div className="mb-4 w-1/4">
+          <div className="mb-4 w-full">
             <label htmlFor="loaded" className="mb-2 block text-sm font-medium">
               New Beem
             </label>
@@ -187,7 +187,7 @@ export default function Form({
               </div>
             </div>
           </div>
-          <div className="mb-4 w-1/4 pl-8">
+          <div className="mb-4 w-full pl-8">
             <label htmlFor="running" className="mb-2 block text-sm font-medium">
               Running Beem
             </label>
@@ -207,7 +207,7 @@ export default function Form({
               />
             </div>
           </div>
-          <div className="mb-4 w-1/4 pl-8">
+          <div className="mb-4 w-full pl-8">
             <label htmlFor="empty" className="mb-2 block text-sm font-medium">
               Empty Beem
             </label>
@@ -227,7 +227,7 @@ export default function Form({
               />
             </div>
           </div>
-          <div className="mb-4 w-1/4 pl-8">
+          <div className="mb-4 w-full pl-8">
             <label htmlFor="return" className="mb-2 block text-sm font-medium">
               Return Beem
             </label>
@@ -247,7 +247,7 @@ export default function Form({
               />
             </div>
           </div>
-          <div className="mb-4 w-1/4 pt-8">
+          <div className="mb-4 w-full pt-8">
             <label htmlFor="empty" className="mb-2 block text-sm font-medium">
               Total Beem in Hand
             </label>

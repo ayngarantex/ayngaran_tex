@@ -24,6 +24,7 @@ export const getInvoices = async (
         OR LOWER(C.CustomerName) LIKE '%${search}%'
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
+        OR I.InvoiceType LIKE '%${search}%'
       )
     `;
     }
@@ -49,6 +50,8 @@ export const getInvoices = async (
     if (page && limit) {
         query += ` LIMIT ${limit} OFFSET ${(page - 1) * limit}`;
     }
+
+    console.log(query)
 
     const [rows]: any = await db.query(query);
     const invoices: any[] = [];
@@ -147,6 +150,7 @@ export const getInvoicesCount = async (
         OR LOWER(C.CustomerName) LIKE '%${search}%'
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
+        OR I.InvoiceType LIKE '%${search}%'
       )
     `;
     }

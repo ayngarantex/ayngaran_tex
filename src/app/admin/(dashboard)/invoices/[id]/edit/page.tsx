@@ -1,5 +1,4 @@
 import Form from '@/app/ui/invoices/edit-form';
-import { fetchNodeProducts } from '@/app/api/node/product';
 import { fetchCustomers } from '@/app/api/node/customers';
 import { fetchInvoiceById } from '@/app/api/node/invoice';
 

@@ -247,7 +247,7 @@ export default function ExpensesContainer() {
 
       <div className="mt-6 flex items-center justify-between gap-2 no-print">
         <div className="flex w-1/2">
-          <div className="w-1/4">
+          <div className="w-full">
             <SearchNew
               placeholder="Search expenses..."
               onSearch={(val) => setQuery(val)}
@@ -304,7 +304,7 @@ export default function ExpensesContainer() {
                 <h3 className="text-md font-bold text-gray-700 mb-4 pb-1 border-b border-slate-100">Bank Accounts & Hand Holdings</h3>
                 <div className="space-y-3.5">
                   <div className="flex justify-between items-center gap-4">
-                    <label className="text-sm font-semibold text-gray-600 w-1/3">Prakash Indusind</label>
+                    <label className="text-sm font-semibold text-gray-600 w-full">Prakash Indusind</label>
                     <input
                       type="number"
                       min="0"
@@ -316,7 +316,7 @@ export default function ExpensesContainer() {
                   </div>
 
                   <div className="flex justify-between items-center gap-4">
-                    <label className="text-sm font-semibold text-gray-600 w-1/3">HDFC Bank</label>
+                    <label className="text-sm font-semibold text-gray-600 w-full">HDFC Bank</label>
                     <input
                       type="number"
                       min="0"
@@ -328,7 +328,7 @@ export default function ExpensesContainer() {
                   </div>
 
                   <div className="flex justify-between items-center gap-4">
-                    <label className="text-sm font-semibold text-gray-600 w-1/3">Canara Bank</label>
+                    <label className="text-sm font-semibold text-gray-600 w-full">Canara Bank</label>
                     <input
                       type="number"
                       min="0"
@@ -340,14 +340,14 @@ export default function ExpensesContainer() {
                   </div>
 
                   <div className="flex justify-between items-center gap-4">
-                    <label className="text-sm font-semibold text-gray-600 w-1/3">Prakash hand (Cash)</label>
+                    <label className="text-sm font-semibold text-gray-600 w-full">Prakash hand (Cash)</label>
                     <div className="w-2/3 bg-slate-100 text-slate-800 font-bold border border-slate-200 rounded-lg p-2 text-sm">
                       {formatCurrency(cashDenomTotal)}
                     </div>
                   </div>
 
                   <div className="flex justify-between items-center gap-4">
-                    <label className="text-sm font-semibold text-gray-600 w-1/3">Govinth</label>
+                    <label className="text-sm font-semibold text-gray-600 w-full">Govinth</label>
                     <input
                       type="number"
                       min="0"
@@ -359,7 +359,7 @@ export default function ExpensesContainer() {
                   </div>
 
                   <div className="flex justify-between items-center gap-4">
-                    <label className="text-sm font-semibold text-gray-600 w-1/3">Checks in Hand</label>
+                    <label className="text-sm font-semibold text-gray-600 w-full">Checks in Hand</label>
                     <input
                       type="number"
                       min="0"

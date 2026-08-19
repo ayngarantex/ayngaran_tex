@@ -204,7 +204,7 @@ export default function RegisterForm() {
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
             />
-            <label htmlFor="isactive" className="ml-2 block text-sm text-gray-900 font-medium">
+            <label htmlFor="isactive" className="block text-sm text-gray-900 font-medium">
               Is Active Account
             </label>
           </div>

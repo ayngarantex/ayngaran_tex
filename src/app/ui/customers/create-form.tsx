@@ -55,8 +55,8 @@ export default function Form() {
     <form>
       <div className="rounded-md bg-blue-50 p-4 md:p-6">
         {/* Customer Select */}
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="name" className="mb-2 block text-sm font-medium">
               Customer Name
             </label>
@@ -74,7 +74,7 @@ export default function Form() {
               />
             </div>
           </div>
-          <div className="mb-4 w-1/4 ml-8">
+          <div className="mb-4 w-full">
             <label htmlFor="gstNumber" className="mb-2 block text-sm font-medium">
               GST Number
             </label>
@@ -94,8 +94,8 @@ export default function Form() {
           </div>
         </div>
 
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               State
             </label>
@@ -126,9 +126,9 @@ export default function Form() {
           </div>
         </div>
 
-        <div className='flex flex-wrap'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
           {/* Invoice Number */}
-          <div className="mb-4 w-1/4">
+          <div className="mb-4 w-full">
             <label htmlFor="address" className="mb-2 block text-sm font-medium">
               Address line 1
             </label>
@@ -149,8 +149,8 @@ export default function Form() {
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="address2" className="mb-2 block text-sm font-medium">
               Address line 2
             </label>
@@ -171,8 +171,8 @@ export default function Form() {
           </div>
         </div>
 
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="mobile" className="mb-2 block text-sm font-medium">
               Mobile
             </label>
@@ -190,7 +190,7 @@ export default function Form() {
               />
             </div>
           </div>
-          <div className="mb-4 w-1/4 ml-8">
+          <div className="mb-4 w-full">
             <label htmlFor="phone" className="mb-2 block text-sm font-medium">
               Phone
             </label>
@@ -209,8 +209,8 @@ export default function Form() {
             </div>
           </div>
         </div>
-        <div className='flex flex-wrap'>
-          <div className="mb-4 w-1/4">
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          <div className="mb-4 w-full">
             <label htmlFor="agent" className="mb-2 block text-sm font-medium">
               Agent
             </label>

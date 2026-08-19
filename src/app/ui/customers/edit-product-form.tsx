@@ -55,9 +55,9 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
               {!index && (
                 <div className="mb-4 flex flex-wrap">
                   <label className="mb-2 block w-60 text-sm font-medium">Product</label>
-                  <label className="mb-2 block text-sm font-medium w-1/4">Code</label>
-                  <label className="mb-2 block text-sm font-medium w-1/4 pl-4">Last Purchase Price / Type</label>
-                  <label className="mb-2 block text-sm font-medium w-1/4 pl-4">Total Purchase Qty</label>
+                  <label className="mb-2 block text-sm font-medium w-full">Code</label>
+                  <label className="mb-2 block text-sm font-medium w-full pl-4">Last Purchase Price / Type</label>
+                  <label className="mb-2 block text-sm font-medium w-full pl-4">Total Purchase Qty</label>
                 </div>
               )}
 
@@ -66,7 +66,7 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
                   {product.Name}
                 </h2>
 
-                <div className="mb-4 w-1/4">
+                <div className="mb-4 w-full">
                   <div className="relative mt-2 rounded-md">
                     <input
                       type="text"
@@ -77,7 +77,7 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
                     />
                   </div>
                 </div>
-                <div className="mb-4 w-1/4">
+                <div className="mb-4 w-full">
                   <div className="relative mt-2 rounded-md pl-4">
                     <input
                       type="text"
@@ -87,7 +87,7 @@ export default function EditForm({ CustomerId, Products }: { CustomerId: number,
                     />
                   </div>
                 </div>
-                <div className="mb-4 w-1/4">
+                <div className="mb-4 w-full">
                   <div className="relative mt-2 rounded-md pl-4">
                     <input
                       type="text"

@@ -35,7 +35,7 @@
 //   return (
 //     <div>
 //       <div className="flex items-center gap-4 mb-4">
-//         <div className="w-1/6">
+//         <div className="w-full">
 //           <input
 //             type="text"
 //             placeholder={'Search Invoice'}
@@ -43,7 +43,7 @@
 //             onChange={(e) => setQuery(e.target.value)}
 //           />
 //         </div>
-//         <div className="w-1/6">
+//         <div className="w-full">
 //           <div className="relative">
 //               <select
 //                   id="financialYear"
@@ -74,7 +74,7 @@
 //               </select>
 //           </div>
 //         </div>
-//         {/* <div className="w-1/6">
+//         {/* <div className="w-full">
 //           <div className="relative">
 //             <select
 //               id="financialYear"
