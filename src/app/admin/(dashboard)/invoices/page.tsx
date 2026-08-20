@@ -6,6 +6,7 @@ import Financialyear from '@/app/lib/financialyear';
 import InvoiceFilterModal from '@/app/ui/invoices/filter-modal';
 import { formatCurrency, pageLimit } from '@/app/lib/utils';
 import { fetchInvoices, fetchInvoicesCount, fetchInvoiceTotal } from '@/app/api/node/invoice';
+import { fetchAllProducts } from '@/app/api/node/product';
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -16,10 +17,12 @@ export default async function Page(props: {
     billType?: string;
     orderBy?: string;
     print?: string;
+    productId?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
+  const productId = searchParams?.productId || '';
 
   // Default to current month start/end dates if not defined
   const today = new Date();
@@ -36,10 +39,12 @@ export default async function Page(props: {
   const currentPage = Number(searchParams?.page) || 1;
   const printMode = searchParams?.print === 'true';
 
-  const invoiceTotalDetatils: any = await fetchInvoiceTotal(query, startDate, endDate, billType, orderBy);
+  const products = await fetchAllProducts();
 
-  const invoices = await fetchInvoices(query, currentPage, startDate, endDate, billType, orderBy, printMode ? null : undefined);
-  const invoicesCount = await fetchInvoicesCount(query, startDate, endDate, billType, orderBy);
+  const invoiceTotalDetatils: any = await fetchInvoiceTotal(query, startDate, endDate, billType, orderBy, productId);
+
+  const invoices = await fetchInvoices(query, currentPage, startDate, endDate, billType, orderBy, printMode ? null : undefined, productId);
+  const invoicesCount = await fetchInvoicesCount(query, startDate, endDate, billType, orderBy, productId);
   const totalPages = Math.ceil(Number(invoicesCount) / pageLimit); //node query
 
   return (
@@ -86,7 +91,7 @@ export default async function Page(props: {
             <Financialyear
               orderBy={true}
             />
-            <InvoiceFilterModal />
+            <InvoiceFilterModal products={products} />
           </div>
         </div>
         {!printMode && (
@@ -140,6 +145,25 @@ export default async function Page(props: {
               </div>
             </div>
           </div>
+          {productId && (
+            (() => {
+              const selectedProduct = products.find((p: any) => String(p.Id) === String(productId));
+              if (!selectedProduct) return null;
+              return (
+                <div className="flex items-center justify-between px-6 py-4 mt-3 bg-blue-50 border border-blue-200 rounded-lg no-print">
+                  <div className="text-sm font-semibold text-blue-800">
+                    Filtered Product: <span className="font-bold text-blue-900">{selectedProduct.Name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-blue-800">Total Quantity Sold:</span>
+                    <span className="text-lg font-bold text-blue-900 bg-white px-3 py-1 rounded-md border border-blue-200 shadow-sm">
+                      {invoiceTotalDetatils?.TotalProductQuantitySold || 0}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()
+          )}
           <div className="mt-5 flex w-full justify-center no-print">
             <Pagination totalPages={totalPages} />
           </div>

@@ -10,10 +10,11 @@ export const fetchInvoices = async (
     endDate: string,
     billType: string,
     orderBy: string,
-    limit?: number | null
+    limit?: number | null,
+    productId?: string | null
 ) => {
     try {
-        const rows = await getInvoices(query || null, startDate || null, endDate || null, billType || null, orderBy || null, currentPage || 1, limit === undefined ? pageLimit : limit);
+        const rows = await getInvoices(query || null, startDate || null, endDate || null, billType || null, orderBy || null, currentPage || 1, limit === undefined ? pageLimit : limit, productId ? Number(productId) : null);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchInvoices Error:", err);
@@ -26,10 +27,11 @@ export const fetchInvoicesCount = async (
     startDate: string,
     endDate: string,
     billType: string,
-    orderBy: string = ''
+    orderBy: string = '',
+    productId?: string | null
 ) => {
     try {
-        const count = await getInvoicesCount(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        const count = await getInvoicesCount(query || null, startDate || null, endDate || null, billType || null, orderBy || null, productId ? Number(productId) : null);
         return count || 0;
     } catch (err) {
         console.error("fetchInvoicesCount Error:", err);
@@ -58,10 +60,11 @@ export const fetchInvoiceTotal = async (
     startDate: string,
     endDate: string,
     billType: string,
-    orderBy: string = ''
+    orderBy: string = '',
+    productId?: string | null
 ) => {
     try {
-        const totals = await getInvoicesTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        const totals = await getInvoicesTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null, productId ? Number(productId) : null);
         return JSON.parse(JSON.stringify(totals));
     } catch (err) {
         console.error("fetchInvoiceTotal Error:", err);

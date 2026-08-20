@@ -5,7 +5,7 @@ import { getFinancialYears, getFinancialYear } from '@/app/lib/utils';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useLoading } from '@/app/ui/loading-context';
 
-export default function InvoiceFilterModal() {
+export default function InvoiceFilterModal({ products = [] }: { products?: any[] }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -17,6 +17,7 @@ export default function InvoiceFilterModal() {
   const paramEndDate = searchParams.get('endDate');
   const paramBillType = searchParams.get('billType') || '';
   const paramOrderBy = searchParams.get('orderBy') || '';
+  const paramProductId = searchParams.get('productId') || '';
 
   // Calculate current month start and end dates
   const today = new Date();
@@ -42,11 +43,13 @@ export default function InvoiceFilterModal() {
   const [localEndDate, setLocalEndDate] = useState(paramEndDate || defaultEndDate);
   const [localBillType, setLocalBillType] = useState(paramBillType);
   const [localOrderBy, setLocalOrderBy] = useState(paramOrderBy);
+  const [localProductId, setLocalProductId] = useState(paramProductId);
 
   // Sync state if URL changes (e.g. from outer reset or other pagination actions)
   useEffect(() => {
     setLocalBillType(paramBillType);
     setLocalOrderBy(paramOrderBy);
+    setLocalProductId(paramProductId);
     
     if (paramStartDate && paramEndDate) {
       setLocalStartDate(paramStartDate);
@@ -57,7 +60,7 @@ export default function InvoiceFilterModal() {
       setLocalEndDate('');
       setLocalFY('All');
     }
-  }, [paramStartDate, paramEndDate, paramBillType, paramOrderBy]);
+  }, [paramStartDate, paramEndDate, paramBillType, paramOrderBy, paramProductId]);
 
   // Adjust dates when FY selection changes
   const handleFYChange = (value: string) => {
@@ -96,6 +99,12 @@ export default function InvoiceFilterModal() {
       params.delete('orderBy');
     }
 
+    if (localProductId) {
+      params.set('productId', localProductId);
+    } else {
+      params.delete('productId');
+    }
+
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
@@ -108,6 +117,7 @@ export default function InvoiceFilterModal() {
     setLocalEndDate(defaultEndDate);
     setLocalBillType('');
     setLocalOrderBy('');
+    setLocalProductId('');
   };
 
   return (
@@ -122,9 +132,9 @@ export default function InvoiceFilterModal() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
         </svg>
         Filters
-        {(paramStartDate || paramEndDate || paramBillType || paramOrderBy) ? (
+        {(paramStartDate || paramEndDate || paramBillType || paramOrderBy || paramProductId) ? (
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xxs font-bold text-white">
-            {[paramStartDate || paramEndDate, paramBillType, paramOrderBy].filter(Boolean).length}
+            {[paramStartDate || paramEndDate, paramBillType, paramOrderBy, paramProductId].filter(Boolean).length}
           </span>
         ) : null}
       </button>
@@ -207,6 +217,26 @@ export default function InvoiceFilterModal() {
                     className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+
+              {/* Product Select */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="productSelect" className="text-sm font-semibold text-gray-700">
+                  Product
+                </label>
+                <select
+                  id="productSelect"
+                  value={localProductId}
+                  onChange={(e) => setLocalProductId(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">All Products</option>
+                  {products.map((prod: any) => (
+                    <option key={prod.Id} value={prod.Id}>
+                      {prod.Name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Bill Type */}
