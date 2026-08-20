@@ -93,7 +93,7 @@ export default function TableInvoiceDetails({
                 <span className='flex w-full pt-2 text-sm italic font-semibold'>Dot: {invoice?.invoice_details?.reduce((total: number, detail: any) => total + detail.Quantity, 0)}</span>
 
                 {Number(hoverInvoiceId) === Number(invoice.InvoiceId) && (
-                    <div className="absolute mt-2 min-w-[50%] border-2 border-gray-200 rounded-lg bg-white shadow-lg p-3 z-50 overflow-y-auto top-100 left-100">
+                    <div className="absolute mt-2 min-w-[50%] border-2 border-gray-200 rounded-lg bg-white shadow-lg p-3 z-50 overflow-y-auto top-100 left-5">
 
                         <p className="text-center text-lg font-semibold mb-4">Purchase Details</p>
 

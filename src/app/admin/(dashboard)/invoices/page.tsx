@@ -4,9 +4,10 @@ import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices, Exp
 import Table from '@/app/ui/invoices/table';
 import Financialyear from '@/app/lib/financialyear';
 import InvoiceFilterModal from '@/app/ui/invoices/filter-modal';
-import { formatCurrency, pageLimit } from '@/app/lib/utils';
+import { formatCurrency, pageLimit, formatDateNew } from '@/app/lib/utils';
 import { fetchInvoices, fetchInvoicesCount, fetchInvoiceTotal } from '@/app/api/node/invoice';
 import { fetchAllProducts } from '@/app/api/node/product';
+import { fetchCustomers } from '@/app/api/node/customers';
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -18,11 +19,13 @@ export default async function Page(props: {
     orderBy?: string;
     print?: string;
     productId?: string;
+    customerId?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const productId = searchParams?.productId || '';
+  const customerId = searchParams?.customerId || '';
 
   // Default to current month start/end dates if not defined
   const today = new Date();
@@ -40,11 +43,12 @@ export default async function Page(props: {
   const printMode = searchParams?.print === 'true';
 
   const products = await fetchAllProducts();
+  const customers = await fetchCustomers("", 1, "", "", "", null);
 
-  const invoiceTotalDetatils: any = await fetchInvoiceTotal(query, startDate, endDate, billType, orderBy, productId);
+  const invoiceTotalDetatils: any = await fetchInvoiceTotal(query, startDate, endDate, billType, orderBy, productId, customerId);
 
-  const invoices = await fetchInvoices(query, currentPage, startDate, endDate, billType, orderBy, printMode ? null : undefined, productId);
-  const invoicesCount = await fetchInvoicesCount(query, startDate, endDate, billType, orderBy, productId);
+  const invoices = await fetchInvoices(query, currentPage, startDate, endDate, billType, orderBy, printMode ? null : undefined, productId, customerId);
+  const invoicesCount = await fetchInvoicesCount(query, startDate, endDate, billType, orderBy, productId, customerId);
   const totalPages = Math.ceil(Number(invoicesCount) / pageLimit); //node query
 
   return (
@@ -72,9 +76,13 @@ export default async function Page(props: {
           <PrintInvoiceSelector />
         </>
       )}
-      <div className="flex w-full items-center justify-between no-print">
-        {/* ${lusitana.className} */}
-        <h1 className={`text-2xl`}>Invoices ({invoicesCount || 0})</h1>
+      <div className="flex w-full items-end justify-between no-print">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold text-gray-800">Invoices ({invoicesCount || 0})</h1>
+          <p className="text-xs text-gray-500 mt-1 font-semibold bg-gray-100 border border-gray-200 px-2.5 py-0.5 rounded-md w-fit">
+            Fetched Period: {startDate ? formatDateNew(startDate) : 'All'} to {endDate ? formatDateNew(endDate) : 'All'}
+          </p>
+        </div>
       </div>
       {printMode && (
         <div className="hidden print:block mb-6 border-b pb-4">
@@ -91,7 +99,7 @@ export default async function Page(props: {
             <Financialyear
               orderBy={true}
             />
-            <InvoiceFilterModal products={products} />
+            <InvoiceFilterModal products={products} customers={customers} />
           </div>
         </div>
         {!printMode && (
@@ -145,21 +153,33 @@ export default async function Page(props: {
               </div>
             </div>
           </div>
-          {productId && (
+          {(productId || customerId) && (
             (() => {
-              const selectedProduct = products.find((p: any) => String(p.Id) === String(productId));
-              if (!selectedProduct) return null;
+              const selectedProduct = productId ? products.find((p: any) => String(p.Id) === String(productId)) : null;
+              const selectedCustomer = customerId ? customers.find((c: any) => String(c.CustomerId) === String(customerId)) : null;
+              if (!selectedProduct && !selectedCustomer) return null;
               return (
-                <div className="flex items-center justify-between px-6 py-4 mt-3 bg-blue-50 border border-blue-200 rounded-lg no-print">
-                  <div className="text-sm font-semibold text-blue-800">
-                    Filtered Product: <span className="font-bold text-blue-900">{selectedProduct.Name}</span>
+                <div className="flex flex-col gap-2 md:flex-row md:items-center justify-between px-6 py-4 mt-3 bg-blue-50 border border-blue-200 rounded-lg no-print">
+                  <div className="flex flex-col gap-1">
+                    {selectedProduct && (
+                      <div className="text-sm font-semibold text-blue-800">
+                        Filtered Product: <span className="font-bold text-blue-900">{selectedProduct.Name}</span>
+                      </div>
+                    )}
+                    {selectedCustomer && (
+                      <div className="text-sm font-semibold text-blue-800">
+                        Filtered Customer: <span className="font-bold text-blue-900">{selectedCustomer.CustomerName}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-blue-800">Total Quantity Sold:</span>
-                    <span className="text-lg font-bold text-blue-900 bg-white px-3 py-1 rounded-md border border-blue-200 shadow-sm">
-                      {invoiceTotalDetatils?.TotalProductQuantitySold || 0}
-                    </span>
-                  </div>
+                  {selectedProduct && (
+                    <div className="flex items-center gap-2 self-start md:self-auto">
+                      <span className="text-sm font-semibold text-blue-800">Total Quantity Sold:</span>
+                      <span className="text-lg font-bold text-blue-900 bg-white px-3 py-1 rounded-md border border-blue-200 shadow-sm">
+                        {invoiceTotalDetatils?.TotalProductQuantitySold || 0}
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })()
