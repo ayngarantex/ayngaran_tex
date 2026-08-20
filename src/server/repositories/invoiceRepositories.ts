@@ -25,6 +25,13 @@ export const getInvoices = async (
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
         OR I.InvoiceType LIKE '%${search}%'
+        OR I.InvoiceId IN (
+          SELECT ID.InvoiceId 
+          FROM invoice_details ID 
+          LEFT JOIN products P ON ID.ItemId = P.Id 
+          WHERE LOWER(P.Name) LIKE LOWER('%${search}%') 
+             OR LOWER(ID.ProductName) LIKE LOWER('%${search}%')
+        )
       )
     `;
     }
@@ -50,6 +57,8 @@ export const getInvoices = async (
     if (page && limit) {
         query += ` LIMIT ${limit} OFFSET ${(page - 1) * limit}`;
     }
+
+    console.log("query", query)
 
     const [rows]: any = await db.query(query);
     const invoices: any[] = [];
@@ -149,6 +158,13 @@ export const getInvoicesCount = async (
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
         OR I.InvoiceType LIKE '%${search}%'
+        OR I.InvoiceId IN (
+          SELECT ID.InvoiceId 
+          FROM invoice_details ID 
+          LEFT JOIN products P ON ID.ItemId = P.Id 
+          WHERE LOWER(P.Name) LIKE LOWER('%${search}%') 
+             OR LOWER(ID.ProductName) LIKE LOWER('%${search}%')
+        )
       )
     `;
     }
@@ -188,6 +204,13 @@ export const getInvoicesTotal = async (
         OR LOWER(C.CustomerName) LIKE '%${search}%'
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
+        OR I.InvoiceId IN (
+          SELECT ID.InvoiceId 
+          FROM invoice_details ID 
+          LEFT JOIN products P ON ID.ItemId = P.Id 
+          WHERE LOWER(P.Name) LIKE LOWER('%${search}%') 
+             OR LOWER(ID.ProductName) LIKE LOWER('%${search}%')
+        )
       )
     `;
     }
