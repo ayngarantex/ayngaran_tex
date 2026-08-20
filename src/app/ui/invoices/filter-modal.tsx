@@ -18,11 +18,17 @@ export default function InvoiceFilterModal() {
   const paramBillType = searchParams.get('billType') || '';
   const paramOrderBy = searchParams.get('orderBy') || '';
 
-  // Get current financial year as default
+  // Calculate current month start and end dates
   const today = new Date();
-  const currentYear = today.getFullYear();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+  const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
+  const defaultStartDate = formatYYYYMMDD(new Date(year, month, 1));
+  const defaultEndDate = formatYYYYMMDD(new Date(year, month + 1, 0));
+
+  // Get current financial year as default for select dropdowns
   const currentMonth = today.getMonth() + 1;
-  const defaultStartYear = currentMonth < 4 ? currentYear - 1 : currentYear;
+  const defaultStartYear = currentMonth < 4 ? year - 1 : year;
   const defaultEndYear = defaultStartYear + 1;
   const defaultFY = `${defaultStartYear}-${defaultEndYear}`;
 
@@ -32,8 +38,8 @@ export default function InvoiceFilterModal() {
 
   // Local state variables for the modal inputs
   const [localFY, setLocalFY] = useState(initialFY);
-  const [localStartDate, setLocalStartDate] = useState(paramStartDate || `${defaultStartYear}-04-01`);
-  const [localEndDate, setLocalEndDate] = useState(paramEndDate || `${defaultEndYear}-03-31`);
+  const [localStartDate, setLocalStartDate] = useState(paramStartDate || defaultStartDate);
+  const [localEndDate, setLocalEndDate] = useState(paramEndDate || defaultEndDate);
   const [localBillType, setLocalBillType] = useState(paramBillType);
   const [localOrderBy, setLocalOrderBy] = useState(paramOrderBy);
 
@@ -98,8 +104,8 @@ export default function InvoiceFilterModal() {
 
   const handleResetFilters = () => {
     setLocalFY(defaultFY);
-    setLocalStartDate(`${defaultStartYear}-04-01`);
-    setLocalEndDate(`${defaultEndYear}-03-31`);
+    setLocalStartDate(defaultStartDate);
+    setLocalEndDate(defaultEndDate);
     setLocalBillType('');
     setLocalOrderBy('');
   };

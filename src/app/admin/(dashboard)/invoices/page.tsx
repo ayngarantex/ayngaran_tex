@@ -2,6 +2,7 @@ import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
 import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices, ExportGstr1 } from '@/app/ui/invoices/buttons';
 import Table from '@/app/ui/invoices/table';
+import Financialyear from '@/app/lib/financialyear';
 import InvoiceFilterModal from '@/app/ui/invoices/filter-modal';
 import { formatCurrency, pageLimit } from '@/app/lib/utils';
 import { fetchInvoices, fetchInvoicesCount, fetchInvoiceTotal } from '@/app/api/node/invoice';
@@ -20,14 +21,13 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
 
-  // Default to current financial year start/end dates if not defined
+  // Default to current month start/end dates if not defined
   const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
-  const defaultStartYear = currentMonth < 4 ? currentYear - 1 : currentYear;
-  const defaultEndYear = defaultStartYear + 1;
-  const defaultStartDate = `${defaultStartYear}-04-01`;
-  const defaultEndDate = `${defaultEndYear}-03-31`;
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+  const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
+  const defaultStartDate = formatYYYYMMDD(new Date(year, month, 1));
+  const defaultEndDate = formatYYYYMMDD(new Date(year, month + 1, 0));
 
   const startDate = searchParams?.startDate !== undefined ? searchParams.startDate : defaultStartDate;
   const endDate = searchParams?.endDate !== undefined ? searchParams.endDate : defaultEndDate;
@@ -78,9 +78,16 @@ export default async function Page(props: {
         </div>
       )}
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8 no-print">
-        <div className='flex items-center gap-3 no-print'>
-          <Search placeholder="Search invoices..." />
-          <InvoiceFilterModal />
+        <div className='flex w-1/2 items-center gap-2 no-print'>
+          <div className='w-1/4 no-print'>
+            <Search placeholder="Search invoices..." />
+          </div>
+          <div className='w-3/4 pl-2 no-print flex items-center gap-2'>
+            <Financialyear
+              orderBy={true}
+            />
+            <InvoiceFilterModal />
+          </div>
         </div>
         {!printMode && (
           <div className="flex gap-2 text-wrap flex-wrap">
