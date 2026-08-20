@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useMemo } from 'react';
 import { getFinancialYears, getFinancialYear } from '@/app/lib/utils';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useLoading } from '@/app/ui/loading-context';
+import SearchDropdown from '@/app/ui/search-dropdown';
 
 export default function InvoiceFilterModal({ products = [], customers = [] }: { products?: any[], customers?: any[] }) {
   const searchParams = useSearchParams();
@@ -46,6 +47,23 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
   const [localOrderBy, setLocalOrderBy] = useState(paramOrderBy);
   const [localProductId, setLocalProductId] = useState(paramProductId);
   const [localCustomerId, setLocalCustomerId] = useState(paramCustomerId);
+
+  const dropdownProducts = useMemo(() => {
+    return products.map((p: any) => ({
+      id: p.Id,
+      label: p.Name || '',
+    }));
+  }, [products]);
+
+  const dropdownCustomers = useMemo(() => {
+    return customers.map((c: any) => ({
+      id: c.CustomerId,
+      label: c.CustomerName || '',
+    }));
+  }, [customers]);
+
+  const selectedProduct = products.find((p: any) => String(p.Id) === String(localProductId));
+  const selectedCustomer = customers.find((c: any) => String(c.CustomerId) === String(localCustomerId));
 
   // Sync state if URL changes (e.g. from outer reset or other pagination actions)
   useEffect(() => {
@@ -231,42 +249,34 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
 
               {/* Product Select */}
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="productSelect" className="text-sm font-semibold text-gray-700">
+                <label className="text-sm font-semibold text-gray-700">
                   Product
                 </label>
-                <select
-                  id="productSelect"
-                  value={localProductId}
-                  onChange={(e) => setLocalProductId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">All Products</option>
-                  {products.map((prod: any) => (
-                    <option key={prod.Id} value={prod.Id}>
-                      {prod.Name}
-                    </option>
-                  ))}
-                </select>
+                <SearchDropdown
+                  items={dropdownProducts}
+                  onSelect={(item) => setLocalProductId(item ? String(item.id) : '')}
+                  placeholder="Search Product..."
+                  value={selectedProduct ? selectedProduct.Name : ''}
+                  hideLabel={true}
+                  showUserIcon={false}
+                  className="w-full bg-white"
+                />
               </div>
 
               {/* Customer Select */}
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="customerSelect" className="text-sm font-semibold text-gray-700">
+                <label className="text-sm font-semibold text-gray-700">
                   Customer
                 </label>
-                <select
-                  id="customerSelect"
-                  value={localCustomerId}
-                  onChange={(e) => setLocalCustomerId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">All Customers</option>
-                  {customers.map((cust: any) => (
-                    <option key={cust.CustomerId} value={cust.CustomerId}>
-                      {cust.CustomerName}
-                    </option>
-                  ))}
-                </select>
+                <SearchDropdown
+                  items={dropdownCustomers}
+                  onSelect={(item) => setLocalCustomerId(item ? String(item.id) : '')}
+                  placeholder="Search Customer..."
+                  value={selectedCustomer ? selectedCustomer.CustomerName : ''}
+                  hideLabel={true}
+                  showUserIcon={false}
+                  className="w-full bg-white"
+                />
               </div>
 
               {/* Bill Type */}
