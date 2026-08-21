@@ -117,7 +117,7 @@ export default function EditForm({
               Loom
             </label>
             <div className="mt-2 rounded-md flex items-center gap-6">
-              <p className="font-semibold text-lg">{summaryDetails?.LoomName}</p>
+              <p className="font-semibold text-lg whitespace-nowrap">{summaryDetails?.LoomName}</p>
               <label className="inline-flex items-center gap-2 cursor-pointer px-3 py-1.5 hover:bg-slate-50 transition-colors">
                 <input
                   type="checkbox"
@@ -132,7 +132,7 @@ export default function EditForm({
         </div>
 
         <div className="flex gap-6 mt-4">
-          <div className="border rounded-lg mb-4 p-4 w-full bg-white">
+          <div className="border rounded-lg mb-4 p-4 w-1/3 bg-white">
             <h1 className={`text-2xl mb-4`}>Warp Details ({totalWarps})</h1>
             <div
               key={`selP0`}

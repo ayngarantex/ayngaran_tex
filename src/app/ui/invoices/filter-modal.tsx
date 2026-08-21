@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useMemo } from 'react';
 import { getFinancialYears, getFinancialYear } from '@/app/lib/utils';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useLoading } from '@/app/ui/loading-context';
+import SearchDropdown from '@/app/ui/search-dropdown';
 
-export default function InvoiceFilterModal() {
+export default function InvoiceFilterModal({ products = [], customers = [] }: { products?: any[], customers?: any[] }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -17,12 +18,20 @@ export default function InvoiceFilterModal() {
   const paramEndDate = searchParams.get('endDate');
   const paramBillType = searchParams.get('billType') || '';
   const paramOrderBy = searchParams.get('orderBy') || '';
+  const paramProductId = searchParams.get('productId') || '';
+  const paramCustomerId = searchParams.get('customerId') || '';
 
-  // Get current financial year as default
+  // Calculate current month start and end dates
   const today = new Date();
-  const currentYear = today.getFullYear();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+  const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
+  const defaultStartDate = formatYYYYMMDD(new Date(year, month, 1));
+  const defaultEndDate = formatYYYYMMDD(new Date(year, month + 1, 0));
+
+  // Get current financial year as default for select dropdowns
   const currentMonth = today.getMonth() + 1;
-  const defaultStartYear = currentMonth < 4 ? currentYear - 1 : currentYear;
+  const defaultStartYear = currentMonth < 4 ? year - 1 : year;
   const defaultEndYear = defaultStartYear + 1;
   const defaultFY = `${defaultStartYear}-${defaultEndYear}`;
 
@@ -32,15 +41,36 @@ export default function InvoiceFilterModal() {
 
   // Local state variables for the modal inputs
   const [localFY, setLocalFY] = useState(initialFY);
-  const [localStartDate, setLocalStartDate] = useState(paramStartDate || `${defaultStartYear}-04-01`);
-  const [localEndDate, setLocalEndDate] = useState(paramEndDate || `${defaultEndYear}-03-31`);
+  const [localStartDate, setLocalStartDate] = useState(paramStartDate || defaultStartDate);
+  const [localEndDate, setLocalEndDate] = useState(paramEndDate || defaultEndDate);
   const [localBillType, setLocalBillType] = useState(paramBillType);
   const [localOrderBy, setLocalOrderBy] = useState(paramOrderBy);
+  const [localProductId, setLocalProductId] = useState(paramProductId);
+  const [localCustomerId, setLocalCustomerId] = useState(paramCustomerId);
+
+  const dropdownProducts = useMemo(() => {
+    return products.map((p: any) => ({
+      id: p.Id,
+      label: p.Name || '',
+    }));
+  }, [products]);
+
+  const dropdownCustomers = useMemo(() => {
+    return customers.map((c: any) => ({
+      id: c.CustomerId,
+      label: c.CustomerName || '',
+    }));
+  }, [customers]);
+
+  const selectedProduct = products.find((p: any) => String(p.Id) === String(localProductId));
+  const selectedCustomer = customers.find((c: any) => String(c.CustomerId) === String(localCustomerId));
 
   // Sync state if URL changes (e.g. from outer reset or other pagination actions)
   useEffect(() => {
     setLocalBillType(paramBillType);
     setLocalOrderBy(paramOrderBy);
+    setLocalProductId(paramProductId);
+    setLocalCustomerId(paramCustomerId);
     
     if (paramStartDate && paramEndDate) {
       setLocalStartDate(paramStartDate);
@@ -51,7 +81,7 @@ export default function InvoiceFilterModal() {
       setLocalEndDate('');
       setLocalFY('All');
     }
-  }, [paramStartDate, paramEndDate, paramBillType, paramOrderBy]);
+  }, [paramStartDate, paramEndDate, paramBillType, paramOrderBy, paramProductId, paramCustomerId]);
 
   // Adjust dates when FY selection changes
   const handleFYChange = (value: string) => {
@@ -90,6 +120,18 @@ export default function InvoiceFilterModal() {
       params.delete('orderBy');
     }
 
+    if (localProductId) {
+      params.set('productId', localProductId);
+    } else {
+      params.delete('productId');
+    }
+
+    if (localCustomerId) {
+      params.set('customerId', localCustomerId);
+    } else {
+      params.delete('customerId');
+    }
+
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
@@ -98,10 +140,12 @@ export default function InvoiceFilterModal() {
 
   const handleResetFilters = () => {
     setLocalFY(defaultFY);
-    setLocalStartDate(`${defaultStartYear}-04-01`);
-    setLocalEndDate(`${defaultEndYear}-03-31`);
+    setLocalStartDate(defaultStartDate);
+    setLocalEndDate(defaultEndDate);
     setLocalBillType('');
     setLocalOrderBy('');
+    setLocalProductId('');
+    setLocalCustomerId('');
   };
 
   return (
@@ -116,9 +160,9 @@ export default function InvoiceFilterModal() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
         </svg>
         Filters
-        {(paramStartDate || paramEndDate || paramBillType || paramOrderBy) ? (
+        {(paramStartDate || paramEndDate || paramBillType || paramOrderBy || paramProductId || paramCustomerId) ? (
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xxs font-bold text-white">
-            {[paramStartDate || paramEndDate, paramBillType, paramOrderBy].filter(Boolean).length}
+            {[paramStartDate || paramEndDate, paramBillType, paramOrderBy, paramProductId, paramCustomerId].filter(Boolean).length}
           </span>
         ) : null}
       </button>
@@ -201,6 +245,38 @@ export default function InvoiceFilterModal() {
                     className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+
+              {/* Product Select */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">
+                  Product
+                </label>
+                <SearchDropdown
+                  items={dropdownProducts}
+                  onSelect={(item) => setLocalProductId(item ? String(item.id) : '')}
+                  placeholder="Search Product..."
+                  value={selectedProduct ? selectedProduct.Name : ''}
+                  hideLabel={true}
+                  showUserIcon={false}
+                  className="w-full bg-white"
+                />
+              </div>
+
+              {/* Customer Select */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">
+                  Customer
+                </label>
+                <SearchDropdown
+                  items={dropdownCustomers}
+                  onSelect={(item) => setLocalCustomerId(item ? String(item.id) : '')}
+                  placeholder="Search Customer..."
+                  value={selectedCustomer ? selectedCustomer.CustomerName : ''}
+                  hideLabel={true}
+                  showUserIcon={false}
+                  className="w-full bg-white"
+                />
               </div>
 
               {/* Bill Type */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { getFinancialYears, getFinancialYear, loomsList, formatDateNew } from './utils';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useLoading } from '../ui/loading-context';
@@ -21,17 +21,25 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
         ? getFinancialYear(paramStartDate)
         : currentFy;
 
-    const [startYearSplit, endYearSplit] = initialFy.split("-").map(String);
+    const today = new Date();
+    const currYear = today.getFullYear();
+    const currMonth = today.getMonth();
+    const startOfMonth = new Date(currYear, currMonth, 1);
+    const endOfMonth = new Date(currYear, currMonth + 1, 0);
+    const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
+    const defaultStart = formatYYYYMMDD(startOfMonth);
+    const defaultEnd = formatYYYYMMDD(endOfMonth);
 
     const [financialYear, setFinancialYear] = useState<string>(initialFy);
-    const [startDate, setStartDate] = useState<string>(paramStartDate || (initialFy !== "All" ? `${startYearSplit}-04-01` : ""));
-    const [endDate, setEndDate] = useState<string>(paramEndDate || (initialFy !== "All" ? `${endYearSplit}-03-31` : ""));
+    const [startDate, setStartDate] = useState<string>(paramStartDate || defaultStart);
+    const [endDate, setEndDate] = useState<string>(paramEndDate || defaultEnd);
     const [billType, setBillType] = useState<string>(searchParams.get('billType') || "");
     const [orderByColumn, setOrderByColumn] = useState<string>(searchParams.get('orderBy') || "");
     const [loomName, setLoomName] = useState<string>(searchParams.get('loomName') || "");
     const [loomId, setLoomId] = useState<string>(searchParams.get('loomId') || "");
     const [sizingId, setSizingId] = useState<string>(searchParams.get('sizingId') || "");
     const [loomStatus, setLoomStatus] = useState<string>(searchParams.get('loomStatus') || "");
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
         const params = new URLSearchParams(searchParams);
@@ -89,6 +97,10 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
     }, [startDate, endDate, billType, orderByColumn, loomName, loomId, loomStatus, sizingId])
 
     useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
         if (financialYear !== "All") {
             const [start, end] = financialYear.split("-").map(String);
             setStartDate(`${start}-04-01`);

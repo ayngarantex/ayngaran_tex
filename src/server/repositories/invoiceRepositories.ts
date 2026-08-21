@@ -7,7 +7,9 @@ export const getInvoices = async (
     billType: string | null,
     orderBy: string | null,
     page: number | null,
-    limit: number | null
+    limit: number | null,
+    productId: number | null = null,
+    customerId: number | null = null
 ) => {
     let query = `
     SELECT I.*, C.*, C.Mobile AS CustomerMobile
@@ -37,6 +39,14 @@ export const getInvoices = async (
         query += ` AND I.BillType='${billType}' `;
     }
 
+    if (productId) {
+        query += ` AND I.InvoiceId IN (SELECT ID.InvoiceId FROM invoice_details ID WHERE ID.ItemId = ${productId}) `;
+    }
+
+    if (customerId) {
+        query += ` AND I.CustomerId = ${customerId} `;
+    }
+
     if (orderBy === "pending") {
         query += ` ORDER BY 
             CASE WHEN (I.InvoiceAmount - I.ReceivedAmount) > 0 THEN 0 ELSE 1 END,
@@ -51,6 +61,8 @@ export const getInvoices = async (
         query += ` LIMIT ${limit} OFFSET ${(page - 1) * limit}`;
     }
 
+    console.log("query", query)
+
     const [rows]: any = await db.query(query);
     const invoices: any[] = [];
 
@@ -59,7 +71,7 @@ export const getInvoices = async (
             SELECT 
                 ID.*,
                 P.Id AS ProductId,
-                P.Name AS ProductName
+                COALESCE(P.Name, ID.ProductName) AS ProductName
             FROM invoice_details ID
             LEFT JOIN products P ON ID.ItemId = P.Id
             WHERE ID.InvoiceId = ${row.InvoiceId}
@@ -127,12 +139,22 @@ export const getInvoices = async (
     return invoices;
 };
 
+// OR I.InvoiceId IN (
+//           SELECT ID.InvoiceId 
+//           FROM invoice_details ID 
+//           LEFT JOIN products P ON ID.ItemId = P.Id 
+//           WHERE LOWER(P.Name) LIKE LOWER('%${search}%') 
+//              OR LOWER(ID.ProductName) LIKE LOWER('%${search}%')
+//         )
+
 export const getInvoicesCount = async (
     search: string | null,
     startDate: string | null,
     endDate: string | null,
     billType: string | null,
-    orderBy: string | null
+    orderBy: string | null,
+    productId: number | null = null,
+    customerId: number | null = null
 ) => {
     let query = `
     SELECT COUNT(*) AS totalCount
@@ -160,6 +182,15 @@ export const getInvoicesCount = async (
     if (billType) {
         query += ` AND I.BillType='${billType}' `;
     }
+
+    if (productId) {
+        query += ` AND I.InvoiceId IN (SELECT ID.InvoiceId FROM invoice_details ID WHERE ID.ItemId = ${productId}) `;
+    }
+
+    if (customerId) {
+        query += ` AND I.CustomerId = ${customerId} `;
+    }
+
     const [rows]: any = await db.query(query);
     return rows[0].totalCount;
 };
@@ -169,13 +200,49 @@ export const getInvoicesTotal = async (
     startDate: string | null,
     endDate: string | null,
     billType: string | null,
-    orderBy: string | null
+    orderBy: string | null,
+    productId: number | null = null,
+    customerId: number | null = null
 ) => {
     let query = `
     SELECT SUM(I.InvoiceAmount) AS TotalInvoiceAmount,
            SUM(I.ReceivedAmount) AS TotalReceivedAmount,
            SUM(I.InvoiceAmount - I.ReceivedAmount) AS TotalBalanceAmount,
            SUM(CASE WHEN I.IsCancel = 1 THEN I.InvoiceAmount ELSE 0 END) AS TotalCancelledAmount
+  `;
+
+    if (productId) {
+        query += `, (
+            SELECT COALESCE(SUM(ID.Quantity), 0)
+            FROM invoice_details ID
+            JOIN invoice Inv ON ID.InvoiceId = Inv.InvoiceId
+            LEFT JOIN customers Cust ON Inv.CustomerId = Cust.CustomerId
+            WHERE ID.ItemId = ${productId}
+              AND (Inv.IsCancel = 0 OR Inv.IsCancel IS NULL)
+        `;
+        if (startDate && endDate) {
+            query += ` AND DATE(Inv.InvoiceDate) BETWEEN '${startDate}' AND '${endDate}' `;
+        }
+        if (billType) {
+            query += ` AND Inv.BillType = '${billType}' `;
+        }
+        if (customerId) {
+            query += ` AND Inv.CustomerId = ${customerId} `;
+        }
+        if (search) {
+            query += `
+              AND (
+                Inv.InvoiceNumber LIKE '%${search}%'
+                OR LOWER(Cust.CustomerName) LIKE '%${search}%'
+                OR LOWER(Cust.GstNumber) LIKE '%${search}%'
+                OR Inv.InvoiceDate LIKE '%${search}%'
+              )
+            `;
+        }
+        query += `) AS TotalProductQuantitySold `;
+    }
+
+    query += `
     FROM invoice I
     LEFT JOIN customers C ON I.CustomerId = C.CustomerId
     WHERE 1=1
@@ -187,7 +254,7 @@ export const getInvoicesTotal = async (
         I.InvoiceNumber LIKE '%${search}%'
         OR LOWER(C.CustomerName) LIKE '%${search}%'
         OR LOWER(C.GstNumber) LIKE '%${search}%'
-        OR I.InvoiceDate LIKE'%${search}%'
+        OR I.InvoiceDate LIKE'%${search}%'        
       )
     `;
     }
@@ -199,6 +266,15 @@ export const getInvoicesTotal = async (
     if (billType) {
         query += ` AND I.BillType='${billType}' `;
     }
+
+    if (productId) {
+        query += ` AND I.InvoiceId IN (SELECT ID.InvoiceId FROM invoice_details ID WHERE ID.ItemId = ${productId}) `;
+    }
+
+    if (customerId) {
+        query += ` AND I.CustomerId = ${customerId} `;
+    }
+
     const [rows]: any = await db.query(query);
     return rows[0];
 };
