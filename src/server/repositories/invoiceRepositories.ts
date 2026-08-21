@@ -51,8 +51,6 @@ export const getInvoices = async (
         query += ` LIMIT ${limit} OFFSET ${(page - 1) * limit}`;
     }
 
-    console.log(query)
-
     const [rows]: any = await db.query(query);
     const invoices: any[] = [];
 

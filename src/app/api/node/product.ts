@@ -90,3 +90,13 @@ export const deleteProduct = async (
     const res = await deleteProductRepo(Id);
     return JSON.parse(JSON.stringify(res));
 };
+
+export const fetchAllProducts = async () => {
+    try {
+        const rows = await getProducts(null, null, null);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchAllProducts Error:", err);
+        return [];
+    }
+};

@@ -8,6 +8,7 @@ import FinancialyearNew from '@/app/lib/financialyearNew';
 import SearchNew from '../search-new';
 import { formatCurrency } from '@/app/lib/utils';
 import PaginationNew from '@/app/lib/paginationNew';
+import { getCashInHand, saveCashInHand } from '@/app/api/node/dashboard';
 
 export default function ExpensesContainer() {
   const fetchExpensesQuery = async (query: string, startDate: string, endDate: string, page: number) => {
@@ -75,13 +76,10 @@ export default function ExpensesContainer() {
   const [denom20, setDenom20] = useState(0);
   const [denom10, setDenom10] = useState(0);
 
-  // load from localStorage on mount
-  useEffect(() => {
-    setHasMounted(true);
+  const fetchDBCash = async () => {
     try {
-      const stored = localStorage.getItem('ayngaran_cash_in_hand');
-      if (stored) {
-        const parsed = JSON.parse(stored);
+      const parsed = await getCashInHand();
+      if (parsed) {
         setIndusind(Number(parsed.indusind) || 0);
         setHdfc(Number(parsed.hdfc) || 0);
         setCanarabank(Number(parsed.canarabank) || 0);
@@ -96,8 +94,14 @@ export default function ExpensesContainer() {
         setDenom10(Number(parsed.denom10) || 0);
       }
     } catch (e) {
-      console.error("Error reading localStorage:", e);
+      console.error("Error reading database cash:", e);
     }
+  };
+
+  // load from database on mount
+  useEffect(() => {
+    setHasMounted(true);
+    fetchDBCash();
   }, []);
 
   // refetch whenever filters/page change
@@ -109,7 +113,7 @@ export default function ExpensesContainer() {
   const bankTotal = indusind + hdfc + canarabank + check + govinth
   const totalCashInHand = cashDenomTotal + bankTotal;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const dataToStore = {
       indusind,
       hdfc,
@@ -123,7 +127,7 @@ export default function ExpensesContainer() {
       denom20,
       denom10
     };
-    localStorage.setItem('ayngaran_cash_in_hand', JSON.stringify(dataToStore));
+    await saveCashInHand(dataToStore);
     setIsCalculatorOpen(false);
   };
 
@@ -164,7 +168,10 @@ export default function ExpensesContainer() {
               </h2>
             </div>
             <button
-              onClick={() => setIsCalculatorOpen(true)}
+              onClick={() => {
+                fetchDBCash();
+                setIsCalculatorOpen(true);
+              }}
               className="bg-white/20 hover:bg-white/35 text-white rounded-lg px-2 py-1 text-xs font-bold transition-all flex items-center gap-1 border border-white/10 shadow-sm cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
