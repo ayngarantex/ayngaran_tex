@@ -27,16 +27,8 @@ export default async function Page(props: {
   const productId = searchParams?.productId || '';
   const customerId = searchParams?.customerId || '';
 
-  // Default to current month start/end dates if not defined
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth(); // 0-indexed
-  const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
-  const defaultStartDate = formatYYYYMMDD(new Date(year, month, 1));
-  const defaultEndDate = formatYYYYMMDD(new Date(year, month + 1, 0));
-
-  const startDate = searchParams?.startDate !== undefined ? searchParams.startDate : defaultStartDate;
-  const endDate = searchParams?.endDate !== undefined ? searchParams.endDate : defaultEndDate;
+  const startDate = searchParams?.startDate !== undefined ? searchParams.startDate : "";
+  const endDate = searchParams?.endDate !== undefined ? searchParams.endDate : "";
   const billType = searchParams?.billType || '';
   const orderBy = searchParams?.orderBy || '';
   const currentPage = Number(searchParams?.page) || 1;

@@ -25,11 +25,12 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth(); // 0-indexed
-  const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
-  const defaultStartDate = formatYYYYMMDD(new Date(year, month, 1));
-  const defaultEndDate = formatYYYYMMDD(new Date(year, month + 1, 0));
-
-  // Get current financial year as default for select dropdowns
+  const formatYYYYMMDD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
   const currentMonth = today.getMonth() + 1;
   const defaultStartYear = currentMonth < 4 ? year - 1 : year;
   const defaultEndYear = defaultStartYear + 1;
@@ -39,6 +40,66 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
     ? getFinancialYear(paramStartDate)
     : defaultFY;
 
+  const defaultStartDate = `${defaultStartYear}-04-01`;
+  const defaultEndDate = `${defaultEndYear}-03-31`;
+
+  const getPeriodDates = (period: string) => {
+    switch (period) {
+      case 'current-month':
+        return {
+          start: formatYYYYMMDD(new Date(year, month, 1)),
+          end: formatYYYYMMDD(new Date(year, month + 1, 0)),
+        };
+      case 'last-month':
+        return {
+          start: formatYYYYMMDD(new Date(year, month - 1, 1)),
+          end: formatYYYYMMDD(new Date(year, month, 0)),
+        };
+      case 'last-3-months':
+        return {
+          start: formatYYYYMMDD(new Date(year, month - 2, 1)),
+          end: formatYYYYMMDD(new Date(year, month + 1, 0)),
+        };
+      case 'last-6-months':
+        return {
+          start: formatYYYYMMDD(new Date(year, month - 5, 1)),
+          end: formatYYYYMMDD(new Date(year, month + 1, 0)),
+        };
+      case 'current-fy':
+        return {
+          start: `${defaultStartYear}-04-01`,
+          end: `${defaultEndYear}-03-31`,
+        };
+      default:
+        return null;
+    }
+  };
+
+  const getPeriodFromDates = (start: string | null, end: string | null) => {
+    if (!start || !end) return 'custom';
+
+    const datesCurrentMonth = getPeriodDates('current-month');
+    if (datesCurrentMonth?.start === start && datesCurrentMonth?.end === end) return 'current-month';
+
+    const datesLastMonth = getPeriodDates('last-month');
+    if (datesLastMonth?.start === start && datesLastMonth?.end === end) return 'last-month';
+
+    const dates3Months = getPeriodDates('last-3-months');
+    if (dates3Months?.start === start && dates3Months?.end === end) return 'last-3-months';
+
+    const dates6Months = getPeriodDates('last-6-months');
+    if (dates6Months?.start === start && dates6Months?.end === end) return 'last-6-months';
+
+    const datesCurrentFY = getPeriodDates('current-fy');
+    if (datesCurrentFY?.start === start && datesCurrentFY?.end === end) return 'current-fy';
+
+    return 'custom';
+  };
+
+  const initialPeriod = paramStartDate && paramEndDate
+    ? getPeriodFromDates(paramStartDate, paramEndDate)
+    : 'current-fy';
+
   // Local state variables for the modal inputs
   const [localFY, setLocalFY] = useState(initialFY);
   const [localStartDate, setLocalStartDate] = useState(paramStartDate || defaultStartDate);
@@ -47,6 +108,7 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
   const [localOrderBy, setLocalOrderBy] = useState(paramOrderBy);
   const [localProductId, setLocalProductId] = useState(paramProductId);
   const [localCustomerId, setLocalCustomerId] = useState(paramCustomerId);
+  const [localQuickPeriod, setLocalQuickPeriod] = useState(initialPeriod);
 
   const dropdownProducts = useMemo(() => {
     return products.map((p: any) => ({
@@ -71,21 +133,44 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
     setLocalOrderBy(paramOrderBy);
     setLocalProductId(paramProductId);
     setLocalCustomerId(paramCustomerId);
-    
+
     if (paramStartDate && paramEndDate) {
       setLocalStartDate(paramStartDate);
       setLocalEndDate(paramEndDate);
       setLocalFY(getFinancialYear(paramStartDate));
+      setLocalQuickPeriod(getPeriodFromDates(paramStartDate, paramEndDate));
     } else if (paramStartDate === '' || paramEndDate === '') {
       setLocalStartDate('');
       setLocalEndDate('');
       setLocalFY('All');
+      setLocalQuickPeriod('custom');
+    } else {
+      // Default to current financial year if no dates in URL
+      setLocalStartDate(defaultStartDate);
+      setLocalEndDate(defaultEndDate);
+      setLocalFY(defaultFY);
+      setLocalQuickPeriod('current-fy');
     }
   }, [paramStartDate, paramEndDate, paramBillType, paramOrderBy, paramProductId, paramCustomerId]);
+
+  const handleQuickPeriodChange = (value: string) => {
+    setLocalQuickPeriod(value);
+    const dates = getPeriodDates(value);
+    if (dates) {
+      setLocalStartDate(dates.start);
+      setLocalEndDate(dates.end);
+      if (value === 'current-fy') {
+        setLocalFY(defaultFY);
+      } else {
+        setLocalFY('');
+      }
+    }
+  };
 
   // Adjust dates when FY selection changes
   const handleFYChange = (value: string) => {
     setLocalFY(value);
+    setLocalQuickPeriod('custom');
     if (value === 'All') {
       setLocalStartDate('');
       setLocalEndDate('');
@@ -146,6 +231,7 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
     setLocalOrderBy('');
     setLocalProductId('');
     setLocalCustomerId('');
+    setLocalQuickPeriod('current-fy');
   };
 
   return (
@@ -192,6 +278,26 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
 
             {/* Content */}
             <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+              {/* Quick Period Select */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="quickPeriod" className="text-sm font-semibold text-gray-700">
+                  Quick Period
+                </label>
+                <select
+                  id="quickPeriod"
+                  value={localQuickPeriod}
+                  onChange={(e) => handleQuickPeriodChange(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="custom">Custom Date Range</option>
+                  <option value="current-month">Current Month</option>
+                  <option value="last-month">Last Month</option>
+                  <option value="last-3-months">Last 3 Months</option>
+                  <option value="last-6-months">Last 6 Months</option>
+                  <option value="current-fy">Current Financial Year</option>
+                </select>
+              </div>
+
               {/* Financial Year */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="financialYear" className="text-sm font-semibold text-gray-700">
@@ -226,6 +332,7 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
                     onChange={(e) => {
                       setLocalStartDate(e.target.value);
                       setLocalFY(''); // custom user override
+                      setLocalQuickPeriod('custom');
                     }}
                     className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
@@ -241,6 +348,7 @@ export default function InvoiceFilterModal({ products = [], customers = [] }: { 
                     onChange={(e) => {
                       setLocalEndDate(e.target.value);
                       setLocalFY(''); // custom user override
+                      setLocalQuickPeriod('custom');
                     }}
                     className="w-full rounded-lg border border-gray-300 p-2.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
