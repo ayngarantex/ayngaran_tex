@@ -30,7 +30,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
           </div>
         </>
       )}
-      <div className={`transition-opacity duration-300 ${isPending ? 'opacity-65 pointer-events-none' : 'opacity-100'}`}>
+      <div>
         {children}
       </div>
     </LoadingContext.Provider>

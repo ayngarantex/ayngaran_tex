@@ -30,7 +30,7 @@ export default function PrintScreenInvoiceDetails({
                 : null}
             <div className='border pt-3 m-1'>
                 <div className="flex justify-between items-start w-full">
-                    <div className="w-full">
+                    <div className="w-full border-0">
                         <div className='flex justify-between px-4 '>
                             <h1 className="text-xl font-bold">GSTIN: 33AYWPV5842M1ZD</h1>
                             {/* <p className="self-center flex">({type})</p> */}
@@ -67,7 +67,7 @@ export default function PrintScreenInvoiceDetails({
                 <p className='py-1 bg-blue-200 flex justify-center text-xl border-t mt-2'>
                     {invoice?.BillType === 'gst' ? 'Tax Invoice' : 'Delivery Chalan | Not for Sale'}
                 </p>
-                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 border-t'>
+                <div className='flex flex-wrap border-t'>
                     <div className='px-4 py-4 w-2/5 border-r'>
                         <p className="text-base mb-2 self-start w-full flex">
                             <span className='w-32'>Invoice No # </span>

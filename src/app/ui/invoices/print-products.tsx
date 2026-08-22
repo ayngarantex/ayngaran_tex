@@ -26,7 +26,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
   return (
     <div className="">
       <div className="">
-        <table className="pt-4 w-full border-t">
+        <table className="pt-4 w-full border-t table-fixed">
           <thead>
             <tr className="bg-blue-100">
               <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "60px" }}>S No.</th>
@@ -36,7 +36,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
                 : null}
               <th className="text-sm border-b border-x px-2 py-1 text-center" style={{ width: "90px" }}>Qty</th>
               <th className="text-sm border-b border-r px-2 py-1 text-center" style={{ width: "90px" }}>Price</th>
-              <th className="text-sm border-b border-r px-2 py-1 text-right" style={{ width: "120px" }}>Amount</th>
+              <th className={`text-sm border-b px-2 py-1 text-right`} style={{ width: "120px" }}>Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -114,38 +114,38 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
             {invoice?.BillType === 'gst' ?
               <>
                 <div className="pl-2 align-top justify-end w-full flex">
-                  <span className='text-sm py-1 text-sm text-left pl-4 border-l py-1' style={{ width: "181px" }}>Total Amount Before Tax</span>
+                  <span className='text-sm py-1 text-sm text-left pl-4 border-l py-1' style={{ width: "180px" }}>Total Amount Before Tax</span>
                   <span className="pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.BeforeTax ? (invoice?.BeforeTax).toFixed(2) : 0}</span>
                 </div>
                 {customer?.State === 'TamilNadu' ?
                   <>
                     <div className="border-0 pl-2 align-top justify-end w-full flex">
-                      <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "181px" }}>CGST <span className="pl-2">(2.5%)</span></span>
+                      <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>CGST <span className="pl-2">(2.5%)</span></span>
                       <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{customer?.State === 'TamilNadu' ? (invoice?.Cgst ? (invoice?.Cgst).toFixed(2) : '') : null}</span>
                     </div>
                     <div className="border-0 pl-2 align-top justify-end w-full flex">
-                      <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "181px" }}>SGST <span className="pl-2">(2.5%)</span></span>
+                      <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>SGST <span className="pl-2">(2.5%)</span></span>
                       <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{customer?.State === 'TamilNadu' ? (invoice?.Sgst ? (invoice?.Sgst).toFixed(2) : '') : null}</span>
                     </div>
                   </>
                   :
                   <div className="border-0 pl-2 align-top justify-end w-full flex">
-                    <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "181px" }}>IGST <span className="pl-2">(5%) </span></span>
+                    <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>IGST <span className="pl-2">(5%) </span></span>
                     <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{customer?.State !== 'TamilNadu' ? (invoice?.Igst).toFixed(2) : null}</span>
                   </div>
                 }
                 <div className="border-0 pl-2 align-top justify-end w-full flex">
-                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "181px" }}>Round Off (-/+)</span>
+                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>Round Off (-/+)</span>
                   <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.RoundOff ? (invoice?.RoundOff) : ""}</span>
                 </div>
                 <div className="border-0 pl-2 align-top justify-end w-full flex">
-                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "181px" }}>Discount (-/+)</span>
+                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>Discount (-/+)</span>
                   <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.Discount ? (invoice?.Discount) : ""}</span>
                 </div>
               </>
               : null}
             <div className="border-0 pl-2 align-top justify-end w-full flex">
-              <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "181px" }}> {invoice?.BillType === 'gst' ? 'Total Amount After Tax' : 'Total Amount'}</span>
+              <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}> {invoice?.BillType === 'gst' ? 'Total Amount After Tax' : 'Total Amount'}</span>
               <span className="pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.InvoiceAmount ? formatCurrency(invoice?.InvoiceAmount) : ""}</span>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
               <span className="text-sm pl-2">All Payment should be made by A/c Payess Cheque/Draft/RTGS</span>
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-end border-l py-2" style={{ width: "200px" }}>
+          <div className="flex flex-wrap justify-end border-l py-2" style={{ width: "210px" }}>
             <p className="w-full self-start text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
             <p className="w-full self-end text-center font-semibold text-sm">Authorized Signatory</p>
           </div>
