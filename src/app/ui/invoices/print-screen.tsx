@@ -75,7 +75,7 @@ export default function PrintScreen({
                 />
                 <label
                     htmlFor="pending"
-                    className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600 pt-1"
+                    className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600 pt-1 ml-2 pb-1"
                 >
                     Original for Recipent
                 </label>
@@ -92,7 +92,7 @@ export default function PrintScreen({
                 />
                 <label
                     htmlFor="pending"
-                    className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600 pt-1"
+                    className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600 pt-1 ml-2 mb-1"
                 >
                     Duplicate for Supplier / Transporter
                 </label>

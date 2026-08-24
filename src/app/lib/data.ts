@@ -40,8 +40,8 @@ export const fetchYarnsDetails = nodeYarns.fetchYarnsDetails;
 export const fetchSuppliers = nodeSuppliers.fetchSuppliers;
 export const fetchSupplierPages = async (...args: any[]) => 1;
 export const fetchSupplierById = nodeSuppliers.fetchSupplierById;
-export const fetchYarnBySupplierId = async (...args: any[]) => [];
-export const fetchPaymentBySupplierId = async (...args: any[]) => [];
+export const fetchYarnBySupplierId = nodeSuppliers.fetchYarnBySupplierId;
+export const fetchPaymentBySupplierId = nodeSuppliers.fetchPaymentBySupplierId;
 
 export const fetchSizing = nodeSizing.fetchSizing;
 export const fetchSizingPages = nodeSizing.fetchSizingPages;

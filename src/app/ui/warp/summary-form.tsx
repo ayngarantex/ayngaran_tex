@@ -138,8 +138,17 @@ export default function EditForm({
               key={`selP0`}
               className="flex gap-3 items-center mb-2 w-full"
             >
-              <p className='font-semibold text-lg w-1/2'>Meter <span className='text-blue-600 font-medium'>({(totalMeters || 0).toFixed(2)})</span></p>
-              <p className='font-semibold text-lg w-1/2'>Weight <span className='text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
+              <div className='flex flex-col w-1/2'>
+                <p className='font-semibold text-lg w-full'>
+                  Meter
+                  <span className='ml-2 text-blue-600 font-medium mr-1'>({(totalMeters || 0).toFixed(2)})</span>
+                </p>
+                <p className='font-semibold text-lg w-full my-2'>
+                  Dhoties
+                  <span className='ml-2 text-blue-600 font-medium'>({(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((totalMeters || 0) / 1.89) : Math.floor((totalMeters || 0) / 1.93)})</span>
+                </p>
+              </div>
+              <p className='font-semibold text-lg w-1/2'>Weight <span className='ml-2 text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
             </div>
             {summaryDetails?.warp_detail?.length ?
               summaryDetails?.warp_detail.map((row: any, rowIndex: number) => (
@@ -177,6 +186,7 @@ export default function EditForm({
           </div>
 
           <PieceReceivedDetails
+            summaryDetails={summaryDetails}
             summaryProducts={summaryProducts}
             setSummaryProducts={setSummaryProducts}
           />
@@ -196,11 +206,12 @@ export default function EditForm({
 }
 
 interface PieceReceivedProps {
+  summaryDetails: any;
   summaryProducts: any[];
   setSummaryProducts: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-function PieceReceivedDetails({ summaryProducts, setSummaryProducts }: PieceReceivedProps) {
+function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProducts }: PieceReceivedProps) {
   const handleChange = (
     index: number,
     field: string,
@@ -347,6 +358,9 @@ function PieceReceivedDetails({ summaryProducts, setSummaryProducts }: PieceRece
         </div>
         <div className="mt-2 font-bold text-sm pr-8">
           Dhoties: {totalDhoties || 0}
+        </div>
+        <div className="mt-2 font-bold text-sm pr-8">
+          Meter {totalDhoties && ((summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? ((totalDhoties || 0) * 1.89) : ((totalDhoties || 0) * 1.93))}
         </div>
         <div className="mt-2 font-bold text-sm">
           Weight: {(totalWeight || 0).toFixed(2)}

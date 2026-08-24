@@ -9,11 +9,20 @@ export const getSuppliers = async (
 ) => {
     let sql = `
         SELECT S.*, S.Address AS Adress,
-               COALESCE((
-                   SELECT SUM(COALESCE(Y.InvoiceAmount, 0) - COALESCE(Y.PaidAmount, 0))
-                   FROM yarns Y
-                   WHERE Y.SupplierId = S.SupplierId
-               ), 0) AS pendingAmount
+               CASE 
+                   WHEN S.Type = 'Sizing' THEN
+                       COALESCE((
+                           SELECT SUM(COALESCE(Siz.InvoiceAmount, 0) - COALESCE(Siz.ReceivedAmount, 0))
+                           FROM sizing Siz
+                           WHERE Siz.SupplierId = S.SupplierId
+                       ), 0)
+                   ELSE
+                       COALESCE((
+                           SELECT SUM(COALESCE(Y.InvoiceAmount, 0) - COALESCE(Y.PaidAmount, 0))
+                           FROM yarns Y
+                           WHERE Y.SupplierId = S.SupplierId
+                       ), 0)
+               END AS pendingAmount
         FROM suppliers S
         WHERE 1=1
     `;
@@ -131,5 +140,99 @@ export const deleteSupplier = async (id: number) => {
     const sql = "DELETE FROM suppliers WHERE SupplierId = ?";
     const [result]: any = await db.query(sql, [id]);
     return result;
+};
+
+export const getYarnBySupplierId = async (
+    supplierId: number,
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = "SELECT * FROM yarns WHERE SupplierId = ?";
+    const params: any[] = [supplierId];
+    if (startDate && endDate) {
+        sql += " AND DATE(InvoiceDate) BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+    if (billType) {
+        sql += " AND BillType = ?";
+        params.push(billType);
+    }
+    sql += " ORDER BY InvoiceDate ASC, YarnId ASC";
+    const [rows]: any = await db.query(sql, params);
+    return rows;
+};
+
+export const getYarnPaymentsBySupplierId = async (
+    supplierId: number,
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = `
+        SELECT YPD.*, Y.InvoiceNumber, Y.BillType
+        FROM yarn_payment_details YPD
+        JOIN yarns Y ON YPD.YarnId = Y.YarnId
+        WHERE Y.SupplierId = ?
+    `;
+    const params: any[] = [supplierId];
+    if (startDate && endDate) {
+        sql += " AND DATE(Y.InvoiceDate) BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+    if (billType) {
+        sql += " AND Y.BillType = ?";
+        params.push(billType);
+    }
+    sql += " ORDER BY YPD.Date ASC";
+    const [rows]: any = await db.query(sql, params);
+    return rows;
+};
+
+export const getSizingBySupplierId = async (
+    supplierId: number,
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = "SELECT * FROM sizing WHERE SupplierId = ?";
+    const params: any[] = [supplierId];
+    if (startDate && endDate) {
+        sql += " AND DATE(InvoiceDate) BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+    if (billType) {
+        sql += " AND BillType = ?";
+        params.push(billType);
+    }
+    sql += " ORDER BY InvoiceDate ASC, SizingId ASC";
+    const [rows]: any = await db.query(sql, params);
+    return rows;
+};
+
+export const getSizingPaymentsBySupplierId = async (
+    supplierId: number,
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = `
+        SELECT SPD.*, S.InvoiceNumber, S.BillType
+        FROM sizing_payment_details SPD
+        JOIN sizing S ON SPD.SizingId = S.SizingId
+        WHERE S.SupplierId = ?
+    `;
+    const params: any[] = [supplierId];
+    if (startDate && endDate) {
+        sql += " AND DATE(S.InvoiceDate) BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+    if (billType) {
+        sql += " AND S.BillType = ?";
+        params.push(billType);
+    }
+    sql += " ORDER BY SPD.Date ASC";
+    const [rows]: any = await db.query(sql, params);
+    return rows;
 };
 

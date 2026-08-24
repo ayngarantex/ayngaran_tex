@@ -110,7 +110,7 @@ export default function ProductForm({ invProducts, setInvProducts, edit = false 
             />
 
             {/* Price */}
-            <div className="w-50">
+            <div className="w-50 mt-3">
               <SearchDropdown
                 items={dropdownItems}
                 onSelect={(item) => {

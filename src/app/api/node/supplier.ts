@@ -1,7 +1,18 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getSuppliers, getSupplierCount, getSupplierById, createSupplier as createSupplierRepo, updateSupplier as updateSupplierRepo, deleteSupplier as deleteSupplierRepo } from "@/server/repositories/supplierRepositories";
+import {
+    getSuppliers,
+    getSupplierCount,
+    getSupplierById,
+    createSupplier as createSupplierRepo,
+    updateSupplier as updateSupplierRepo,
+    deleteSupplier as deleteSupplierRepo,
+    getYarnBySupplierId as getYarnBySupplierIdRepo,
+    getYarnPaymentsBySupplierId as getYarnPaymentsBySupplierIdRepo,
+    getSizingBySupplierId as getSizingBySupplierIdRepo,
+    getSizingPaymentsBySupplierId as getSizingPaymentsBySupplierIdRepo
+} from "@/server/repositories/supplierRepositories";
 
 export const fetchSuppliers = async (
     query: string,
@@ -65,4 +76,53 @@ export const updateSupplier = async (supplierData: any) => {
 export const deleteSupplier = async (id: number) => {
     const res = await deleteSupplierRepo(id);
     return JSON.parse(JSON.stringify(res));
+};
+
+export const fetchYarnBySupplierId = async (
+    supplierId: number,
+    startDate: string,
+    endDate: string,
+    billType: string
+) => {
+    try {
+        const supplier = await getSupplierById(supplierId);
+        if (!supplier) return [];
+        if (supplier.Type === 'Sizing') {
+            const rows = await getSizingBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
+            const mapped = rows.map((r: any) => ({
+                ...r,
+                YarnId: r.SizingId,
+                PaidAmount: r.ReceivedAmount || 0
+            }));
+            return JSON.parse(JSON.stringify(mapped));
+        } else {
+            const rows = await getYarnBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
+            return JSON.parse(JSON.stringify(rows));
+        }
+    } catch (err) {
+        console.error("fetchYarnBySupplierId Error:", err);
+        return [];
+    }
+};
+
+export const fetchPaymentBySupplierId = async (
+    supplierId: number,
+    startDate: string,
+    endDate: string,
+    billType: string
+) => {
+    try {
+        const supplier = await getSupplierById(supplierId);
+        if (!supplier) return [];
+        if (supplier.Type === 'Sizing') {
+            const rows = await getSizingPaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
+            return JSON.parse(JSON.stringify(rows));
+        } else {
+            const rows = await getYarnPaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
+            return JSON.parse(JSON.stringify(rows));
+        }
+    } catch (err) {
+        console.error("fetchPaymentBySupplierId Error:", err);
+        return [];
+    }
 };

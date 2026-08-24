@@ -1,18 +1,16 @@
 'use client'
 import { useRef, useState } from 'react';
-import { formatCurrency, formatDate, formatDateNew, getFinancialYearShortNew } from '@/app/lib/utils';
-import InvoiceStatus from '@/app/ui/invoices/status';
+import { formatCurrency, formatDate, formatDateNew } from '@/app/lib/utils';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 
-export default function LedgerInvoicePayment({ customer, invoices, payments, startDate, endDate }: { customer: any, invoices: any[], payments: any[], startDate: string, endDate: string }) {
+export default function SupplierLedgerInvoicePayment({ supplier, invoices, payments, startDate, endDate }: { supplier: any, invoices: any[], payments: any[], startDate: string, endDate: string }) {
     const [printOption, setPrintOption] = useState(false);
-    const [hoverInvoiceId, setHoverInvoiceId] = useState<number | null>(null);
-    const [invoiceDetails, setInvoiceDetails] = useState<any[]>([]);
     const [filterType, setFilterType] = useState<'all' | 'debit' | 'credit'>('all');
 
     const printRef = useRef<HTMLDivElement>(null);
-    const cusData = Array.isArray(customer) ? customer[0] : customer;
+    const supData = Array.isArray(supplier) ? supplier[0] : supplier;
+    const isSizing = supData?.Type === 'Sizing';
 
     const handlePrint = () => {
         if (!printRef.current) return;
@@ -25,22 +23,9 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
         window.location.reload();
     };
 
-    const handleMouseEnter = (InvoiceId: number, invoiceDetails: any) => {
-        setHoverInvoiceId(InvoiceId);
-        setInvoiceDetails(invoiceDetails);
-    };
-
-    const handleMouseLeave = () => {
-        setHoverInvoiceId(null);
-        setInvoiceDetails([]);
-    };
-
     // Calculate totals
-    const totalPurchased = invoices
-        .filter((inv) => inv.InvoiceType !== 'Credit Note')
-        .reduce((sum, item) => sum + (item?.InvoiceAmount || 0), 0);
-
-    const totalPaid = payments.reduce((sum, item) => sum + item.TotalPaid, 0);
+    const totalPurchased = invoices.reduce((sum, item) => sum + (item?.InvoiceAmount || 0), 0);
+    const totalPaid = payments.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
 
     // Merge and chronologically sort invoices and payments
     const combinedItems = [
@@ -48,19 +33,19 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
             date: new Date(inv.InvoiceDate),
             dateStr: inv.InvoiceDate,
             type: 'Invoice',
-            refId: `invoice_${inv.InvoiceId}`,
+            refId: `invoice_${isSizing ? inv.SizingId : inv.YarnId}`,
             data: inv,
-            debit: inv.InvoiceType === 'Credit Note' ? 0 : inv.InvoiceAmount,
-            credit: inv.InvoiceType === 'Credit Note' ? inv.InvoiceAmount : 0,
+            debit: inv.InvoiceAmount || 0,
+            credit: 0,
         })),
-        ...payments.map((pay) => ({
+        ...payments.map((pay, idx) => ({
             date: new Date(pay.Date),
             dateStr: pay.Date,
             type: 'Payment',
-            refId: `payment_${pay.Date}_${pay.BillType}`,
+            refId: `payment_${pay.Date}_${idx}`,
             data: pay,
             debit: 0,
-            credit: pay.TotalPaid,
+            credit: Number(pay.Amount || 0),
         }))
     ];
 
@@ -77,10 +62,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
     let runningBalance = 0;
     const ledgerRows = combinedItems.map((item) => {
         if (item.type === 'Invoice') {
-            const isCreditNote = item.data.InvoiceType === 'Credit Note';
-            const isCancel = item.data.IsCancel === 1;
-            const change = (isCreditNote || isCancel) ? 0 : item.debit;
-            runningBalance += change;
+            runningBalance += item.debit;
         } else {
             runningBalance -= item.credit;
         }
@@ -103,7 +85,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
         let currentPageRows: any[] = [];
         filteredRows.forEach((row, idx) => {
             currentPageRows.push(row);
-            const limit = pages.length === 0 ? 14 : 14;
+            const limit = pages.length === 0 ? 16 : 14;
             if (currentPageRows.length === limit || idx === filteredRows.length - 1) {
                 pages.push(currentPageRows);
                 currentPageRows = [];
@@ -161,19 +143,19 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         <div className='flex flex-wrap w-full border-b mb-3'>
                             <div className="w-1/3">
                                 <label className="text-sm font-bold text-gray-500">
-                                    Customer Name
+                                    Supplier Name
                                 </label>
                                 <div className="mt-1 text-lg font-semibold text-gray-800">
-                                    {cusData?.CustomerName}
+                                    {supData?.Name}
                                 </div>
                             </div>
-                            {cusData?.GstNumber && (
+                            {supData?.GstNumber && (
                                 <div className="w-1/3 pl-8">
                                     <label className="text-sm font-bold text-gray-500">
                                         GST Number
                                     </label>
                                     <div className="mt-1 text-lg font-semibold text-gray-800">
-                                        {cusData?.GstNumber}
+                                        {supData?.GstNumber}
                                     </div>
                                 </div>
                             )}
@@ -216,7 +198,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                 <div key={pageIdx} className={`w-full ${pageIdx > 0 ? 'break-before-page mt-8' : ''}`}>
                                     {pageIdx > 0 && (
                                         <div className="flex justify-between border-b pb-2 mb-4 text-xs font-bold text-gray-500 uppercase">
-                                            <span>Ledger Statement: {cusData?.CustomerName}</span>
+                                            <span>Ledger Statement: {supData?.Name}</span>
                                             <span>Page {pageIdx + 1} of {pages.length}</span>
                                         </div>
                                     )}
@@ -239,44 +221,30 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                         <td className="px-3 py-2 text-right">-</td>
                                                         <td className="px-3 py-2 text-right">-</td>
                                                         <td className="px-3 py-2 text-right font-semibold">{formatCurrency(openingBalance)}</td>
-                                                        <td className="px-3 py-2 print:hidden"></td>
                                                     </tr>
                                                 )}
 
                                                 {pageRows.map((item: any, index: number) => {
                                                     const isInvoice = item.type === 'Invoice';
-                                                    const isCreditNote = isInvoice && item.data.InvoiceType === 'Credit Note';
-                                                    const isCancel = isInvoice && item.data.IsCancel === 1;
-
-                                                    let rowBg = 'bg-white';
-                                                    if (isCancel) rowBg = 'bg-red-100 border-red-500';
-                                                    else if (isCreditNote) rowBg = 'bg-red-300 border-red-500';
-                                                    else if (item.type === 'Payment') rowBg = 'bg-green-200 border-green-500';
+                                                    const editUrl = isSizing 
+                                                        ? `/admin/sizing/${item.data.SizingId || item.data.YarnId}/edit`
+                                                        : `/admin/yarns/${item.data.YarnId}/edit`;
 
                                                     return (
-                                                        <tr key={item.refId} className={`w-full border-b py-4 text-sm last-of-type:border-none ${rowBg}`}>
+                                                        <tr key={item.refId} className={`w-full border-b py-4 text-sm last-of-type:border-none bg-white`}>
                                                             <td className="whitespace-nowrap px-4 py-4">{formatDateNew(item.dateStr)}</td>
                                                             <td className="px-3 py-4 relative">
                                                                 {isInvoice ? (
                                                                     <div>
                                                                         <div className="flex items-center">
                                                                             <span className="font-semibold text-gray-800">
-                                                                                {new Date(item.data.InvoiceDate) > new Date('2026-03-31') || item.data.InvoiceType === 'Credit Note' ? (
-                                                                                    <>
-                                                                                        {item.data.BillType === 'gst' && `${getFinancialYearShortNew(item.data.InvoiceDate)}/${item.data.InvoiceType === 'Credit Note' ? 'AT-C' : 'AT'}/`}
-                                                                                        {item.data?.InvoiceNumber.toString().padStart(2, '0')}
-                                                                                        {isCreditNote ? ' (Debit)' : ''}
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>{item.data.BillType === 'gst' ? 'GST' : 'DC'} - {item.data?.InvoiceNumber}</>
-                                                                                )}
+                                                                                Invoice: {item.data.InvoiceNumber}
                                                                             </span>
                                                                         </div>
-                                                                        {item.data.DeliveryNote && <div className="text-xs text-gray-500 mt-0.5">{item.data.DeliveryNote}</div>}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="text-sm font-medium text-gray-700">
-                                                                        Payment Received
+                                                                        Payment: {item.data.Type || 'Paid'}
                                                                     </div>
                                                                 )}
                                                             </td>
@@ -307,7 +275,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         /* Default screen layout: Render a single continuous scrollable table */
                         <>
                             <div className="flex w-full items-center justify-between">
-                                <h1 className="text-2xl font-semibold text-gray-800">Statement of Account (Ledger)</h1>
+                                <h1 className="text-2xl font-semibold text-gray-800">Statement of Account (Supplier Ledger)</h1>
                             </div>
                             <div className="mt-6">
                                 <div className="rounded-lg bg-blue-50 p-2 md:pt-0 overflow-x-auto w-full">
@@ -319,22 +287,17 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                 <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Invoice</th>
                                                 <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Payment</th>
                                                 <th scope="col" style={{ width: '140px' }} className="px-3 py-5 font-bold text-right">Balance</th>
-                                                <th scope="col" style={{ width: '110px' }} className="px-3 py-5 font-bold text-left">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white">
                                             {filteredRows.map((item: any, index: number) => {
                                                 const isInvoice = item.type === 'Invoice';
-                                                const isCreditNote = isInvoice && item.data.InvoiceType === 'Credit Note';
-                                                const isCancel = isInvoice && item.data.IsCancel === 1;
-
-                                                let rowBg = 'bg-white';
-                                                if (isCancel) rowBg = 'bg-red-100 border-red-500';
-                                                else if (isCreditNote) rowBg = 'bg-red-300 border-red-500';
-                                                else if (item.type === 'Payment') rowBg = 'bg-green-200 border-green-500';
+                                                const editUrl = isSizing 
+                                                    ? `/admin/sizing/${item.data.SizingId || item.data.YarnId}/edit`
+                                                    : `/admin/yarns/${item.data.YarnId}/edit`;
 
                                                 return (
-                                                    <tr key={item.refId} className={`w-full border-b py-4 text-sm last-of-type:border-none ${rowBg}`}>
+                                                    <tr key={item.refId} className={`w-full border-b py-4 text-sm last-of-type:border-none bg-white`}>
                                                         {/* Date */}
                                                         <td className="whitespace-nowrap px-4 py-4">{formatDateNew(item.dateStr)}</td>
 
@@ -342,60 +305,15 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                         <td className="px-3 py-4 relative">
                                                             {isInvoice ? (
                                                                 <div>
-                                                                    <div className="flex items-center"
-                                                                        onMouseEnter={() => handleMouseEnter(item.data.InvoiceId, item.data.invoice_details)}
-                                                                        onMouseLeave={handleMouseLeave}
-                                                                    >
-                                                                        <Link className='text-blue-600 font-semibold hover:underline' href={`/admin/invoices/${item.data.InvoiceId}/edit`}>
-                                                                            {new Date(item.data.InvoiceDate) > new Date('2026-03-31') || item.data.InvoiceType === 'Credit Note' ? (
-                                                                                <>
-                                                                                    {item.data.BillType === 'gst' && (
-                                                                                        <span>
-                                                                                            {getFinancialYearShortNew(item.data.InvoiceDate)}/
-                                                                                            {item.data.InvoiceType === 'Credit Note' ? 'AT-C' : 'AT'}
-                                                                                            /
-                                                                                        </span>
-                                                                                    )}
-                                                                                    {item.data?.InvoiceNumber.toString().padStart(2, '0')}
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <span>{item.data.BillType === 'gst' ? 'GST' : 'DC'} - </span>
-                                                                                    {item.data?.InvoiceNumber}
-                                                                                </>
-                                                                            )}
+                                                                    <div className="flex items-center">
+                                                                        <Link className='text-blue-600 font-semibold hover:underline' href={editUrl}>
+                                                                            Invoice: {item.data.InvoiceNumber}
                                                                         </Link>
                                                                     </div>
-                                                                    {item.data.DeliveryNote && <div className="text-xs text-gray-500 mt-0.5">{item.data.DeliveryNote}</div>}
-                                                                    {Number(hoverInvoiceId) === Number(item.data.InvoiceId) && (
-                                                                        <div className="absolute mt-2 w-80 border-2 border-gray-200 rounded-lg bg-white shadow-lg p-3 z-50 overflow-y-auto left-4">
-                                                                            <p className="text-center text-sm font-semibold mb-2 text-gray-700">Purchase Details</p>
-                                                                            {invoiceDetails.length === 0 ? (
-                                                                                <p className="text-xs text-gray-400">Loading...</p>
-                                                                            ) : (
-                                                                                <ul className="text-xs space-y-1 text-gray-600">
-                                                                                    <li key={'hover_' + index} className="pb-1 border-b border-gray-200 mb-1 flex font-semibold text-gray-800">
-                                                                                        <span className="w-1/2 pr-2">Name</span>
-                                                                                        <span className="w-1/6 pr-2">Qty</span>
-                                                                                        <span className="w-1/6 pr-2">Price</span>
-                                                                                        <span className="w-1/6">Total</span>
-                                                                                    </li>
-                                                                                    {invoiceDetails.map((invDetail: any, idx: number) => (
-                                                                                        <li key={idx} className="pb-1 border-b border-gray-200 mb-1 flex">
-                                                                                            <span className="w-1/2 pr-2 truncate">{invDetail?.products?.Name}</span>
-                                                                                            <span className="w-1/6 pr-2">{invDetail?.Quantity}</span>
-                                                                                            <span className="w-1/6 pr-2">{invDetail.Price}</span>
-                                                                                            <span className="w-1/6">{invDetail.Price * invDetail.Quantity}</span>
-                                                                                        </li>
-                                                                                    ))}
-                                                                                </ul>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
                                                                 </div>
                                                             ) : (
                                                                 <div className="text-sm font-medium text-gray-700">
-                                                                    Payment Received {item.data?.InvoiceNumber?.length ? `(Bill: ${item.data.InvoiceNumber.join(', ')})` : ''}
+                                                                    Payment: {item.data.Type || 'Paid'}
                                                                 </div>
                                                             )}
                                                         </td>
@@ -408,23 +326,6 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
 
                                                         {/* Balance */}
                                                         <td className="whitespace-nowrap px-3 py-4 text-right font-semibold">{formatCurrency(item.balance)}</td>
-
-                                                        {/* Status */}
-                                                        <td className="whitespace-nowrap px-3 py-4">
-                                                            {isCreditNote ?
-                                                                <span className="text-xs text-red-700 font-semibold bg-red-100 px-2.5 py-1 rounded">CN</span>
-                                                                : isInvoice ? (
-                                                                    <InvoiceStatus
-                                                                        ReceivedAmount={item.data?.ReceivedAmount || 0}
-                                                                        BalanceAmount={item.data?.BalanceAmount || 0}
-                                                                        InvoiceAmount={item.data?.InvoiceAmount || 0}
-                                                                        InvoiceDate={item.data?.InvoiceDate}
-                                                                        IsCancel={item.data?.IsCancel}
-                                                                    />
-                                                                ) : (
-                                                                    <span className="text-xs text-green-700 font-semibold bg-green-100 px-2.5 py-1 rounded">Received</span>
-                                                                )}
-                                                        </td>
                                                     </tr>
                                                 );
                                             })}
@@ -436,7 +337,6 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                 <td className="px-3 py-4 text-right">{formatCurrency(totalPurchased)}</td>
                                                 <td className="px-3 py-4 text-right text-emerald-800">{formatCurrency(totalPaid)}</td>
                                                 <td className="px-3 py-4 text-right text-red-800">{formatCurrency(totalPurchased - totalPaid)}</td>
-                                                <td className="px-3 py-4"></td>
                                             </tr>
                                         </tfoot>
                                     </table>

@@ -14,6 +14,8 @@ export const getLooms = async (search: string | null, page: number | null, limit
         params.push(limit, (page - 1) * limit);
     }
 
+    console.log("sql", sql)
+
     const [rows]: any = await db.query(sql, params);
     return rows;
 };
