@@ -78,7 +78,7 @@ export default function Form({
                 name="loomId"
                 onChange={(e) => {
                   const selected = looms.find(
-                    (loom: any) => loom.LoomId.toString() === e.target.value
+                    (loom: any) => loom.LoomId === e.target.value
                   );
                   setSelectedLoom(selected)
                 }}

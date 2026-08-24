@@ -1,9 +1,10 @@
 import { fetchCustomerInvoices, fetchCustomerPayments } from '@/app/api/node/invoice';
-import { fetchCustomerById } from '@/app/api/node/customers'
+import { fetchCustomerById, fetchCustomers } from '@/app/api/node/customers';
 import Financialyear from '@/app/lib/financialyear';
 import { formatCurrency, formatDateNew } from '@/app/lib/utils';
 import Link from 'next/link';
 import LedgerDetails from './ledger-details';
+import CustomerLedgerSelect from './customer-ledger-select';
 
 export default async function Page(props:
     {
@@ -20,7 +21,8 @@ export default async function Page(props:
     const customer = await fetchCustomerById(String(CustomerId));
     // const cusNew = await fetchCustomerById(CustomerId);
     const invoices = await fetchCustomerInvoices(CustomerId, startDate, endDate, billType);
-    const paymentDetails = await fetchCustomerPayments(CustomerId, startDate, endDate, billType)
+    const paymentDetails = await fetchCustomerPayments(CustomerId, startDate, endDate, billType);
+    const customers = await fetchCustomers('', 0, "", "", "");
 
     const grouped: Record<string, { newDate: string; Date: string; BillType: string; InvoiceNumber: (string | number)[]; Type: string, TotalPaid: number }> = {};
 
@@ -75,11 +77,15 @@ export default async function Page(props:
             <div className="rounded-md bg-blue-50 p-4 md:p-6">
                 <div className='flex flex-wrap mb-6'>
                     <div className="mb-4 w-1/4">
-                        <label htmlFor="name" className="mb-2 text-sm font-bold">
+                        <label htmlFor="name" className="mb-2 block text-sm font-bold text-gray-700">
                             Customer Name
                         </label>
-                        <div className="relative mt-2 tex-lg">
-                            {customer?.CustomerName}
+                        <div className="relative mt-2">
+                            <CustomerLedgerSelect
+                                customers={customers}
+                                currentCustomerId={CustomerId}
+                                currentCustomerName={customer?.CustomerName || ''}
+                            />
                         </div>
                     </div>
                     <div className="mb-4 w-1/4 pl-8">
