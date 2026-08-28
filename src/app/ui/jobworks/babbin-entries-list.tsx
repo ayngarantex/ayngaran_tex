@@ -174,7 +174,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                     <Link className="cursor-pointer" href={`/admin/jobworks/${entry.id}/entries`}>
                                         Edit
                                     </Link>
-                                    <span onClick={() => handleDelete(entry.id)} className="text-red-600 cursor-pointer">Delete</span>
+                                    <span onClick={() => handleDelete(entry.id)} className="text-red-600 cursor-pointer ml-3">Delete</span>
                                 </td>
                             </tr>
                         ))}

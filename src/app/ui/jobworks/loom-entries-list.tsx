@@ -129,7 +129,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                             const balance = suffixBalances[index];
                             return (
                                 <tr
-                                    key={entry.id}
+                                    key={'entry _' + index}
                                     className={`hover:bg-slate-50 transition-colors ${entry.isSizingGroup ? 'bg-indigo-50/30' : ''}`}
                                 >
                                     <td className="px-4 py-3 whitespace-nowrap">
@@ -204,7 +204,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                                 <Link className="cursor-pointer" href={`/admin/jobworks/${entry.id}/entries`}>
                                                     Edit
                                                 </Link>
-                                                <span onClick={() => handleDelete(Number(entry.id))} className="text-red-600 cursor-pointer">Delete</span>
+                                                <span onClick={() => handleDelete(Number(entry.id))} className="text-red-600 cursor-pointer ml-2">Delete</span>
                                             </>
                                         )}
                                     </td>

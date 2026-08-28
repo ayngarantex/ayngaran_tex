@@ -137,7 +137,7 @@ export default function TableInvoiceDetails({
                                             <span className="min-w-[30%] pr-4">&nbsp;</span>
                                             <span className="min-w-[20%] pr-4">&nbsp;</span>
                                             <span className="min-w-[20%] pr-4 text-right font-semibold">Discount</span>
-                                            <span className="min-w-[30%] pr-4 text-right font-semibold">{formatCurrency((invoice?.Discount || 0) + Number(invoice?.RoundOff || 0))}</span>
+                                            <span className="min-w-[30%] pr-4 text-right font-semibold">{formatCurrency(Number(invoice?.Discount || 0) + Number(invoice?.RoundOff || 0))}</span>
                                         </li>
                                     </>
                                 )}

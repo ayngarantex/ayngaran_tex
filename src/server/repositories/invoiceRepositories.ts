@@ -48,8 +48,8 @@ export const getInvoices = async (
     }
 
     if (orderBy === "pending") {
-        query += ` ORDER BY 
-            CASE WHEN (I.InvoiceAmount - I.ReceivedAmount) > 0 THEN 0 ELSE 1 END,
+        query += ` AND (I.InvoiceAmount - I.ReceivedAmount) > 0`
+        query += ` ORDER BY I.IsCancel, CASE WHEN (I.InvoiceAmount - I.ReceivedAmount) > 0 THEN 0 ELSE 1 END,
             I.InvoiceDate ASC`;
     } else if (orderBy === "InvoiceNumberASC") {
         query += ` ORDER BY I.InvoiceNumber ASC`;
@@ -60,8 +60,6 @@ export const getInvoices = async (
     if (page && limit) {
         query += ` LIMIT ${limit} OFFSET ${(page - 1) * limit}`;
     }
-
-    console.log("query", query)
 
     const [rows]: any = await db.query(query);
     const invoices: any[] = [];
@@ -191,6 +189,10 @@ export const getInvoicesCount = async (
         query += ` AND I.CustomerId = ${customerId} `;
     }
 
+    if (orderBy === 'pending') {
+        query += ` AND (I.InvoiceAmount - I.ReceivedAmount) > 0`
+    }
+
     const [rows]: any = await db.query(query);
     return rows[0].totalCount;
 };
@@ -243,10 +245,10 @@ export const getInvoicesTotal = async (
     }
 
     query += `
-    FROM invoice I
-    LEFT JOIN customers C ON I.CustomerId = C.CustomerId
-    WHERE 1=1
-  `;
+        FROM invoice I
+        LEFT JOIN customers C ON I.CustomerId = C.CustomerId
+        WHERE 1=1
+    `;
 
     if (search) {
         query += `
