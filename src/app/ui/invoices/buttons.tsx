@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { deleteInvoice, fetchInvoices, fetchGstr1Data } from '@/app/api/node/invoice';
 import { PencilIcon, PlusIcon, TrashIcon, PrinterIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -59,13 +59,47 @@ export function DeleteInvoice({ id }: { id: string }) {
   );
 }
 
-export function DownloadInvoice({ invoice }: { invoice: any }) {
+export function DownloadInvoice({ 
+  invoice,
+  original = true,
+  duplicate = false,
+  className,
+  showLabel = false,
+}: { 
+  invoice: any;
+  original?: boolean;
+  duplicate?: boolean;
+  className?: string;
+  showLabel?: boolean;
+}) {
   const [downloading, setDownloading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = async () => {
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
+
+  const handleDownload = async (optOriginal: boolean, optDuplicate: boolean) => {
+    setShowDropdown(false);
     setDownloading(true);
     try {
-      const response = await fetch(`/api/invoices/${invoice.InvoiceId}/pdf`);
+      const params = new URLSearchParams();
+      params.set('original', String(optOriginal));
+      params.set('duplicate', String(optDuplicate));
+
+      const response = await fetch(`/api/invoices/${invoice.InvoiceId}/pdf?${params.toString()}`);
       if (!response.ok) throw new Error("Failed to download PDF");
 
       const blob = await response.blob();
@@ -85,7 +119,10 @@ export function DownloadInvoice({ invoice }: { invoice: any }) {
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
-      link.parentNode?.removeChild(link);
+      
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
     } catch (err) {
       console.error(err);
       alert("Error downloading PDF");
@@ -94,23 +131,64 @@ export function DownloadInvoice({ invoice }: { invoice: any }) {
     }
   };
 
+  const handleButtonClick = () => {
+    if (showLabel) {
+      handleDownload(original, duplicate);
+    } else {
+      setShowDropdown(!showDropdown);
+    }
+  };
+
   return (
-    <button
-      type="button"
-      onClick={handleDownload}
-      disabled={downloading}
-      className="rounded-md border p-2 hover:bg-blue-100 cursor-pointer disabled:opacity-50"
-      title="Download PDF"
-    >
-      {downloading ? (
-        <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      ) : (
-        <ArrowDownTrayIcon className="w-5" />
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={handleButtonClick}
+        disabled={downloading}
+        className={className || "rounded-md border p-2 hover:bg-blue-100 cursor-pointer disabled:opacity-50 flex items-center justify-center"}
+        title={showLabel ? "Download PDF" : "Download PDF copies"}
+      >
+        {downloading ? (
+          <div className="flex items-center justify-center gap-2">
+            <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {showLabel && <span>Downloading...</span>}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <ArrowDownTrayIcon className="w-5" />
+            {showLabel && <span>Download PDF</span>}
+          </div>
+        )}
+      </button>
+
+      {showDropdown && !showLabel && (
+        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 focus:outline-none border border-gray-100">
+          <div className="py-1">
+            <button
+              onClick={() => handleDownload(true, false)}
+              className="text-left block w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+            >
+              Original Copy
+            </button>
+            <button
+              onClick={() => handleDownload(false, true)}
+              className="text-left block w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium border-t border-gray-100"
+            >
+              Duplicate Copy
+            </button>
+            <button
+              onClick={() => handleDownload(true, true)}
+              className="text-left block w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium border-t border-gray-100"
+            >
+              Both Copies
+            </button>
+          </div>
+        </div>
       )}
-    </button>
+    </div>
   );
 }
 

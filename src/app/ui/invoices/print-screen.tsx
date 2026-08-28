@@ -8,20 +8,25 @@ import PrintProduct from './print-products';
 import Link from 'next/link';
 import { Button } from '../button';
 import PrintScreenInvoiceDetails from './print-screen-invoice-details';
+import { DownloadInvoice } from './buttons';
 
 export default function PrintScreen({
     invoice,
     products,
-    customer
+    customer,
+    initialOriginal = true,
+    initialDuplicate = false,
 }: {
     invoice: any;
     products: ProductField[];
-    customer: any
+    customer: any;
+    initialOriginal?: boolean;
+    initialDuplicate?: boolean;
 }) {
     const printRef = useRef<HTMLDivElement>(null);
-    const [showDuplicateCopy, setShowDuplicateCopy] = useState(false);
-    const [printOriginalCopy, setPrintOriginalCopy] = useState(true);
-    const [printDuplicateCopy, setPrintDuplicateCopy] = useState(false);
+    const [showDuplicateCopy, setShowDuplicateCopy] = useState(initialDuplicate);
+    const [printOriginalCopy, setPrintOriginalCopy] = useState(initialOriginal);
+    const [printDuplicateCopy, setPrintDuplicateCopy] = useState(initialDuplicate);
 
     const handlePrint = () => {
         setShowDuplicateCopy(true);
@@ -32,7 +37,7 @@ export default function PrintScreen({
         document.body.innerHTML = printContents;
         window.print();
         document.body.innerHTML = originalContents;
-        setShowDuplicateCopy(false);
+        setShowDuplicateCopy(printDuplicateCopy);
         window.location.reload();
     };
 
@@ -41,18 +46,27 @@ export default function PrintScreen({
     }, [invoice?.invoice_details]);
 
     return (
-        <div className="p-8">
+        <div className="p-8 print:p-0">
             <div className='flex justify-between no-print'>
-                <Button type="button" color={'blue'} onClick={
-                    () => {
-                        setShowDuplicateCopy(true)
-                        setTimeout(() => {
-                            handlePrint()
-                        }, 100);
-                    }
-                }>
-                    Print Invoice
-                </Button>
+                <div className="flex gap-2">
+                    <Button type="button" onClick={
+                        () => {
+                            setShowDuplicateCopy(true)
+                            setTimeout(() => {
+                                handlePrint()
+                            }, 100);
+                        }
+                    }>
+                        Print Invoice
+                    </Button>
+                    <DownloadInvoice
+                        invoice={invoice}
+                        original={printOriginalCopy}
+                        duplicate={printDuplicateCopy}
+                        showLabel={true}
+                        className="flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-all duration-150 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+                    />
+                </div>
 
                 <Link
                     href="/admin/invoices"
@@ -100,7 +114,7 @@ export default function PrintScreen({
             {/* </div> */}
 
             {/* ✅ PRINT AREA */}
-            <div id="print-area" ref={printRef} className="bg-white shadow pt-4 print-container">
+            <div id="print-area" ref={printRef} className="bg-white print:shadow-none shadow pt-4 print-container">
                 {printOriginalCopy ?
                     <div className="invoice">
                         <PrintScreenInvoiceDetails

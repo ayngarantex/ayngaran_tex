@@ -5,11 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col md:h-screen md:flex-row md:overflow-hidden bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col md:h-screen md:flex-row md:overflow-hidden bg-slate-50 text-slate-900 print:bg-white print:h-auto print:min-h-0">
       <div className="w-full flex-none md:w-64 no-print">
         <SideNav />
       </div>
-      <div className="flex-grow p-3 sm:p-6 md:overflow-y-auto md:p-8 bg-slate-50">
+      <div className="flex-grow p-3 sm:p-6 md:overflow-y-auto md:p-8 bg-slate-50 print:p-0 print:bg-white print:overflow-visible">
         <LoadingProvider>
           {children}
         </LoadingProvider>

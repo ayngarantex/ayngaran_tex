@@ -17,9 +17,13 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const original = searchParams.get('original') !== 'false';
+  const duplicate = searchParams.get('duplicate') === 'true';
+
   const host = request.headers.get('host') || 'localhost:3000';
   const protocol = request.headers.get('x-forwarded-proto') || 'http';
-  const printUrl = `${protocol}://${host}/admin/invoices/${invoiceId}/print`;
+  const printUrl = `${protocol}://${host}/admin/invoices/${invoiceId}/print?original=${original}&duplicate=${duplicate}`;
 
   // Forward session cookies so Puppeteer authenticates properly
   const cookieHeader = request.headers.get('cookie');
