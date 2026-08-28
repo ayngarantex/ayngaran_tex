@@ -21,14 +21,23 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
         ? getFinancialYear(paramStartDate)
         : currentFy;
 
-    const today = new Date();
-    const currYear = today.getFullYear();
-    const currMonth = today.getMonth();
-    const startOfMonth = new Date(currYear, currMonth, 1);
-    const endOfMonth = new Date(currYear, currMonth + 1, 0);
-    const formatYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
-    const defaultStart = formatYYYYMMDD(startOfMonth);
-    const defaultEnd = formatYYYYMMDD(endOfMonth);
+    const [fyStartYear, fyEndYear] = currentFy.split("-");
+    const defaultStart = fyStartYear ? `${fyStartYear}-04-01` : "";
+    const defaultEnd = fyEndYear ? `${fyEndYear}-03-31` : "";
+
+    // const today = new Date();
+    // const currYear = today.getFullYear();
+    // const currMonth = today.getMonth();
+    // const startOfMonth = new Date(currYear, currMonth, 1);
+    // const endOfMonth = new Date(currYear, currMonth + 1, 0);
+    // const formatYYYYMMDD = (d: Date) => {
+    //     const y = d.getFullYear();
+    //     const m = String(d.getMonth() + 1).padStart(2, '0');
+    //     const day = String(d.getDate()).padStart(2, '0');
+    //     return `${y}-${m}-${day}`;
+    // };
+    // const defaultStart = formatYYYYMMDD(startOfMonth);
+    // const defaultEnd = formatYYYYMMDD(endOfMonth);
 
     const [financialYear, setFinancialYear] = useState<string>(initialFy);
     const [startDate, setStartDate] = useState<string>(paramStartDate || defaultStart);

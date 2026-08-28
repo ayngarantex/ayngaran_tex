@@ -600,138 +600,138 @@ export default function Form({
               </div>
             </div>
           </div>
-
-          <div>
-            <fieldset>
-              <legend className="mb-2 block text-sm font-medium">
-                Bill Type
-              </legend>
-              <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
-                <div className="flex gap-4">
-                  <div className="flex items-center">
-                    <input
-                      id="gst"
-                      name="billType"
-                      type="radio"
-                      value="gst"
-                      checked={billType === "gst"}
-                      className="h-4 w-4 cursor-pointer border-gray-300 bg-green-300 text-gray-600 focus:ring-2"
-                      onChange={(e) => {
-                        setBillType('gst')
-                      }}
-                    />
-                    <label
-                      htmlFor="gst"
-                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
-                    >
-                      Gst
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="normal"
-                      name="billType"
-                      type="radio"
-                      value="normal"
-                      checked={billType === "normal"}
-                      className="h-4 w-4 cursor-pointer border-gray-300 bg-blue-300 text-black focus:ring-2"
-                      onChange={(e) => {
-                        setBillType('normal')
-                      }}
-                    />
-                    <label
-                      htmlFor="normal"
-                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600"
-                    >
-                      Normal
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </div>
         </div>
-        {billType === 'gst' ?
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-6'>
-            <div className="w-full">
-              <label htmlFor="tax percentage" className="mb-2 block text-sm font-medium">
-                Tax Percentage
-              </label>
-              <div className="relative mt-2 rounded-md">
-                <div className="relative">
-                  <input
-                    id="tax percentage"
-                    name="tax percentage"
-                    type="text"
-                    placeholder="Enter tax percentage"
-                    value={taxPercentage}
-                    onChange={(e) => {
-                      setTaxPercentage(Number(e.target.value))
-                    }}
-                    className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
-                  />
-                </div>
-              </div>
-            </div>
-            {selectedSupplier?.State === 'TamilNadu' ?
-              <>
-                <div className="mb-4 w-full">
-                  <label htmlFor="cgst" className="mb-2 block text-sm font-medium">
-                    CGST ({cgstPercentage})%
-                  </label>
-                  <div className="relative mt-2 rounded-md">
-                    <div className="relative">
-                      <input
-                        id="cgst"
-                        name="cgst"
-                        type="text"
-                        disabled
-                        value={(cgstAmount || 0).toFixed(2)}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
-                      />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="mb-4 w-full">
-                  <label htmlFor="cgst" className="mb-2 block text-sm font-medium">
-                    SGST ({sgstPercentage})%
+        <div className="grid grid-cols-1 gap-6 mt-6">
+          <fieldset>
+            <legend className="mb-2 block text-sm font-medium">
+              Bill Type
+            </legend>
+            <div className="rounded-lg border border-gray-500 px-[14px] py-3">
+              <div className="flex gap-3">
+                <div className={`flex items-center ${billType === 'gst' ? "" : "my-6"}`}>
+                  <input
+                    id="gst"
+                    name="billType"
+                    type="radio"
+                    value="gst"
+                    checked={billType === "gst"}
+                    className="h-4 w-4 cursor-pointer border-gray-300 bg-green-300 text-gray-600 focus:ring-2"
+                    onChange={(e) => {
+                      setBillType('gst')
+                    }}
+                  />
+                  <label
+                    htmlFor="gst"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600 ml-3"
+                  >
+                    Gst
                   </label>
-                  <div className="relative mt-2 rounded-md">
-                    <div className="relative">
-                      <input
-                        id="sgst"
-                        name="sgst"
-                        type="text"
-                        disabled
-                        value={(sgstAmount || 0).toFixed(2)}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
-                      />
-                    </div>
-                  </div>
                 </div>
-              </>
-              :
-              <div className="mb-4 w-full">
-                <label htmlFor="igst" className="mb-2 block text-sm font-medium">
-                  IGST ({igstPercentage})%
-                </label>
-                <div className="relative mt-2 rounded-md">
-                  <div className="relative">
-                    <input
-                      id="igst"
-                      name="igst"
-                      type="text"
-                      disabled
-                      value={(igstAmount || 0).toFixed(2)}
-                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
-                    />
-                  </div>
+                <div className={`flex items-center ${billType === 'gst' ? "" : "my-6"}`}>
+                  <input
+                    id="normal"
+                    name="billType"
+                    type="radio"
+                    value="normal"
+                    checked={billType === "normal"}
+                    className="h-4 w-4 cursor-pointer border-gray-300 bg-blue-300 text-black focus:ring-2"
+                    onChange={(e) => {
+                      setBillType('normal')
+                    }}
+                  />
+                  <label
+                    htmlFor="normal"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-base font-medium text-gray-600 ml-3"
+                  >
+                    Normal
+                  </label>
                 </div>
               </div>
-            }
-          </div>
-          : null}
+              {billType === 'gst' ?
+                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-6'>
+                  <div className="w-full">
+                    <label htmlFor="tax percentage" className="mb-2 block text-sm font-medium">
+                      Tax Percentage
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                      <div className="relative">
+                        <input
+                          id="tax percentage"
+                          name="tax percentage"
+                          type="text"
+                          placeholder="Enter tax percentage"
+                          value={taxPercentage}
+                          onChange={(e) => {
+                            setTaxPercentage(Number(e.target.value))
+                          }}
+                          className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {selectedSupplier?.State === 'TamilNadu' ?
+                    <>
+                      <div className="mb-4 w-full">
+                        <label htmlFor="cgst" className="mb-2 block text-sm font-medium">
+                          CGST ({cgstPercentage})%
+                        </label>
+                        <div className="relative mt-2 rounded-md">
+                          <div className="relative">
+                            <input
+                              id="cgst"
+                              name="cgst"
+                              type="text"
+                              disabled
+                              value={(cgstAmount || 0).toFixed(2)}
+                              className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mb-4 w-full">
+                        <label htmlFor="cgst" className="mb-2 block text-sm font-medium">
+                          SGST ({sgstPercentage})%
+                        </label>
+                        <div className="relative mt-2 rounded-md">
+                          <div className="relative">
+                            <input
+                              id="sgst"
+                              name="sgst"
+                              type="text"
+                              disabled
+                              value={(sgstAmount || 0).toFixed(2)}
+                              className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                    :
+                    <div className="mb-4 w-full">
+                      <label htmlFor="igst" className="mb-2 block text-sm font-medium">
+                        IGST ({igstPercentage})%
+                      </label>
+                      <div className="relative mt-2 rounded-md">
+                        <div className="relative">
+                          <input
+                            id="igst"
+                            name="igst"
+                            type="text"
+                            disabled
+                            value={(igstAmount || 0).toFixed(2)}
+                            className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                : null}
+            </div>
+          </fieldset>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
           <div>

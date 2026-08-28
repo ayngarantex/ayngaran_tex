@@ -4,12 +4,19 @@ import { formatCurrency, formatDate, formatDateNew, getFinancialYearShortNew } f
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { useSearchParams } from 'next/navigation';
 
 export default function LedgerInvoicePayment({ customer, invoices, payments, startDate, endDate }: { customer: any, invoices: any[], payments: any[], startDate: string, endDate: string }) {
-    const [printOption, setPrintOption] = useState(false);
+    const searchParams = useSearchParams();
+    const isPrintMode = searchParams.get('print') === 'true';
+    const filterTypeParam = searchParams.get('filterType') as 'all' | 'debit' | 'credit';
+
+    const [printOption, setPrintOption] = useState(isPrintMode);
     const [hoverInvoiceId, setHoverInvoiceId] = useState<number | null>(null);
     const [invoiceDetails, setInvoiceDetails] = useState<any[]>([]);
-    const [filterType, setFilterType] = useState<'all' | 'debit' | 'credit'>('all');
+    const [filterType, setFilterType] = useState<'all' | 'debit' | 'credit'>(filterTypeParam || 'all');
+    const [downloading, setDownloading] = useState(false);
 
     const printRef = useRef<HTMLDivElement>(null);
     const cusData = Array.isArray(customer) ? customer[0] : customer;
@@ -23,6 +30,37 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
         document.body.innerHTML = originalContents;
         setPrintOption(false);
         window.location.reload();
+    };
+
+    const handleDownloadPdf = async () => {
+        setDownloading(true);
+        try {
+            const params = new URLSearchParams();
+            if (startDate) params.set('startDate', startDate);
+            if (endDate) params.set('endDate', endDate);
+            if (filterType) params.set('filterType', filterType);
+            const billType = searchParams.get('billType');
+            if (billType) params.set('billType', billType);
+
+            const response = await fetch(`/api/customers/${cusData.CustomerId}/pdf?${params.toString()}`);
+            if (!response.ok) throw new Error("Failed to download PDF");
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const fileName = `ledger_customer_${cusData.CustomerName.replace(/\s+/g, '_')}.pdf`;
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+        } catch (err) {
+            console.error(err);
+            alert("Error downloading PDF");
+        } finally {
+            setDownloading(false);
+        }
     };
 
     const handleMouseEnter = (InvoiceId: number, invoiceDetails: any) => {
@@ -126,16 +164,34 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                         <option value="credit">Credit Only (Payments)</option>
                     </select>
                 </div>
-                <Button type="button" color={'blue'} onClick={
-                    () => {
-                        setPrintOption(true)
-                        setTimeout(() => {
-                            handlePrint()
-                        }, 100);
-                    }
-                }>
-                    Print
-                </Button>
+                <div className="flex gap-2">
+                    <Button type="button" color={'blue'} onClick={
+                        () => {
+                            setPrintOption(true)
+                            setTimeout(() => {
+                                handlePrint()
+                            }, 100);
+                        }
+                    }>
+                        Print
+                    </Button>
+                    <Button
+                        type="button"
+                        color="blue"
+                        onClick={handleDownloadPdf}
+                        disabled={downloading}
+                        className="flex items-center gap-2"
+                    >
+                        <div className='flex'>
+                            {downloading ? (
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent ml-2" />
+                            ) : (
+                                <ArrowDownTrayIcon className="w-5" />
+                            )}
+                            Download PDF
+                        </div>
+                    </Button>
+                </div>
             </div>
 
             <div className={`flex flex-col w-full mt-6 p-2 md:p-6 justify-between gap-6 ${printOption ? 'print-layout' : ''}`} ref={printRef} >

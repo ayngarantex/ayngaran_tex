@@ -252,8 +252,8 @@ export const createSizing = async (
             `INSERT INTO sizing (
                 SupplierId, InvoiceNumber, InvoiceDate, WarpType, Color, Meters, YarnId,
                 YarnSent, YarnUsed, YarnBalance, Price, BeforeTax, TaxPercentage,
-                Cgst, Sgst, Igst, AfterTax, RoundOff, InvoiceAmount, ReceivedAmount
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                Cgst, Sgst, Igst, AfterTax, RoundOff, InvoiceAmount, ReceivedAmount, BillType
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 Number(invoiceData.SupplierId) > 0 ? Number(invoiceData.SupplierId) : null,
                 invoiceData.InvoiceNumber || null,
@@ -274,7 +274,8 @@ export const createSizing = async (
                 invoiceData.AfterTax || 0,
                 invoiceData.RoundOff || null,
                 invoiceData.InvoiceAmount || 0,
-                invoiceData.ReceivedAmount || 0
+                invoiceData.ReceivedAmount || 0,
+                invoiceData.BillType || 0,
             ]
         );
 
@@ -449,7 +450,7 @@ export const updateSizing = async (
             `UPDATE sizing SET
                 SupplierId = ?, InvoiceNumber = ?, InvoiceDate = ?, WarpType = ?, Color = ?, Meters = ?, YarnId = ?,
                 YarnSent = ?, YarnUsed = ?, YarnBalance = ?, Price = ?, BeforeTax = ?, TaxPercentage = ?,
-                Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, InvoiceAmount = ?, ReceivedAmount = ?
+                Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, InvoiceAmount = ?, ReceivedAmount = ?, BillType = ?
              WHERE SizingId = ?`,
             [
                 invoiceData.SupplierId || null,
@@ -472,6 +473,7 @@ export const updateSizing = async (
                 invoiceData.RoundOff || null,
                 invoiceData.InvoiceAmount || 0,
                 invoiceData.ReceivedAmount || 0,
+                invoiceData.BillType || 0,
                 sizingId
             ]
         );

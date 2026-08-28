@@ -21,13 +21,13 @@ export default function InvoiceStatus({ ReceivedAmount, InvoiceAmount, BalanceAm
         : null}
       {(IsCancel === 0 || IsCancel === null) && (!InvoiceAmount || (ReceivedAmount !== InvoiceAmount)) ? (
         <>
-          Pending<span className='text-red-600 px-1'>({daysDiffNew(InvoiceDate)})</span>
+          <span>Pending</span> <span className='text-red-600 px-1'>({daysDiffNew(InvoiceDate)})</span>
           <ClockIcon className="w-4 text-gray-500" />
         </>
       ) : null}
       {InvoiceAmount && ReceivedAmount === InvoiceAmount ? (
         <>
-          Paid
+          <span>Paid</span>
           <CheckIcon className="w-4 text-white" />
         </>
       ) : null}
