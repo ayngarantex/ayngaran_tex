@@ -312,15 +312,33 @@ export default function SupplierLedgerInvoicePayment({ supplier, invoices, payme
                                                 })}
                                             </tbody>
                                             <tfoot className="border-t-2 border-gray-300 font-bold bg-blue-50/50">
-                                                <tr className="text-sm text-gray-800">
-                                                    <td className="px-4 py-4">Page Total</td>
-                                                    <td className="px-3 py-4 text-xs italic text-gray-500">
-                                                        {isLastPage ? 'Closing Balance' : 'Balance Carried Forward (c/f)'}
-                                                    </td>
-                                                    <td className="px-3 py-4 text-right">{formatCurrency(pageDebit)}</td>
-                                                    <td className="px-3 py-4 text-right text-emerald-800">{formatCurrency(pageCredit)}</td>
-                                                    <td className="px-3 py-4 text-right text-red-800">{formatCurrency(closingBalance)}</td>
-                                                </tr>
+                                                {isLastPage ? (
+                                                    <tr className="text-sm text-gray-800 border-t border-gray-300">
+                                                        <td className="px-4 py-4">Grand Total</td>
+                                                        <td className="px-3 py-4 text-xs italic text-gray-500">
+                                                            Closing Balance
+                                                        </td>
+                                                        <td className="px-3 py-4 text-right">
+                                                            {formatCurrency(filteredRows.reduce((sum, r) => sum + r.debit, 0))}
+                                                        </td>
+                                                        <td className="px-3 py-4 text-right text-emerald-800">
+                                                            {formatCurrency(filteredRows.reduce((sum, r) => sum + r.credit, 0))}
+                                                        </td>
+                                                        <td className="px-3 py-4 text-right text-red-800">
+                                                            {formatCurrency(filteredRows[filteredRows.length - 1]?.balance || 0)}
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    <tr className="text-sm text-gray-800">
+                                                        <td className="px-4 py-4">Page Total</td>
+                                                        <td className="px-3 py-4 text-xs italic text-gray-500">
+                                                            Balance Carried Forward (c/f)
+                                                        </td>
+                                                        <td className="px-3 py-4 text-right">{formatCurrency(pageDebit)}</td>
+                                                        <td className="px-3 py-4 text-right text-emerald-800">{formatCurrency(pageCredit)}</td>
+                                                        <td className="px-3 py-4 text-right text-red-800">{formatCurrency(closingBalance)}</td>
+                                                    </tr>
+                                                )}
                                             </tfoot>
                                         </table>
                                     </div>

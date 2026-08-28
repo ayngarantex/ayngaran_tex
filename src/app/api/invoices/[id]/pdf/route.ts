@@ -45,6 +45,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     }
 
     const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
     
     if (cookieHeader) {
       await page.setExtraHTTPHeaders({
