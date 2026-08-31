@@ -139,9 +139,10 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
     const pages: any[][] = [];
     if (printOption) {
         let currentPageRows: any[] = [];
+        const isSinglePage = filteredRows.length <= 14;
         filteredRows.forEach((row, idx) => {
             currentPageRows.push(row);
-            const limit = pages.length === 0 ? 14 : 14;
+            const limit = isSinglePage ? 14 : (pages.length === 0 ? 14 : 14);
             if (currentPageRows.length === limit || idx === filteredRows.length - 1) {
                 pages.push(currentPageRows);
                 currentPageRows = [];
@@ -194,7 +195,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                 </div>
             </div>
 
-            <div className={`flex flex-col w-full mt-6 p-2 md:p-6 justify-between gap-6 ${printOption ? 'print-layout' : ''}`} ref={printRef} >
+            <div className={`flex flex-col w-full mt-6 p-2 md:p-6 justify-between gap-6 print:mt-0 print:p-0 print:gap-0 ${printOption ? 'print-layout' : ''}`} ref={printRef} >
                 {printOption && (
                     <>
                         <style dangerouslySetInnerHTML={{
