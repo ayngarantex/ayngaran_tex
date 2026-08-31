@@ -3,8 +3,10 @@ export const fetchPaymentDetails = async (
     currentPage: number,
     pageLimit: number,
     startDate: string,
-    endDate: string
+    endDate: string,
+    type: string = 'invoice'
 ) => {
+    const queryName = type === 'sizing' ? 'sizingPayments' : type === 'yarn' ? 'yarnPayments' : 'payments';
     const response = await fetch(
         `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
         {
@@ -22,7 +24,7 @@ export const fetchPaymentDetails = async (
                         $startDate: String,
                         $endDate: String
                     ) {
-                        payments(
+                        ${queryName}(
                             search: $search,
                             page: $page,
                             limit: $limit,
@@ -50,14 +52,18 @@ export const fetchPaymentDetails = async (
 
     const result = await response.json();
 
-    return result?.data?.payments;
+    console.log("result", result)
+
+    return result?.data?.[queryName];
 };
 
 export const fetchPaymentCount = async (
     query: string,
     startDate: string,
-    endDate: string
+    endDate: string,
+    type: string = 'invoice'
 ) => {
+    const queryName = type === 'sizing' ? 'sizingPaymentCount' : type === 'yarn' ? 'yarnPaymentCount' : 'paymentCount';
     const response = await fetch(
         `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/graphql`,
         {
@@ -73,7 +79,7 @@ export const fetchPaymentCount = async (
                         $startDate: String,
                         $endDate: String
                     ) {
-                        paymentCount(
+                        ${queryName}(
                             search: $search,
                             startDate: $startDate,
                             endDate: $endDate
@@ -91,5 +97,5 @@ export const fetchPaymentCount = async (
 
     const result = await response.json();
 
-    return result?.data?.paymentCount;
+    return result?.data?.[queryName];
 };

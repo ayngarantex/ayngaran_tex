@@ -7,14 +7,16 @@ export default async function ProductTable({
   pageLimit,
   startDate,
   endDate,
+  type = 'invoice',
 }: {
   query: string;
   currentPage: number;
   pageLimit: number;
   startDate: string;
   endDate: string;
+  type?: string;
 }) {
-  const payments = await fetchPaymentDetails(query, currentPage, pageLimit, startDate, endDate);
+  const payments = await fetchPaymentDetails(query, currentPage, pageLimit, startDate, endDate, type);
 
   return (
     <div className="mt-6 flow-root">
@@ -24,7 +26,7 @@ export default async function ProductTable({
             <thead className="rounded-lg text-left text-lg font-medium">
               <tr className='font-bold'>
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
-                  Customer Name
+                  {type === 'invoice' ? 'Customer Name' : 'Supplier Name'}
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   Date

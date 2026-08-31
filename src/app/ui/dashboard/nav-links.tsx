@@ -22,17 +22,17 @@ import clsx from 'clsx';
 const links = [
   { name: 'Home', href: '/admin', icon: HomeIcon },
   { name: 'Invoices', href: '/admin/invoices', icon: DocumentDuplicateIcon },
-  { name: 'Customers', href: '/admin/customers', icon: UserGroupIcon },
-  { name: 'Products', href: '/admin/products', icon: CubeIcon },
-  { name: 'Payments', href: '/admin/payments', icon: BanknotesIcon },
-  { name: 'Suppliers', href: '/admin/suppliers', icon: BuildingStorefrontIcon },
   { name: 'Yarns', href: '/admin/yarns', icon: NumberedListIcon },
   { name: 'Sizing', href: '/admin/sizing', icon: AdjustmentsVerticalIcon },
+  { name: 'Customers', href: '/admin/customers', icon: UserGroupIcon },
+  { name: 'Suppliers', href: '/admin/suppliers', icon: BuildingStorefrontIcon },
+  { name: 'Payments', href: '/admin/payments', icon: BanknotesIcon },
+  { name: 'Products', href: '/admin/products', icon: CubeIcon },
   { name: 'Purchases', href: '/admin/purchases', icon: ShoppingBagIcon },
+  { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon },
   { name: 'Warp', href: '/admin/warp', icon: MapIcon },
   { name: 'Expenses', href: '/admin/expenses', icon: CurrencyRupeeIcon },
-  { name: 'Investments', href: '/admin/investments', icon: BanknotesIcon },
-  { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon }
+  { name: 'Investments', href: '/admin/investments', icon: BanknotesIcon }
 ];
 
 export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) {
