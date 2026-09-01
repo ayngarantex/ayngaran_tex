@@ -42,7 +42,9 @@ export default async function Page(props: {
                     <div className="no-print flex w-full items-center justify-between mb-4">
                         <div className='flex items-center gap-4'>
                             <h1 className="text-2xl font-bold text-gray-800">Supplier Ledger Account</h1>
-                            <Financialyear hideBillType={true} />
+                            <div className="w-[420px]">
+                                <Financialyear />
+                            </div>
                         </div>
                     </div>
 

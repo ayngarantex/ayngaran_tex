@@ -43,21 +43,34 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
             if (billType) params.set('billType', billType);
 
             const response = await fetch(`/api/customers/${cusData.CustomerId}/pdf?${params.toString()}`);
-            if (!response.ok) throw new Error("Failed to download PDF");
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                console.error("PDF server generation error:", errData);
+                alert(`Server PDF generation issue (${errData.details || errData.error || 'Server error'}). Opening print view so you can save as PDF directly.`);
+                setPrintOption(true);
+                setTimeout(() => {
+                    handlePrint();
+                }, 150);
+                return;
+            }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
 
-            const fileName = `ledger_customer_${cusData.CustomerName.replace(/\s+/g, '_')}.pdf`;
+            const fileName = `ledger_customer_${cusData?.CustomerName ? cusData.CustomerName.replace(/\s+/g, '_') : 'customer'}.pdf`;
             const link = document.createElement('a');
             link.href = url;
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
             link.parentNode?.removeChild(link);
-        } catch (err) {
-            console.error(err);
-            alert("Error downloading PDF");
+        } catch (err: any) {
+            console.error("Download PDF error:", err);
+            alert("Unable to download PDF from server. Opening print view so you can save as PDF directly.");
+            setPrintOption(true);
+            setTimeout(() => {
+                handlePrint();
+            }, 150);
         } finally {
             setDownloading(false);
         }

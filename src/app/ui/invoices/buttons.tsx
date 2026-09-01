@@ -100,7 +100,13 @@ export function DownloadInvoice({
       params.set('duplicate', String(optDuplicate));
 
       const response = await fetch(`/api/invoices/${invoice.InvoiceId}/pdf?${params.toString()}`);
-      if (!response.ok) throw new Error("Failed to download PDF");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.error("Invoice PDF server generation error:", errData);
+        alert(`Server PDF generation issue (${errData.details || errData.error || 'Server error'}). Opening print page so you can print or save as PDF.`);
+        window.open(`/admin/invoices/${invoice.InvoiceId}/print?original=${optOriginal}&duplicate=${optDuplicate}`, '_blank');
+        return;
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -123,9 +129,10 @@ export function DownloadInvoice({
       if (link.parentNode) {
         link.parentNode.removeChild(link);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error downloading PDF");
+    } catch (err: any) {
+      console.error("Invoice PDF download error:", err);
+      alert("Unable to download PDF from server. Opening print page so you can save as PDF directly.");
+      window.open(`/admin/invoices/${invoice.InvoiceId}/print?original=${optOriginal}&duplicate=${optDuplicate}`, '_blank');
     } finally {
       setDownloading(false);
     }

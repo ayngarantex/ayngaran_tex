@@ -22,15 +22,15 @@ import clsx from 'clsx';
 const links = [
   { name: 'Home', href: '/admin', icon: HomeIcon },
   { name: 'Invoices', href: '/admin/invoices', icon: DocumentDuplicateIcon },
+  { name: 'Products', href: '/admin/products', icon: CubeIcon },
+  { name: 'Purchases', href: '/admin/purchases', icon: ShoppingBagIcon },
   { name: 'Yarns', href: '/admin/yarns', icon: NumberedListIcon },
   { name: 'Sizing', href: '/admin/sizing', icon: AdjustmentsVerticalIcon },
   { name: 'Customers', href: '/admin/customers', icon: UserGroupIcon },
   { name: 'Suppliers', href: '/admin/suppliers', icon: BuildingStorefrontIcon },
-  { name: 'Payments', href: '/admin/payments', icon: BanknotesIcon },
-  { name: 'Products', href: '/admin/products', icon: CubeIcon },
-  { name: 'Purchases', href: '/admin/purchases', icon: ShoppingBagIcon },
   { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon },
   { name: 'Warp', href: '/admin/warp', icon: MapIcon },
+  { name: 'Payments', href: '/admin/payments', icon: BanknotesIcon },
   { name: 'Expenses', href: '/admin/expenses', icon: CurrencyRupeeIcon },
   { name: 'Investments', href: '/admin/investments', icon: BanknotesIcon }
 ];
