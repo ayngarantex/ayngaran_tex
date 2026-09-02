@@ -2,18 +2,34 @@ import chromium from '@sparticuz/chromium';
 import puppeteerCore from 'puppeteer-core';
 import fs from 'fs';
 
+const CHROMIUM_REMOTE_PACK_URL = 'https://github.com/sparticuz/chromium/releases/download/v147.0.0/chromium-v147.0.0-pack.tar';
+
+/**
+ * Gets executable path for @sparticuz/chromium with fallback to remote release pack
+ * if local /bin directory is missing in serverless build tracing.
+ */
+async function getChromiumExecutablePath(): Promise<string> {
+  try {
+    return await chromium.executablePath();
+  } catch (err: any) {
+    console.warn('Local sparticuz/chromium bin missing, fetching remote pack tarball:', err?.message || err);
+    return await chromium.executablePath(CHROMIUM_REMOTE_PACK_URL);
+  }
+}
+
 /**
  * Robustly launches Puppeteer across different environments:
  * 1. Vercel / AWS Lambda Serverless (@sparticuz/chromium + puppeteer-core)
  * 2. Standalone Node.js server / Linux VPS (puppeteer with server flags)
  * 3. Fallback to system Chromium/Chrome binaries on Linux/Windows VPS if local bundle missing
- * 4. Fallback to @sparticuz/chromium pack executable path
+ * 4. Fallback to @sparticuz/chromium remote pack executable path
  */
 export async function launchBrowser() {
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
   if (isServerless) {
     try {
+      const execPath = await getChromiumExecutablePath();
       return await puppeteerCore.launch({
         args: [
           ...chromium.args,
@@ -24,7 +40,7 @@ export async function launchBrowser() {
           '--ignore-certificate-errors',
         ],
         defaultViewport: (chromium as any).defaultViewport,
-        executablePath: await chromium.executablePath(),
+        executablePath: execPath,
         headless: (chromium as any).headless,
       } as any);
     } catch (e) {
@@ -83,7 +99,7 @@ export async function launchBrowser() {
 
   // Strategy 3: Try @sparticuz/chromium as ultimate fallback
   try {
-    const execPath = await chromium.executablePath();
+    const execPath = await getChromiumExecutablePath();
     return await puppeteerCore.launch({
       args: [
         ...chromium.args,
