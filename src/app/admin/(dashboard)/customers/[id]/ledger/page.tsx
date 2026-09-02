@@ -69,10 +69,9 @@ export default async function Page(props:
                     </div>
                     <div className="flex w-full mb-2">
                         <h1 className={`text-2xl self-center`}>Customer&nbsp;Details</h1>
-                        <div className='w-80 ml-8'>
+                        <div className='w-[420px] ml-8'>
                             <Financialyear
                                 hidePage={true}
-                                hideBillType={true}
                             />
                         </div>
                     </div>

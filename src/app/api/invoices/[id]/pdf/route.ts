@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getInvoiceById } from '@/server/repositories/invoiceRepository';
-import chromium from '@sparticuz/chromium';
-import puppeteerCore from 'puppeteer-core';
+import { launchBrowser, navigateToPrintUrl } from '@/app/lib/puppeteer-helper';
 
 export const runtime = 'nodejs'; // Ensure Node runtime for Buffer support
 export const dynamic = 'force-dynamic';
@@ -21,44 +20,16 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const original = searchParams.get('original') !== 'false';
   const duplicate = searchParams.get('duplicate') === 'true';
 
-  const host = request.headers.get('host') || 'localhost:3000';
-  const protocol = request.headers.get('x-forwarded-proto') || 'http';
-  const printUrl = `${protocol}://${host}/admin/invoices/${invoiceId}/print?original=${original}&duplicate=${duplicate}`;
-
-  // Forward session cookies so Puppeteer authenticates properly
+  const targetPath = `/admin/invoices/${invoiceId}/print?original=${original}&duplicate=${duplicate}`;
   const cookieHeader = request.headers.get('cookie');
 
+  let browser: any;
   try {
-    let browser: any;
-
-    if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
-      // Production Vercel Serverless environment
-      browser = await puppeteerCore.launch({
-        args: chromium.args,
-        defaultViewport: (chromium as any).defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: (chromium as any).headless,
-      });
-    } else {
-      // Local Windows / Development environment
-      const puppeteer = await import('puppeteer');
-      browser = await puppeteer.default.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-    }
-
+    browser = await launchBrowser();
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
-    
-    if (cookieHeader) {
-      await page.setExtraHTTPHeaders({
-        cookie: cookieHeader,
-      });
-    }
 
-    // Navigate to print page and wait until network is idle
-    await page.goto(printUrl, { waitUntil: 'networkidle0' });
+    await navigateToPrintUrl(page, request.url, targetPath, cookieHeader);
 
     // Emulate print media type so @media print styles apply
     await page.emulateMediaType('print');
@@ -81,9 +52,12 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       },
     });
   } catch (error: any) {
+    if (browser) {
+      try { await browser.close(); } catch (e) {}
+    }
     console.error('Failed to generate PDF with Puppeteer:', error);
     return NextResponse.json(
-      { error: 'Failed to generate PDF', details: error?.message },
+      { error: 'Failed to generate PDF', details: error?.message || String(error) },
       { status: 500 }
     );
   }
