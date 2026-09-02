@@ -7,27 +7,32 @@ import fs from 'fs';
  * 1. Vercel / AWS Lambda Serverless (@sparticuz/chromium + puppeteer-core)
  * 2. Standalone Node.js server / Linux VPS (puppeteer with server flags)
  * 3. Fallback to system Chromium/Chrome binaries on Linux/Windows VPS if local bundle missing
+ * 4. Fallback to @sparticuz/chromium pack executable path
  */
 export async function launchBrowser() {
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
   if (isServerless) {
-    return await puppeteerCore.launch({
-      args: [
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--ignore-certificate-errors',
-      ],
-      defaultViewport: (chromium as any).defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: (chromium as any).headless,
-    } as any);
+    try {
+      return await puppeteerCore.launch({
+        args: [
+          ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--ignore-certificate-errors',
+        ],
+        defaultViewport: (chromium as any).defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: (chromium as any).headless,
+      } as any);
+    } catch (e) {
+      console.warn('Serverless chromium launch failed, falling back to next strategy:', e);
+    }
   }
 
-  // Standard Node.js server / Linux VPS / Docker / Dev environment
+  // Strategy 1: Standard Node.js server / Linux VPS / Docker / Dev environment via puppeteer
   try {
     const puppeteer = await import('puppeteer');
     return await puppeteer.default.launch({
@@ -43,41 +48,41 @@ export async function launchBrowser() {
     } as any);
   } catch (err) {
     console.warn('Standard puppeteer launch failed, attempting fallback to system chromium:', err);
+  }
 
-    // Common system chromium paths on Linux/Windows VPS
-    const systemChromiumPaths = [
-      '/usr/bin/chromium',
-      '/usr/bin/chromium-browser',
-      '/usr/bin/google-chrome',
-      '/usr/bin/google-chrome-stable',
-      '/snap/bin/chromium',
-      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-    ];
+  // Strategy 2: Common system chromium paths on Linux/Windows VPS
+  const systemChromiumPaths = [
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/snap/bin/chromium',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ];
 
-    let foundExecutable: string | undefined;
-    for (const exePath of systemChromiumPaths) {
-      if (fs.existsSync(exePath)) {
-        foundExecutable = exePath;
-        break;
+  for (const exePath of systemChromiumPaths) {
+    if (fs.existsSync(exePath)) {
+      try {
+        return await puppeteerCore.launch({
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--ignore-certificate-errors',
+          ],
+          executablePath: exePath,
+          headless: true,
+        } as any);
+      } catch (e) {
+        console.warn(`System executable launch failed for ${exePath}:`, e);
       }
     }
+  }
 
-    if (foundExecutable) {
-      return await puppeteerCore.launch({
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--ignore-certificate-errors',
-        ],
-        executablePath: foundExecutable,
-        headless: true,
-      } as any);
-    }
-
-    // Try @sparticuz/chromium as ultimate fallback
+  // Strategy 3: Try @sparticuz/chromium as ultimate fallback
+  try {
     const execPath = await chromium.executablePath();
     return await puppeteerCore.launch({
       args: [
@@ -90,6 +95,9 @@ export async function launchBrowser() {
       executablePath: execPath,
       headless: true,
     } as any);
+  } catch (e: any) {
+    console.error('All Puppeteer launch strategies failed:', e);
+    throw new Error('Server browser environment unavailable for PDF generation: ' + (e?.message || String(e)));
   }
 }
 
