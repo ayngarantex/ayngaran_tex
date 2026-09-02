@@ -94,9 +94,9 @@ export async function launchBrowser() {
 }
 
 /**
- * Attempts navigation to target URL with loopback fallback URLs.
+ * Attempts navigation to target URL with loopback fallback URLs and direct HTML fetch fallback.
  * On production servers, accessing the external public domain from inside the server process
- * often fails due to NAT loopback restrictions. Trying local loopback addresses guarantees connection.
+ * often fails due to NAT loopback restrictions. Trying local loopback addresses and HTML fetch guarantees connection.
  */
 export async function navigateToPrintUrl(page: any, requestUrl: string, targetPath: string, cookieHeader: string | null) {
   const reqUrlObj = new URL(requestUrl);
@@ -122,8 +122,8 @@ export async function navigateToPrintUrl(page: any, requestUrl: string, targetPa
   for (const testUrl of urlsToTry) {
     try {
       const res = await page.goto(testUrl, {
-        waitUntil: 'networkidle2',
-        timeout: 25000,
+        waitUntil: 'domcontentloaded',
+        timeout: 15000,
       });
       if (res && res.status() < 400) {
         // Wait for key content elements (tables, invoice container, print layout) to render
@@ -136,6 +136,28 @@ export async function navigateToPrintUrl(page: any, requestUrl: string, targetPa
     } catch (e: any) {
       lastError = e;
       console.warn(`Puppeteer navigation attempt failed for ${testUrl}:`, e?.message || e);
+    }
+  }
+
+  // Fallback: If network navigation attempts failed, fetch HTML directly and set content
+  if (!navigated) {
+    try {
+      const fetchUrl = `${protocol}//${host}${targetPath}`;
+      const fetchRes = await fetch(fetchUrl, {
+        headers: { cookie: cookieHeader || '' }
+      });
+      if (fetchRes.ok) {
+        let html = await fetchRes.text();
+        if (!html.includes('<base')) {
+          html = html.replace('<head>', `<head><base href="${protocol}//${host}">`);
+        }
+        await page.setContent(html, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('table, .invoice, #print-area, .print-layout', { timeout: 8000 }).catch(() => {});
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        navigated = true;
+      }
+    } catch (fetchErr: any) {
+      console.warn('Direct HTML fetch fallback failed:', fetchErr?.message || fetchErr);
     }
   }
 
