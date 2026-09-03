@@ -196,9 +196,9 @@ export default function ReturnProducts({ products, retProducts, setRetProducts }
                   <input
                     type="number"
                     step="any"
-                    value={row.price || ""}
+                    value={row.price !== undefined && row.price !== null ? row.price : ""}
                     onChange={(e) =>
-                      handleChange(rowIndex, "price", Number(e.target.value))
+                      handleChange(rowIndex, "price", e.target.value === "" ? "" : Number(e.target.value))
                     }
                     className="border border-gray-300 p-2 rounded-lg text-sm bg-white w-full"
                     placeholder="Price"

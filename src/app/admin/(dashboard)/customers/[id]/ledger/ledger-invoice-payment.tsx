@@ -472,8 +472,8 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                                                         <li key={idx} className="pb-1 border-b border-gray-200 mb-1 flex">
                                                                                             <span className="w-1/2 pr-2 truncate">{invDetail?.products?.Name}</span>
                                                                                             <span className="w-1/6 pr-2">{invDetail?.Quantity}</span>
-                                                                                            <span className="w-1/6 pr-2">{invDetail.Price}</span>
-                                                                                            <span className="w-1/6">{invDetail.Price * invDetail.Quantity}</span>
+                                                                                            <span className="w-1/6 pr-2">{parseFloat(invDetail.Price || 0).toFixed(2)}</span>
+                                                                                            <span className="w-1/6">{(parseFloat(invDetail.Price || 0) * Number(invDetail.Quantity || 0)).toFixed(2)}</span>
                                                                                         </li>
                                                                                     ))}
                                                                                 </ul>

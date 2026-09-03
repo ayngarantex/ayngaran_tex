@@ -15,7 +15,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
   const [fillTdRow, setFillTdRow] = useState<any[]>([])
   useEffect(() => {
     let fillTdRows = []
-    let int = (invoice?.BillType === 'gst' ? 8 : 12) - invProducts.length
+    let int = (invoice?.BillType === 'gst' ? 8 : 14) - invProducts.length
     for (let i = 0; i <= int; i++) {
       fillTdRows.push(i)
     }
