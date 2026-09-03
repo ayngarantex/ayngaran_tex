@@ -5,7 +5,7 @@ import PrintScreen from "@/app/ui/invoices/print-screen";
 
 export default async function Page(props: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ original?: string; duplicate?: string }>;
+  searchParams?: Promise<{ original?: string; duplicate?: string; signature?: string }>;
 }) {
 
   const params = await props.params;
@@ -17,6 +17,7 @@ export default async function Page(props: {
 
   const initialOriginal = searchParams?.original !== 'false';
   const initialDuplicate = searchParams?.duplicate === 'true';
+  const initialSignature = false;
 
   return (
     <PrintScreen
@@ -25,6 +26,7 @@ export default async function Page(props: {
       customer={customer}
       initialOriginal={initialOriginal}
       initialDuplicate={initialDuplicate}
+      initialSignature={initialSignature}
     />
   );
 };

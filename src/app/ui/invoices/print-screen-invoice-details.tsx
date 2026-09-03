@@ -10,12 +10,14 @@ export default function PrintScreenInvoiceDetails({
     invoice,
     products,
     type,
-    customer
+    customer,
+    showSignature = false,
 }: {
     invoice: any;
     products: ProductField[];
     type: string;
-    customer: any
+    customer: any;
+    showSignature?: boolean;
 }) {
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +66,7 @@ export default function PrintScreenInvoiceDetails({
                         </div>
                     </div>
                 </div>
-                <p className='py-1 bg-blue-200 flex justify-center text-xl border-t mt-2'>
+                <p className='py-1 flex justify-center text-xl border-t mt-2'>
                     {invoice?.BillType === 'gst' ? 'Tax Invoice' : 'Delivery Chalan | Not for Sale'}
                 </p>
                 <div className='flex flex-wrap border-t'>
@@ -118,6 +120,7 @@ export default function PrintScreenInvoiceDetails({
                         invProducts={invoiceProductData}
                         products={products}
                         customer={customer}
+                        showSignature={showSignature}
                     />
                 </div>
             </div>

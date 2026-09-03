@@ -111,8 +111,8 @@ export default function TableInvoiceDetails({
                                     <li key={index} className="pb-2 border-b border-gray-200 mb-2 flex">
                                         <span className="min-w-[30%] pr-4">{invDetail?.products?.Name}</span>
                                         <span className="min-w-[20%] pr-4 text-right">{invDetail?.Quantity}</span>
-                                        <span className="min-w-[20%] pr-4 text-right">{invDetail.Price}</span>
-                                        <span className="min-w-[30%] pr-4 text-right">{invDetail.Price * invDetail.Quantity}</span>
+                                        <span className="min-w-[20%] pr-4 text-right">{parseFloat(invDetail.Price || 0).toFixed(2)}</span>
+                                        <span className="min-w-[30%] pr-4 text-right">{(parseFloat(invDetail.Price || 0) * Number(invDetail.Quantity || 0)).toFixed(2)}</span>
                                     </li>
                                 ))}
                                 {invoice.BillType === 'gst' && (

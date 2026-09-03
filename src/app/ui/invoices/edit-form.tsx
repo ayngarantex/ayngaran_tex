@@ -225,8 +225,8 @@ export default function EditForm({
     let afterTaxVal = beforeTax + taxAmount;
     setAfterTax(Number(afterTaxVal.toFixed(2)))
 
-    let roundOffVal = (Math.round(afterTaxVal) - afterTaxVal).toFixed(2)
-    setRoundOff(roundOffVal)
+    // let roundOffVal = (Math.round(afterTaxVal) - afterTaxVal).toFixed(2)
+    // setRoundOff(roundOffVal)
   }, [billType, beforeTax, cgstAmount, sgstAmount, igstAmount, selectedCustomer])
 
   useEffect(() => {
@@ -695,6 +695,7 @@ export default function EditForm({
 
         <PaymentForm
           invPayment={invoicePaymentData}
+          billType={billType}
           invoiceAmount={invoiceAmount}
           setInvPayments={setInvPayments}
         />

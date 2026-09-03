@@ -8,14 +8,15 @@ const paymentTo = ["Prakash", "Govinth", "Sekar"]
 
 interface PaymentProps {
   invoiceAmount: any,
+  billType: string,
   invPayment: any,
   setInvPayments: React.Dispatch<React.SetStateAction<PaymentRow[]>>;
 }
 
-export default function PaymentForm({ invoiceAmount, invPayment, setInvPayments }: PaymentProps) {
+export default function PaymentForm({ invoiceAmount, billType, invPayment, setInvPayments }: PaymentProps) {
 
   const [selectedPayment, setSelectedPayment] = useState<PaymentRow[]>([
-    { pId: 0, date: "date", amount: "", type: "Gpay", to: "Prakash" },
+    { pId: 0, date: "date", amount: "", type: billType === "gst" ? "Bank" : "Gpay", to: "Prakash" },
   ]);
   const initialized = useRef(false);
 

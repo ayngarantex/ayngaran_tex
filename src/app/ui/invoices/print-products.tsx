@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ProductField } from "@/app/lib/definitions";
 import React, { useEffect, useState } from "react";
 import { ProductRow } from '@/app/lib/types';
@@ -8,14 +9,15 @@ interface ProductsProps {
   invProducts: any;
   products: ProductField[];
   customer?: any;
+  showSignature?: boolean;
 }
 
 
-export default function PrintProduct({ invoice, invProducts, products, customer }: ProductsProps) {
+export default function PrintProduct({ invoice, invProducts, products, customer, showSignature = true }: ProductsProps) {
   const [fillTdRow, setFillTdRow] = useState<any[]>([])
   useEffect(() => {
     let fillTdRows = []
-    let int = (invoice?.BillType === 'gst' ? 8 : 12) - invProducts.length
+    let int = (invoice?.BillType === 'gst' ? 8 : 14) - invProducts.length
     for (let i = 0; i <= int; i++) {
       fillTdRows.push(i)
     }
@@ -28,7 +30,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
       <div className="">
         <table className="pt-4 w-full border-t table-fixed">
           <thead>
-            <tr className="bg-blue-100">
+            <tr className="">
               <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "60px" }}>S No.</th>
               <th className="text-sm border-b border-x px-2 py-1 text-left">Particulars</th>
               {invoice?.BillType === 'gst' ?
@@ -172,9 +174,23 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
               <span className="text-sm pl-2">All Payment should be made by A/c Payess Cheque/Draft/RTGS</span>
             </p>
           </div>
-          <div className="flex flex-wrap justify-end border-l py-2" style={{ width: "210px" }}>
-            <p className="w-full self-start text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
-            <p className="w-full self-end text-center font-semibold text-sm">Authorized Signatory</p>
+          <div className="flex flex-col justify-between items-center border-l py-2 px-2" style={{ width: "210px" }}>
+            <p className="w-full text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
+            {showSignature ? (
+              <div className="flex justify-center items-center h-[65px] w-full py-0.5">
+                <Image
+                  src="/uploads/signature_trimmed.png"
+                  alt="Authorized Signature"
+                  width={200}
+                  height={70}
+                  className="max-h-[62px] max-w-[195px] w-auto h-auto object-contain"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="h-[65px]" />
+            )}
+            <p className="w-full text-center font-semibold text-sm">Authorized Signatory</p>
           </div>
         </div>
       </div>

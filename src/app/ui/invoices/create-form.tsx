@@ -647,6 +647,7 @@ export default function Form({
 
         <PaymentForm
           invoiceAmount={invoiceAmount}
+          billType={billType}
           invPayment={[]}
           setInvPayments={setInvPayments}
         />
