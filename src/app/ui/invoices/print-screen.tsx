@@ -16,17 +16,20 @@ export default function PrintScreen({
     customer,
     initialOriginal = true,
     initialDuplicate = false,
+    initialSignature = true,
 }: {
     invoice: any;
     products: ProductField[];
     customer: any;
     initialOriginal?: boolean;
     initialDuplicate?: boolean;
+    initialSignature?: boolean;
 }) {
     const printRef = useRef<HTMLDivElement>(null);
     const [showDuplicateCopy, setShowDuplicateCopy] = useState(initialDuplicate);
     const [printOriginalCopy, setPrintOriginalCopy] = useState(initialOriginal);
     const [printDuplicateCopy, setPrintDuplicateCopy] = useState(initialDuplicate);
+    const [showSignature, setShowSignature] = useState(initialSignature);
 
     const handlePrint = () => {
         setShowDuplicateCopy(true);
@@ -111,6 +114,22 @@ export default function PrintScreen({
                     Duplicate for Supplier / Transporter
                 </label>
             </div>
+            <div className="flex items-center pt-2 no-print">
+                <input
+                    id="addSignature"
+                    name="addSignature"
+                    type="checkbox"
+                    className="h-4 w-4 cursor-pointer border-gray-300 bg-blue-100 text-gray-600 focus:ring-2"
+                    onChange={(e) => setShowSignature(e.target.checked)}
+                    checked={showSignature}
+                />
+                <label
+                    htmlFor="addSignature"
+                    className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600 pt-1 ml-2 mb-1"
+                >
+                    Add Authorized Signature
+                </label>
+            </div>
             {/* </div> */}
 
             {/* ✅ PRINT AREA */}
@@ -122,6 +141,7 @@ export default function PrintScreen({
                             products={products}
                             type={'ORIGINAL FOR RECIPIENT'}
                             customer={customer}
+                            showSignature={showSignature}
                         />
                     </div>
                     : null}
@@ -132,6 +152,7 @@ export default function PrintScreen({
                             products={products}
                             type={'Duplicate'}
                             customer={customer}
+                            showSignature={showSignature}
                         />
                     </div>
                     : null}

@@ -10,12 +10,14 @@ export default function PrintScreenInvoiceDetails({
     invoice,
     products,
     type,
-    customer
+    customer,
+    showSignature = true,
 }: {
     invoice: any;
     products: ProductField[];
     type: string;
-    customer: any
+    customer: any;
+    showSignature?: boolean;
 }) {
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +120,7 @@ export default function PrintScreenInvoiceDetails({
                         invProducts={invoiceProductData}
                         products={products}
                         customer={customer}
+                        showSignature={showSignature}
                     />
                 </div>
             </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ProductField } from "@/app/lib/definitions";
 import React, { useEffect, useState } from "react";
 import { ProductRow } from '@/app/lib/types';
@@ -8,10 +9,11 @@ interface ProductsProps {
   invProducts: any;
   products: ProductField[];
   customer?: any;
+  showSignature?: boolean;
 }
 
 
-export default function PrintProduct({ invoice, invProducts, products, customer }: ProductsProps) {
+export default function PrintProduct({ invoice, invProducts, products, customer, showSignature = true }: ProductsProps) {
   const [fillTdRow, setFillTdRow] = useState<any[]>([])
   useEffect(() => {
     let fillTdRows = []
@@ -172,9 +174,23 @@ export default function PrintProduct({ invoice, invProducts, products, customer 
               <span className="text-sm pl-2">All Payment should be made by A/c Payess Cheque/Draft/RTGS</span>
             </p>
           </div>
-          <div className="flex flex-wrap justify-end border-l py-2" style={{ width: "210px" }}>
-            <p className="w-full self-start text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
-            <p className="w-full self-end text-center font-semibold text-sm">Authorized Signatory</p>
+          <div className="flex flex-col justify-between items-center border-l py-2 px-2" style={{ width: "210px" }}>
+            <p className="w-full text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
+            {showSignature ? (
+              <div className="my-1 flex justify-center items-center h-[100px]">
+                <Image
+                  src="/uploads/signature_1782568425227.png"
+                  alt="Authorized Signature"
+                  width={250}
+                  height={100}
+                  className="max-h-[50px] w-auto object-contain"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="h-[50px]" />
+            )}
+            <p className="w-full text-center font-semibold text-sm">Authorized Signatory</p>
           </div>
         </div>
       </div>
