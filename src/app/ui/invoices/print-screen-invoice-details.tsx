@@ -11,7 +11,7 @@ export default function PrintScreenInvoiceDetails({
     products,
     type,
     customer,
-    showSignature = true,
+    showSignature = false,
 }: {
     invoice: any;
     products: ProductField[];
@@ -30,9 +30,9 @@ export default function PrintScreenInvoiceDetails({
             {invoice?.BillType === 'gst' ?
                 <p className="self-center flex justify-end pb-2 font-bold uppercase">{type}</p>
                 : null}
-            <div className='border pt-3 m-1'>
-                <div className="flex justify-between items-start w-full">
-                    <div className="w-full border-0">
+            <div className='border border-black pt-3 m-1'>
+                <div className="flex justify-between items-start w-full border-0">
+                    <div className="w-full">
                         <div className='flex justify-between px-4 '>
                             <h1 className="text-xl font-bold">GSTIN: 33AYWPV5842M1ZD</h1>
                             {/* <p className="self-center flex">({type})</p> */}
@@ -66,11 +66,11 @@ export default function PrintScreenInvoiceDetails({
                         </div>
                     </div>
                 </div>
-                <p className='py-1 bg-blue-200 flex justify-center text-xl border-t mt-2'>
+                <p className='py-1 bg-blue-200 flex justify-center text-xl border-t border-b border-black mt-2'>
                     {invoice?.BillType === 'gst' ? 'Tax Invoice' : 'Delivery Chalan | Not for Sale'}
                 </p>
-                <div className='flex flex-wrap border-t'>
-                    <div className='px-4 py-4 w-2/5 border-r'>
+                <div className='flex flex-wrap border-t border-black'>
+                    <div className='px-4 py-4 w-2/5 border-r border-black'>
                         <p className="text-base mb-2 self-start w-full flex">
                             <span className='w-32'>Invoice No # </span>
                             {invoice?.BillType === 'gst' ?

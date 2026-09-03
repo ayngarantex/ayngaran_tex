@@ -16,20 +16,18 @@ export default function PrintScreen({
     customer,
     initialOriginal = true,
     initialDuplicate = false,
-    initialSignature = true,
 }: {
     invoice: any;
     products: ProductField[];
     customer: any;
     initialOriginal?: boolean;
     initialDuplicate?: boolean;
-    initialSignature?: boolean;
 }) {
     const printRef = useRef<HTMLDivElement>(null);
     const [showDuplicateCopy, setShowDuplicateCopy] = useState(initialDuplicate);
     const [printOriginalCopy, setPrintOriginalCopy] = useState(initialOriginal);
     const [printDuplicateCopy, setPrintDuplicateCopy] = useState(initialDuplicate);
-    const [showSignature, setShowSignature] = useState(initialSignature);
+    const [showSignature, setShowSignature] = useState(false);
 
     const handlePrint = () => {
         setShowDuplicateCopy(true);

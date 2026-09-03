@@ -28,25 +28,25 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
   return (
     <div className="">
       <div className="">
-        <table className="pt-4 w-full border-t table-fixed">
+        <table className="pt-4 w-full border-t border-black table-fixed">
           <thead>
             <tr className="bg-blue-100">
-              <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "60px" }}>S No.</th>
-              <th className="text-sm border-b border-x px-2 py-1 text-left">Particulars</th>
+              <th className="text-sm border-b border-r border-black px-2 py-1 text-left" style={{ width: "60px" }}>S No.</th>
+              <th className="text-sm border-b border-r border-black px-2 py-1 text-left">Particulars</th>
               {invoice?.BillType === 'gst' ?
-                <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "100px" }}>Hsn Code</th>
+                <th className="text-sm border-b border-r border-black px-2 py-1 text-left" style={{ width: "100px" }}>Hsn Code</th>
                 : null}
-              <th className="text-sm border-b border-x px-2 py-1 text-center" style={{ width: "90px" }}>Qty</th>
-              <th className="text-sm border-b border-r px-2 py-1 text-center" style={{ width: "90px" }}>Price</th>
-              <th className={`text-sm border-b px-2 py-1 text-right`} style={{ width: "120px" }}>Amount</th>
+              <th className="text-sm border-b border-r border-black px-2 py-1 text-center" style={{ width: "90px" }}>Qty</th>
+              <th className="text-sm border-b border-r border-black px-2 py-1 text-center" style={{ width: "90px" }}>Price</th>
+              <th className="text-sm border-b border-black px-2 py-1 text-right" style={{ width: "120px" }}>Amount</th>
             </tr>
           </thead>
           <tbody>
             {invProducts?.length ?
               invProducts.map((row: any, rowIndex: number) => (
                 <tr key={"text_" + rowIndex}>
-                  <td style={{ height: "40px" }} className="text-sm pl-2 pr-3 py-1 text-right">{rowIndex + 1}</td>
-                  <td className="border-x px-2 py-1">
+                  <td style={{ height: "40px" }} className="text-sm border-r border-black pl-2 pr-3 py-1 text-right">{rowIndex + 1}</td>
+                  <td className="border-r border-black px-2 py-1">
                     <div className="text-sm flex flex-wrap">
                       {row?.ProductName ? row.ProductName : row.ItemId ? products.filter(e => e.Id === row.ItemId)?.[0].Name : ""}
                       {row.ItemId && products.filter(e => e.Id === row.ItemId).length && products.filter(e => e.Id === row.ItemId)?.[0].ProductCode ?
@@ -60,15 +60,15 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
                     </div>
                   </td>
                   {invoice?.BillType === 'gst' ?
-                    <td className="text-sm px-2 py-1 text-right">
+                    <td className="text-sm border-r border-black px-2 py-1 text-right">
                       {row.ItemId && products.filter(e => e.Id === row.ItemId).length ?
                         products.filter(e => e.Id === row.ItemId)?.[0]?.HSNCode || ""
                         : "52081210"
                       }
                     </td>
                     : null}
-                  <td className="text-sm border-x px-2 py-1 text-right">{row.Quantity}</td>
-                  <td className="text-sm border-r px-2 py-1 text-right">{parseFloat(row.Price).toFixed(2)}</td>
+                  <td className="text-sm border-r border-black px-2 py-1 text-right">{row.Quantity}</td>
+                  <td className="text-sm border-r border-black px-2 py-1 text-right">{parseFloat(row.Price).toFixed(2)}</td>
                   <td className="text-sm px-2 py-1 text-right">{(parseFloat(row.Total).toFixed(2))}</td>
                 </tr>
               ))
@@ -76,13 +76,13 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
             {fillTdRow?.length ?
               fillTdRow.map((row: any, rowIndex: number) => (
                 <tr key={"fillRow_" + rowIndex}>
-                  <td style={{ height: "40px" }} className="px-2 py-1">&nbsp;</td>
-                  <td className="border-x px-2 py-1">&nbsp;</td>
+                  <td style={{ height: "40px" }} className="border-r border-black px-2 py-1">&nbsp;</td>
+                  <td className="border-r border-black px-2 py-1">&nbsp;</td>
                   {invoice?.BillType === 'gst' ?
-                    <td className="px-2 py-1">&nbsp;</td>
+                    <td className="border-r border-black px-2 py-1">&nbsp;</td>
                     : null}
-                  <td className="border-x px-2 py-1 text-right">&nbsp;</td>
-                  <td className="border-r px-2 py-1 text-right">&nbsp;</td>
+                  <td className="border-r border-black px-2 py-1 text-right">&nbsp;</td>
+                  <td className="border-r border-black px-2 py-1 text-right">&nbsp;</td>
                   <td className="px-2 py-1 text-right">&nbsp;</td>
                 </tr>
               ))
@@ -91,7 +91,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
         </table>
       </div>
       <div className="print-footer-fixed">
-        <div className={`flex flex-wrap border-t w-full`} id="banking">
+        <div className="flex flex-wrap border-t border-black w-full" id="banking">
           {invoice?.BillType === 'gst' ?
             <div className="px-2 py-2 align-top text-left w-1/2">
               <p className="self-center flex">
@@ -116,49 +116,49 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
             {invoice?.BillType === 'gst' ?
               <>
                 <div className="pl-2 align-top justify-end w-full flex">
-                  <span className='text-sm py-1 text-sm text-left pl-4 border-l py-1' style={{ width: "180px" }}>Total Amount Before Tax</span>
+                  <span className='text-sm text-left pl-4 border-l border-black py-1' style={{ width: "180px" }}>Total Amount Before Tax</span>
                   <span className="pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.BeforeTax ? (invoice?.BeforeTax).toFixed(2) : 0}</span>
                 </div>
                 {customer?.State === 'TamilNadu' ?
                   <>
                     <div className="border-0 pl-2 align-top justify-end w-full flex">
-                      <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>CGST <span className="pl-2">(2.5%)</span></span>
+                      <span className='text-sm py-1 text-left pl-4 border-l border-black' style={{ width: "180px" }}>CGST <span className="pl-2">(2.5%)</span></span>
                       <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{customer?.State === 'TamilNadu' ? (invoice?.Cgst ? (invoice?.Cgst).toFixed(2) : '') : null}</span>
                     </div>
                     <div className="border-0 pl-2 align-top justify-end w-full flex">
-                      <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>SGST <span className="pl-2">(2.5%)</span></span>
+                      <span className='text-sm py-1 text-left pl-4 border-l border-black' style={{ width: "180px" }}>SGST <span className="pl-2">(2.5%)</span></span>
                       <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{customer?.State === 'TamilNadu' ? (invoice?.Sgst ? (invoice?.Sgst).toFixed(2) : '') : null}</span>
                     </div>
                   </>
                   :
                   <div className="border-0 pl-2 align-top justify-end w-full flex">
-                    <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>IGST <span className="pl-2">(5%) </span></span>
+                    <span className='text-sm py-1 text-left pl-4 border-l border-black' style={{ width: "180px" }}>IGST <span className="pl-2">(5%) </span></span>
                     <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{customer?.State !== 'TamilNadu' ? (invoice?.Igst).toFixed(2) : null}</span>
                   </div>
                 }
                 <div className="border-0 pl-2 align-top justify-end w-full flex">
-                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>Round Off (-/+)</span>
+                  <span className='text-sm py-1 text-left pl-4 border-l border-black' style={{ width: "180px" }}>Round Off (-/+)</span>
                   <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.RoundOff ? (invoice?.RoundOff) : ""}</span>
                 </div>
                 <div className="border-0 pl-2 align-top justify-end w-full flex">
-                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>Discount (-/+)</span>
+                  <span className='text-sm py-1 text-left pl-4 border-l border-black' style={{ width: "180px" }}>Discount (-/+)</span>
                   <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.Discount ? (invoice?.Discount) : ""}</span>
                 </div>
               </>
               : null}
             <div className="border-0 pl-2 align-top justify-end w-full flex">
-              <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}> {invoice?.BillType === 'gst' ? 'Total Amount After Tax' : 'Total Amount'}</span>
+              <span className='text-sm py-1 text-left pl-4 border-l border-black' style={{ width: "180px" }}> {invoice?.BillType === 'gst' ? 'Total Amount After Tax' : 'Total Amount'}</span>
               <span className="pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.InvoiceAmount ? formatCurrency(invoice?.InvoiceAmount) : ""}</span>
             </div>
           </div>
         </div>
         {invoice?.BillType === 'gst' ?
-          <div className="border-t px-2 py-1 align-top text-left" id="total">
+          <div className="border-t border-black px-2 py-1 align-top text-left" id="total">
             <span className='text-sm'>Rupees: </span>
             <span className="pl-2 w-40 text-right text-sm">{numberToIndianWords(invoice?.InvoiceAmount)} Only</span>
           </div>
           : null}
-        <div className="border-t align-top text-left flex justify-between h-28" id="terms">
+        <div className="border-t border-black align-top text-left flex justify-between h-28" id="terms">
           <div className="py-2 px-2">
             <p className="text-sm self-center flex font-semibold">Terms & Conditions</p>
             <p className="text-sm self-center flex">
@@ -174,21 +174,21 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
               <span className="text-sm pl-2">All Payment should be made by A/c Payess Cheque/Draft/RTGS</span>
             </p>
           </div>
-          <div className="flex flex-col justify-between items-center border-l py-2 px-2" style={{ width: "210px" }}>
+          <div className="flex flex-col justify-between items-center border-l border-black py-2 px-2" style={{ width: "210px" }}>
             <p className="w-full text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
             {showSignature ? (
-              <div className="flex justify-center items-center h-[65px] w-full py-0.5">
+              <div className="flex justify-center items-center h-[55px] w-full py-0.5">
                 <Image
                   src="/uploads/signature_trimmed.png"
                   alt="Authorized Signature"
                   width={200}
                   height={70}
-                  className="max-h-[62px] max-w-[195px] w-auto h-auto object-contain"
+                  className="max-h-[55px] max-w-[195px] w-auto h-auto object-contain"
                   unoptimized
                 />
               </div>
             ) : (
-              <div className="h-[65px]" />
+              <div className="h-[55px]" />
             )}
             <p className="w-full text-center font-semibold text-sm">Authorized Signatory</p>
           </div>
