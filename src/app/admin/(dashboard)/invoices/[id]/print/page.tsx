@@ -17,6 +17,7 @@ export default async function Page(props: {
 
   const initialOriginal = searchParams?.original !== 'false';
   const initialDuplicate = searchParams?.duplicate === 'true';
+  const initialSignature = searchParams?.signature !== 'false';
 
   return (
     <PrintScreen
@@ -25,6 +26,7 @@ export default async function Page(props: {
       customer={customer}
       initialOriginal={initialOriginal}
       initialDuplicate={initialDuplicate}
+      initialSignature={initialSignature}
     />
   );
 };
