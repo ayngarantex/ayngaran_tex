@@ -27,6 +27,7 @@ export const getInvoices = async (
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
         OR I.InvoiceType LIKE '%${search}%'
+        OR LOWER(I.InvoiceType) LIKE '%${search}%'
       )
     `;
     }
@@ -169,6 +170,7 @@ export const getInvoicesCount = async (
         OR LOWER(C.GstNumber) LIKE '%${search}%'
         OR I.InvoiceDate LIKE'%${search}%'
         OR I.InvoiceType LIKE '%${search}%'
+        OR LOWER(I.InvoiceType) LIKE '%${search}%'
       )
     `;
     }

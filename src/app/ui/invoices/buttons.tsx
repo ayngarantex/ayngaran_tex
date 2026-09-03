@@ -59,13 +59,13 @@ export function DeleteInvoice({ id }: { id: string }) {
   );
 }
 
-export function DownloadInvoice({ 
+export function DownloadInvoice({
   invoice,
   original = true,
   duplicate = false,
   className,
   showLabel = false,
-}: { 
+}: {
   invoice: any;
   original?: boolean;
   duplicate?: boolean;
@@ -125,7 +125,7 @@ export function DownloadInvoice({
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
-      
+
       if (link.parentNode) {
         link.parentNode.removeChild(link);
       }
@@ -344,10 +344,10 @@ export function ExportInvoices({ query, billType, orderBy }: { query: string, bi
         headers.join(','),
         ...invoices.map((inv: any) => {
           let billNum = '';
-          if (inv.InvoiceType === 'Tax Invoice') {
-            billNum = `${getFinancialYearShortNew(inv.InvoiceDate)}/AT/${String(inv.InvoiceNumber).padStart(2, '0')}`;
-          } else if (inv.InvoiceType === 'Credit Note') {
+          if (inv.InvoiceType === 'Credit Note') {
             billNum = `${getFinancialYearShortNew(inv.InvoiceDate)}/AT-C/${String(inv.InvoiceNumber).padStart(2, '0')}`;
+          } else if (invoiceTypeOptions().map((option: any) => option).includes(inv.InvoiceType)) {
+            billNum = `${getFinancialYearShortNew(inv.InvoiceDate)}/AT/${String(inv.InvoiceNumber).padStart(2, '0')}`;
           } else {
             billNum = `S-DC/${String(inv.InvoiceNumber).padStart(2, '0')}`;
           }

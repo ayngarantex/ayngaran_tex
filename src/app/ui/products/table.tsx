@@ -51,7 +51,7 @@ export default async function ProductTable({
                   Code
                 </th>
                 <th scope="col" className="px-4 py-5 font-bold text-lg sm:pl-6">
-                  Stock
+                  Total
                 </th>
                 <th scope="col" className="px-4 py-5 font-bold text-lg sm:pl-6">
                   Sold

@@ -30,7 +30,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
       <div className="">
         <table className="pt-4 w-full border-t table-fixed">
           <thead>
-            <tr className="bg-blue-100">
+            <tr className="">
               <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "60px" }}>S No.</th>
               <th className="text-sm border-b border-x px-2 py-1 text-left">Particulars</th>
               {invoice?.BillType === 'gst' ?

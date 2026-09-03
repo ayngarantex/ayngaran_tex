@@ -16,7 +16,7 @@ export default function PrintScreen({
     customer,
     initialOriginal = true,
     initialDuplicate = false,
-    initialSignature = true,
+    initialSignature = false,
 }: {
     invoice: any;
     products: ProductField[];

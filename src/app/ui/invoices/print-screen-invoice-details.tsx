@@ -11,7 +11,7 @@ export default function PrintScreenInvoiceDetails({
     products,
     type,
     customer,
-    showSignature = true,
+    showSignature = false,
 }: {
     invoice: any;
     products: ProductField[];
@@ -66,7 +66,7 @@ export default function PrintScreenInvoiceDetails({
                         </div>
                     </div>
                 </div>
-                <p className='py-1 bg-blue-200 flex justify-center text-xl border-t mt-2'>
+                <p className='py-1 flex justify-center text-xl border-t mt-2'>
                     {invoice?.BillType === 'gst' ? 'Tax Invoice' : 'Delivery Chalan | Not for Sale'}
                 </p>
                 <div className='flex flex-wrap border-t'>
