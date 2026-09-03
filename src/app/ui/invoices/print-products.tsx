@@ -177,13 +177,13 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
           <div className="flex flex-col justify-between items-center border-l py-2 px-2" style={{ width: "210px" }}>
             <p className="w-full text-center font-semibold text-sm"><span className="font-normal">for</span> Ayngaran Tex</p>
             {showSignature ? (
-              <div className="my-0.5 flex justify-center items-center h-[65px] w-full overflow-hidden">
+              <div className="flex justify-center items-center h-[65px] w-full py-0.5">
                 <Image
                   src="/uploads/signature_trimmed.png"
                   alt="Authorized Signature"
                   width={200}
                   height={70}
-                  className="max-h-[65px] max-w-[195px] w-auto h-auto object-contain"
+                  className="max-h-[62px] max-w-[195px] w-auto h-auto object-contain"
                   unoptimized
                 />
               </div>
