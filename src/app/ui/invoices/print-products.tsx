@@ -30,15 +30,15 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
       <div className="">
         <table className="pt-4 w-full border-t table-fixed">
           <thead>
-            <tr className="bg-blue-100">
-              <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "60px" }}>S No.</th>
-              <th className="text-sm border-b border-x px-2 py-1 text-left">Particulars</th>
+            <tr className="bg-blue-100 bg-clip-padding">
+              <th className="text-sm border-b px-2 py-1 text-left bg-clip-padding" style={{ width: "60px" }}>S No.</th>
+              <th className="text-sm border-b border-x px-2 py-1 text-left bg-clip-padding">Particulars</th>
               {invoice?.BillType === 'gst' ?
-                <th className="text-sm border-b px-2 py-1 text-left" style={{ width: "100px" }}>Hsn Code</th>
+                <th className="text-sm border-b px-2 py-1 text-left bg-clip-padding" style={{ width: "100px" }}>Hsn Code</th>
                 : null}
-              <th className="text-sm border-b border-x px-2 py-1 text-center" style={{ width: "90px" }}>Qty</th>
-              <th className="text-sm border-b border-r px-2 py-1 text-center" style={{ width: "90px" }}>Price</th>
-              <th className={`text-sm border-b px-2 py-1 text-right`} style={{ width: "120px" }}>Amount</th>
+              <th className="text-sm border-b border-x px-2 py-1 text-center bg-clip-padding" style={{ width: "90px" }}>Qty</th>
+              <th className="text-sm border-b border-r px-2 py-1 text-center bg-clip-padding" style={{ width: "90px" }}>Price</th>
+              <th className={`text-sm border-b px-2 py-1 text-right bg-clip-padding`} style={{ width: "120px" }}>Amount</th>
             </tr>
           </thead>
           <tbody>
