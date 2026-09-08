@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
-import { deleteInvoice, fetchInvoices, fetchGstr1Data } from '@/app/api/node/invoice';
-import { PencilIcon, PlusIcon, TrashIcon, PrinterIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { deleteInvoice, fetchInvoices, fetchGstr1Data, updateInvoicePayments } from '@/app/api/node/invoice';
+import { PencilIcon, PlusIcon, TrashIcon, PrinterIcon, ArrowDownTrayIcon, BanknotesIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getFinancialYearShortNew, formatDateNew, invoiceTypeOptions } from '@/app/lib/utils';
+import PaymentForm from '@/app/ui/invoices/payment-form';
+import { PaymentRow } from '@/app/lib/types';
 
 export function CreateInvoice() {
   return (
@@ -55,6 +57,106 @@ export function DeleteInvoice({ id }: { id: string }) {
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" />
       </button>
+    </>
+  );
+}
+
+export function PayInvoice({ invoice }: { invoice: any }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [invPayments, setInvPayments] = useState<PaymentRow[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const filteredPayments = invPayments.filter((row: PaymentRow) => row.date && row.date !== 'date');
+      const success = await updateInvoicePayments(invoice.InvoiceId, filteredPayments);
+      if (success) {
+        setIsOpen(false);
+        window.location.reload();
+      } else {
+        alert("Failed to save payments.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving payments.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const invoiceNumStr = invoice?.InvoiceType === 'Credit Note'
+    ? `${getFinancialYearShortNew(invoice.InvoiceDate)}/AT-C/${String(invoice.InvoiceNumber).padStart(2, '0')}`
+    : invoiceTypeOptions().map((o: any) => o).includes(invoice?.InvoiceType)
+    ? `${getFinancialYearShortNew(invoice.InvoiceDate)}/AT/${String(invoice.InvoiceNumber).padStart(2, '0')}`
+    : `S-DC/${String(invoice?.InvoiceNumber).padStart(2, '0')}`;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="rounded-md border p-2 border-emerald-300 text-emerald-600 hover:bg-emerald-100 transition-colors"
+        title="Add / Edit Payment"
+      >
+        <BanknotesIcon className="w-5" />
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-slate-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 rounded-t-2xl">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <BanknotesIcon className="w-6 h-6 text-emerald-600" />
+                  Payment for Invoice #{invoiceNumStr}
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Customer: <span className="font-semibold text-slate-700">{invoice?.CustomerName}</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto space-y-4">
+              <PaymentForm
+                invoiceAmount={invoice?.InvoiceAmount || 0}
+                billType={invoice?.BillType || 'gst'}
+                invPayment={invoice?.invoice_payments || invoice?.payment_details || []}
+                setInvPayments={setInvPayments}
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-2xl">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                disabled={loading}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={loading}
+                className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {loading ? 'Saving...' : 'Save Payment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

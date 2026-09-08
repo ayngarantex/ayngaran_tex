@@ -480,6 +480,47 @@ export const updateInvoice = async (invoiceData: any) => {
     }
 };
 
+export const updateInvoicePaymentsRepo = async (invoiceId: any, payments: any[]) => {
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+        const invId = Number(invoiceId);
+
+        await conn.query(
+            "DELETE FROM payment_details WHERE InvoiceId = ?",
+            [invId]
+        );
+
+        let totalReceived = 0;
+        if (payments && payments.length > 0) {
+            for (const item of payments) {
+                if (item.date && item.date !== 'date') {
+                    const amountNum = Number(item.amount || 0);
+                    totalReceived += amountNum;
+                    await conn.query(
+                        `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                        [invId, item.date, amountNum, item.type || '', item.to || '']
+                    );
+                }
+            }
+        }
+
+        await conn.query(
+            "UPDATE invoice SET ReceivedAmount = ? WHERE InvoiceId = ?",
+            [Number(totalReceived.toFixed(2)), invId]
+        );
+
+        await conn.commit();
+        return true;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
 export const deleteInvoice = async (id: any) => {
     const conn = await db.getConnection();
 
