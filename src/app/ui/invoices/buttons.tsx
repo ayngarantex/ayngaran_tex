@@ -85,6 +85,44 @@ export function PayInvoice({ invoice }: { invoice: any }) {
     }
   };
 
+  const handleQuickPayFull = async () => {
+    setLoading(true);
+    try {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
+      const balanceVal = invoice?.BalanceAmount !== undefined && invoice?.BalanceAmount !== null
+        ? Number(invoice.BalanceAmount)
+        : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0));
+      const payAmount = balanceVal > 0 ? balanceVal : Number(invoice?.InvoiceAmount || 0);
+
+      const quickPayments = [
+        {
+          date: todayStr,
+          amount: payAmount.toFixed(2),
+          type: invoice?.BillType === 'gst' ? 'Bank' : 'Gpay',
+          to: 'Prakash'
+        }
+      ];
+
+      const success = await updateInvoicePayments(invoice.InvoiceId, quickPayments);
+      if (success) {
+        setIsOpen(false);
+        window.location.reload();
+      } else {
+        alert("Failed to save payment.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving payment.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const invoiceNumStr = invoice?.InvoiceType === 'Credit Note'
     ? `${getFinancialYearShortNew(invoice.InvoiceDate)}/AT-C/${String(invoice.InvoiceNumber).padStart(2, '0')}`
     : invoiceTypeOptions().map((o: any) => o).includes(invoice?.InvoiceType)
@@ -136,23 +174,34 @@ export function PayInvoice({ invoice }: { invoice: any }) {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-2xl">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-2xl">
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={handleQuickPayFull}
                 disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
-                Cancel
+                ⚡ Pay Full (₹{((invoice?.BalanceAmount !== undefined ? Number(invoice.BalanceAmount) : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0))) > 0 ? (invoice?.BalanceAmount !== undefined ? Number(invoice.BalanceAmount) : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0))) : Number(invoice?.InvoiceAmount || 0)).toFixed(2)}) & Today
               </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={loading}
-                className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? 'Saving...' : 'Save Payment'}
-              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {loading ? 'Saving...' : 'Save Payment'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

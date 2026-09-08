@@ -202,7 +202,9 @@ export default function TableInvoiceDetails({
             </td>
             <td className="whitespace-nowrap py-3 pl-6 pr-3 no-print">
                 <div className="flex justify-end gap-3">
-                    <PayInvoice invoice={invoice} />
+                    {Number(invoice?.InvoiceAmount) !== Number(invoice?.ReceivedAmount) && (
+                        <PayInvoice invoice={invoice} />
+                    )}
                     <UpdateInvoice id={invoice.InvoiceId} />
                     <PrintInvoice id={invoice.InvoiceId} />
                     <DownloadInvoice invoice={invoice} />
