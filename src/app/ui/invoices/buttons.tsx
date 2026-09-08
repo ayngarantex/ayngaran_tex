@@ -7,6 +7,9 @@ import { redirect } from 'next/navigation';
 import { getFinancialYearShortNew, formatDateNew, invoiceTypeOptions } from '@/app/lib/utils';
 import PaymentForm from '@/app/ui/invoices/payment-form';
 import { PaymentRow } from '@/app/lib/types';
+import LumpSumPaymentModal from '@/app/ui/invoices/lump-sum-payment-modal';
+
+export { LumpSumPaymentModal };
 
 export function CreateInvoice() {
   return (

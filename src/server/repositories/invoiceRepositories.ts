@@ -702,3 +702,106 @@ export const getInvoiceDetailsForPeriod = async (startDate: string, endDate: str
         conn.release();
     }
 };
+
+export const processLumpSumPaymentRepo = async (data: {
+    customerId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+}) => {
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const custId = Number(data.customerId);
+        let lumpSumRemaining = Number(data.amount);
+        const pDate = data.paymentDate;
+        const pType = data.paymentType || 'Bank';
+        const pTo = data.paymentTo || 'Prakash';
+
+        if (isNaN(lumpSumRemaining) || lumpSumRemaining <= 0) {
+            throw new Error("Invalid payment amount");
+        }
+
+        let query = `
+            SELECT I.InvoiceId, I.InvoiceNumber, I.InvoiceDate, I.InvoiceAmount, I.ReceivedAmount, I.BillType, I.InvoiceType
+            FROM invoice I
+            WHERE I.CustomerId = ?
+              AND (I.IsCancel IS NULL OR I.IsCancel = 0)
+              AND (I.InvoiceType IS NULL OR I.InvoiceType != 'Credit Note')
+              AND (I.InvoiceAmount - I.ReceivedAmount) > 0.01
+        `;
+        const params: any[] = [custId];
+
+        if (data.billType) {
+            query += ` AND I.BillType = ?`;
+            params.push(data.billType);
+        }
+
+        query += ` ORDER BY I.InvoiceDate ASC, I.InvoiceId ASC`;
+
+        const [invoices]: any = await conn.query(query, params);
+
+        if (!invoices || invoices.length === 0) {
+            await conn.rollback();
+            return {
+                success: false,
+                message: "No pending unpaid invoices found for this customer."
+            };
+        }
+
+        const allocatedInvoices: any[] = [];
+        let totalAllocated = 0;
+
+        for (const inv of invoices) {
+            if (lumpSumRemaining <= 0.001) break;
+
+            const invAmount = Number(inv.InvoiceAmount || 0);
+            const receivedAmount = Number(inv.ReceivedAmount || 0);
+            const pendingBalance = Math.max(0, invAmount - receivedAmount);
+
+            if (pendingBalance <= 0.001) continue;
+
+            const payForThisInv = Math.min(lumpSumRemaining, pendingBalance);
+            const newReceivedTotal = Number((receivedAmount + payForThisInv).toFixed(2));
+
+            await conn.query(
+                `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                [inv.InvoiceId, pDate, Number(payForThisInv.toFixed(2)), pType, pTo]
+            );
+
+            await conn.query(
+                `UPDATE invoice SET ReceivedAmount = ? WHERE InvoiceId = ?`,
+                [newReceivedTotal, inv.InvoiceId]
+            );
+
+            lumpSumRemaining = Number((lumpSumRemaining - payForThisInv).toFixed(2));
+            totalAllocated += payForThisInv;
+
+            allocatedInvoices.push({
+                InvoiceId: inv.InvoiceId,
+                InvoiceNumber: inv.InvoiceNumber,
+                InvoiceDate: inv.InvoiceDate,
+                PaidAmount: Number(payForThisInv.toFixed(2)),
+                RemainingBalance: Number(Math.max(0, invAmount - newReceivedTotal).toFixed(2))
+            });
+        }
+
+        await conn.commit();
+
+        return {
+            success: true,
+            totalAllocated: Number(totalAllocated.toFixed(2)),
+            excessRemaining: Number(lumpSumRemaining.toFixed(2)),
+            allocatedCount: allocatedInvoices.length,
+            allocatedInvoices
+        };
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};

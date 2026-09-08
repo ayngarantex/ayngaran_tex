@@ -6,6 +6,8 @@ import Link from 'next/link';
 import LedgerDetails from './ledger-details';
 import CustomerLedgerSelect from './customer-ledger-select';
 
+import LumpSumPaymentModal from '@/app/ui/invoices/lump-sum-payment-modal';
+
 export default async function Page(props:
     {
         params: Promise<{ id: string }>
@@ -60,6 +62,11 @@ export default async function Page(props:
             {!isPrint && (
                 <>
                     <div className="mt-6 flex justify-end gap-4">
+                        <LumpSumPaymentModal
+                            initialCustomerId={CustomerId}
+                            customerName={customer?.CustomerName}
+                            buttonLabel="⚡ Bulk / Lump-Sum Payment"
+                        />
                         <Link
                             href="/admin/customers"
                             className="flex h-10 items-center rounded-lg bg-blue-400 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-300"
