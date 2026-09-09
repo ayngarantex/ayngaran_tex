@@ -488,3 +488,146 @@ export const updateSizing = async (
     }
 };
 
+export const updateSizingPaymentsRepo = async (sizingId: any, payments: any[]) => {
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+        const sId = Number(sizingId);
+
+        await conn.query(
+            "DELETE FROM sizing_payment_details WHERE SizingId = ?",
+            [sId]
+        );
+
+        let totalReceived = 0;
+        if (payments && payments.length > 0) {
+            for (const item of payments) {
+                if (item.date && item.date !== 'date') {
+                    const amountNum = Number(item.amount || 0);
+                    totalReceived += amountNum;
+                    await conn.query(
+                        `INSERT INTO sizing_payment_details (SizingId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                        [sId, item.date ? new Date(item.date) : null, amountNum, item.type || '', item.to || item.ReceivedBy || '']
+                    );
+                }
+            }
+        }
+
+        await conn.query(
+            "UPDATE sizing SET ReceivedAmount = ? WHERE SizingId = ?",
+            [Number(totalReceived.toFixed(2)), sId]
+        );
+
+        await conn.commit();
+        return true;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
+export const processSizingLumpSumPaymentRepo = async (data: {
+    supplierId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+}) => {
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const supId = Number(data.supplierId);
+        let lumpSumRemaining = Number(data.amount);
+        const pDate = data.paymentDate;
+        const pType = data.paymentType || 'Bank';
+        const pTo = data.paymentTo || 'Prakash';
+
+        if (isNaN(lumpSumRemaining) || lumpSumRemaining <= 0) {
+            throw new Error("Invalid payment amount");
+        }
+
+        let query = `
+            SELECT S.SizingId, S.InvoiceNumber, S.InvoiceDate, S.InvoiceAmount, S.ReceivedAmount, S.BillType
+            FROM sizing S
+            WHERE S.SupplierId = ?
+              AND (S.InvoiceAmount - S.ReceivedAmount) > 0.01
+        `;
+        const params: any[] = [supId];
+
+        if (data.billType) {
+            query += ` AND S.BillType = ?`;
+            params.push(data.billType);
+        }
+
+        query += ` ORDER BY S.InvoiceDate ASC, S.SizingId ASC`;
+
+        const [sizings]: any = await conn.query(query, params);
+
+        if (!sizings || sizings.length === 0) {
+            await conn.rollback();
+            return {
+                success: false,
+                message: "No pending unpaid sizing bills found for this supplier."
+            };
+        }
+
+        const allocatedSizings: any[] = [];
+        let totalAllocated = 0;
+
+        for (const siz of sizings) {
+            if (lumpSumRemaining <= 0.001) break;
+
+            const invAmount = Number(siz.InvoiceAmount || 0);
+            const recAmount = Number(siz.ReceivedAmount || 0);
+            const pendingBalance = Math.max(0, invAmount - recAmount);
+
+            if (pendingBalance <= 0.001) continue;
+
+            const payForThisSiz = Math.min(lumpSumRemaining, pendingBalance);
+            const newRecTotal = Number((recAmount + payForThisSiz).toFixed(2));
+
+            await conn.query(
+                `INSERT INTO sizing_payment_details (SizingId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                [siz.SizingId, pDate ? new Date(pDate) : null, Number(payForThisSiz.toFixed(2)), pType, pTo]
+            );
+
+            await conn.query(
+                `UPDATE sizing SET ReceivedAmount = ? WHERE SizingId = ?`,
+                [newRecTotal, siz.SizingId]
+            );
+
+            lumpSumRemaining = Number((lumpSumRemaining - payForThisSiz).toFixed(2));
+            totalAllocated += payForThisSiz;
+
+            allocatedSizings.push({
+                SizingId: siz.SizingId,
+                InvoiceNumber: siz.InvoiceNumber,
+                InvoiceDate: siz.InvoiceDate,
+                PaidAmount: Number(payForThisSiz.toFixed(2)),
+                RemainingBalance: Number(Math.max(0, invAmount - newRecTotal).toFixed(2))
+            });
+        }
+
+        await conn.commit();
+
+        return {
+            success: true,
+            totalAllocated: Number(totalAllocated.toFixed(2)),
+            excessRemaining: Number(lumpSumRemaining.toFixed(2)),
+            allocatedCount: allocatedSizings.length,
+            allocatedInvoices: allocatedSizings
+        };
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
+

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import SupplierLedgerSelect from './supplier-ledger-select';
 import SupplierLedgerInvoicePayment from './supplier-ledger-invoice-payment';
 import Financialyear from '@/app/lib/financialyear';
+import SupplierLumpSumPaymentModal from '@/app/ui/suppliers/supplier-lump-sum-payment-modal';
 
 export default async function Page(props: {
     params: Promise<{ id: string }>;
@@ -30,7 +31,14 @@ export default async function Page(props: {
         <main className={isPrint ? "" : "p-4 md:p-6"}>
             {!isPrint && (
                 <>
-                    <div className="no-print mt-6 flex justify-end gap-4">
+                    <div className="no-print mt-6 flex items-center justify-end gap-4">
+                        <SupplierLumpSumPaymentModal
+                            suppliers={suppliers}
+                            initialSupplierId={SupplierId}
+                            supplierName={supData?.Name}
+                            supplierType={supData?.Type}
+                            buttonLabel="Lump-Sum Payment"
+                        />
                         <Link
                             href="/admin/suppliers"
                             className="flex h-10 items-center rounded-lg bg-blue-400 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-300"

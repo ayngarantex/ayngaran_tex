@@ -1,8 +1,8 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
-import { CreatePurchase } from '@/app/ui/purchases/buttons';
+import { CreatePurchase, SupplierLumpSumPaymentModal } from '@/app/ui/purchases/buttons';
 import Table from '@/app/ui/purchases/table';
-import { fetchPurchasePages, fetchPurchases, fetchPurchasesDetails } from '@/app/lib/data';
+import { fetchPurchasePages, fetchPurchases, fetchPurchasesDetails, fetchAllSuppliers } from '@/app/lib/data';
 import Financialyear from '@/app/lib/financialyear';
 import { formatCurrency } from '@/app/lib/utils';
 
@@ -24,18 +24,21 @@ export default async function Page(props: {
   const orderBy = searchParams?.orderBy || '';
   const currentPage = Number(searchParams?.page) || 1;
 
-  const data = await fetchPurchasePages(query, startDate, endDate, billType);
+  const [data, purchases, purchasesDetails, suppliers] = await Promise.all([
+    fetchPurchasePages(query, startDate, endDate, billType),
+    fetchPurchases(query, currentPage, startDate, endDate, billType, orderBy),
+    fetchPurchasesDetails(query, startDate, endDate, billType, orderBy),
+    fetchAllSuppliers('All')
+  ]);
   const totalPages = data.totalPages || 0;
-  const purchases = await fetchPurchases(query, currentPage, startDate, endDate, billType, orderBy);
-  const purchasesDetails: any = await fetchPurchasesDetails(query, startDate, endDate, billType, orderBy);
 
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
         <h1 className="text-2xl font-bold">Purchases ({data?.count || 0})</h1>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <div className="flex w-1/2">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 md:mt-8">
+        <div className="flex w-full md:w-1/2">
           <div className="w-1/4">
             <Search placeholder="Search purchases..." />
           </div>
@@ -43,7 +46,10 @@ export default async function Page(props: {
             <Financialyear orderBy={true} />
           </div>
         </div>
-        <CreatePurchase />
+        <div className="flex items-center gap-3">
+          <SupplierLumpSumPaymentModal suppliers={suppliers} initialCategory="purchases" buttonLabel="Supplier Lump-Sum Pay" />
+          <CreatePurchase />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">

@@ -3,6 +3,9 @@ import { BookOpenIcon, PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { deleteSupplier } from '@/app/api/node/supplier';
+import SupplierLumpSumPaymentModal from '@/app/ui/suppliers/supplier-lump-sum-payment-modal';
+
+export { SupplierLumpSumPaymentModal };
 
 export function CreateSupplier() {
   return (
