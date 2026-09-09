@@ -13,10 +13,18 @@ interface PaymentProps {
   setInvPayments: React.Dispatch<React.SetStateAction<PaymentRow[]>>;
 }
 
+const getTodayDateStr = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function PaymentForm({ invoiceAmount, billType, invPayment, setInvPayments }: PaymentProps) {
 
   const [selectedPayment, setSelectedPayment] = useState<PaymentRow[]>([
-    { pId: 0, date: "date", amount: "", type: billType === "gst" ? "Bank" : "Gpay", to: "Prakash" },
+    { pId: 0, date: getTodayDateStr(), amount: "", type: billType === "gst" ? "Bank" : "Gpay", to: "Prakash" },
   ]);
   const initialized = useRef(false);
 
@@ -27,7 +35,7 @@ export default function PaymentForm({ invoiceAmount, billType, invPayment, setIn
 
     const formPayments: PaymentRow[] = invPayment.map((row: any, rowIndex: number) => ({
       pId: rowIndex,
-      date: formatDateToLocalNew(row.Date),
+      date: row.Date ? formatDateToLocalNew(row.Date) : getTodayDateStr(),
       amount: row.Amount,
       type: row.Type,
       to: row.ReceivedBy
@@ -51,8 +59,30 @@ export default function PaymentForm({ invoiceAmount, billType, invPayment, setIn
     e.preventDefault();
     setSelectedPayment((prev) => [
       ...prev,
-      { pId: rowIndex, date: "date", amount: "", type: "Gpay", to: "Prakash" },
+      { pId: rowIndex, date: getTodayDateStr(), amount: "", type: billType === "gst" ? "Bank" : "Gpay", to: "Prakash" },
     ]);
+  };
+
+  const fillFullBalance = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const todayStr = getTodayDateStr();
+    const invAmtNum = Number(invoiceAmount || 0);
+
+    setSelectedPayment((prev) => {
+      if (!prev || prev.length === 0) {
+        return [{ pId: 0, date: todayStr, amount: invAmtNum > 0 ? invAmtNum.toFixed(2) : "", type: billType === "gst" ? "Bank" : "Gpay", to: "Prakash" }];
+      }
+      const updated = [...prev];
+      const lastIdx = updated.length - 1;
+      const otherPaid = updated.slice(0, lastIdx).reduce((sum, r) => sum + Number(r.amount || 0), 0);
+      const rem = Math.max(0, invAmtNum - otherPaid);
+      updated[lastIdx] = {
+        ...updated[lastIdx],
+        date: todayStr,
+        amount: rem > 0 ? rem.toFixed(2) : String(invAmtNum || "")
+      };
+      return updated;
+    });
   };
 
   const removePayment = (rowIndex: number) => {
@@ -181,7 +211,16 @@ export default function PaymentForm({ invoiceAmount, billType, invPayment, setIn
 
       {/* Add Payment Button */}
       <div className="flex flex-wrap gap-4 justify-between items-center mt-6">
-        <Button type="button" color={'blue'} onClick={(e) => addPayment(e, selectedPayment?.length)}>+ Add Payment</Button>
+        <div className="flex gap-2">
+          <Button type="button" color={'blue'} onClick={(e) => addPayment(e, selectedPayment?.length)}>+ Add Payment</Button>
+          <button
+            type="button"
+            onClick={fillFullBalance}
+            className="px-3 py-2 text-xs font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-lg transition-colors"
+          >
+            Fill Today & Full Balance
+          </button>
+        </div>
         {/* Total info */}
         <div className="border border-gray-300 rounded-lg bg-gray-100 p-2 flex gap-4">
           <div className="font-bold text-base md:text-lg text-indigo-700">

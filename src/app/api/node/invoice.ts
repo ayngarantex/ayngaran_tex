@@ -1,7 +1,7 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getInvoices, getInvoicesCount, getInvoicesTotal, getInvoice, getLastInvoiceNumber, createInvoice as createInvoiceRepo, updateInvoice as updateInvoiceRepo, deleteInvoice as deleteInvoiceRepo, getCustomerInvoices, getCustomerPayments, getInvoicesForPeriod, getInvoiceDetailsForPeriod } from "@/server/repositories/invoiceRepositories";
+import { getInvoices, getInvoicesCount, getInvoicesTotal, getInvoice, getLastInvoiceNumber, createInvoice as createInvoiceRepo, updateInvoice as updateInvoiceRepo, updateInvoicePaymentsRepo, processLumpSumPaymentRepo, deleteInvoice as deleteInvoiceRepo, getCustomerInvoices, getCustomerPayments, getInvoicesForPeriod, getInvoiceDetailsForPeriod } from "@/server/repositories/invoiceRepositories";
 
 export const fetchInvoices = async (
     query: string,
@@ -112,6 +112,23 @@ export const createInvoice = async (invoiceData: any) => {
 
 export const updateInvoice = async (invoiceData: any) => {
     const res = await updateInvoiceRepo(invoiceData);
+    return JSON.parse(JSON.stringify(res));
+};
+
+export const updateInvoicePayments = async (invoiceId: number, payments: any[]) => {
+    const res = await updateInvoicePaymentsRepo(invoiceId, payments);
+    return JSON.parse(JSON.stringify(res));
+};
+
+export const processLumpSumPayment = async (data: {
+    customerId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+}) => {
+    const res = await processLumpSumPaymentRepo(data);
     return JSON.parse(JSON.stringify(res));
 };
 

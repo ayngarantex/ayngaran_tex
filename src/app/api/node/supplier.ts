@@ -11,7 +11,10 @@ import {
     getYarnBySupplierId as getYarnBySupplierIdRepo,
     getYarnPaymentsBySupplierId as getYarnPaymentsBySupplierIdRepo,
     getSizingBySupplierId as getSizingBySupplierIdRepo,
-    getSizingPaymentsBySupplierId as getSizingPaymentsBySupplierIdRepo
+    getSizingPaymentsBySupplierId as getSizingPaymentsBySupplierIdRepo,
+    getPurchaseBySupplierId as getPurchaseBySupplierIdRepo,
+    getPurchasePaymentsBySupplierId as getPurchasePaymentsBySupplierIdRepo,
+    processUnifiedSupplierLumpSumPaymentRepo
 } from "@/server/repositories/supplierRepositories";
 
 export const fetchSuppliers = async (
@@ -95,6 +98,14 @@ export const fetchYarnBySupplierId = async (
                 PaidAmount: r.ReceivedAmount || 0
             }));
             return JSON.parse(JSON.stringify(mapped));
+        } else if (supplier.Type === 'Purchase') {
+            const rows = await getPurchaseBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
+            const mapped = rows.map((r: any) => ({
+                ...r,
+                YarnId: r.PurchaseId,
+                PaidAmount: r.PaidAmount || 0
+            }));
+            return JSON.parse(JSON.stringify(mapped));
         } else {
             const rows = await getYarnBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             return JSON.parse(JSON.stringify(rows));
@@ -117,6 +128,9 @@ export const fetchPaymentBySupplierId = async (
         if (supplier.Type === 'Sizing') {
             const rows = await getSizingPaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             return JSON.parse(JSON.stringify(rows));
+        } else if (supplier.Type === 'Purchase') {
+            const rows = await getPurchasePaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
+            return JSON.parse(JSON.stringify(rows));
         } else {
             const rows = await getYarnPaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             return JSON.parse(JSON.stringify(rows));
@@ -126,3 +140,16 @@ export const fetchPaymentBySupplierId = async (
         return [];
     }
 };
+
+export const processUnifiedSupplierLumpSumPayment = async (data: {
+    supplierId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+    category?: 'purchases' | 'yarn' | 'sizing' | null;
+}) => {
+    const res = await processUnifiedSupplierLumpSumPaymentRepo(data);
+    return JSON.parse(JSON.stringify(res));
+};

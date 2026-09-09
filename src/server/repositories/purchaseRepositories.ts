@@ -394,3 +394,146 @@ export const updatePurchase = async (
         conn.release();
     }
 };
+
+export const updatePurchasePaymentsRepo = async (purchaseId: any, payments: any[]) => {
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+        const purId = Number(purchaseId);
+
+        await conn.query(
+            "DELETE FROM purchase_payment_details WHERE PurchaseId = ?",
+            [purId]
+        );
+
+        let totalPaid = 0;
+        if (payments && payments.length > 0) {
+            for (const item of payments) {
+                if (item.date && item.date !== 'date') {
+                    const amountNum = Number(item.amount || 0);
+                    totalPaid += amountNum;
+                    await conn.query(
+                        `INSERT INTO purchase_payment_details (PurchaseId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                        [purId, item.date ? new Date(item.date) : null, amountNum, item.type || '', item.to || item.ReceivedBy || '']
+                    );
+                }
+            }
+        }
+
+        await conn.query(
+            "UPDATE purchases SET PaidAmount = ? WHERE PurchaseId = ?",
+            [Number(totalPaid.toFixed(2)), purId]
+        );
+
+        await conn.commit();
+        return true;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
+export const processSupplierLumpSumPaymentRepo = async (data: {
+    supplierId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+}) => {
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const supId = Number(data.supplierId);
+        let lumpSumRemaining = Number(data.amount);
+        const pDate = data.paymentDate;
+        const pType = data.paymentType || 'Bank';
+        const pTo = data.paymentTo || 'Prakash';
+
+        if (isNaN(lumpSumRemaining) || lumpSumRemaining <= 0) {
+            throw new Error("Invalid payment amount");
+        }
+
+        let query = `
+            SELECT P.PurchaseId, P.InvoiceNumber, P.InvoiceDate, P.InvoiceAmount, P.PaidAmount, P.BillType
+            FROM purchases P
+            WHERE P.SupplierId = ?
+              AND (P.InvoiceAmount - P.PaidAmount) > 0.01
+        `;
+        const params: any[] = [supId];
+
+        if (data.billType) {
+            query += ` AND P.BillType = ?`;
+            params.push(data.billType);
+        }
+
+        query += ` ORDER BY P.InvoiceDate ASC, P.PurchaseId ASC`;
+
+        const [purchases]: any = await conn.query(query, params);
+
+        if (!purchases || purchases.length === 0) {
+            await conn.rollback();
+            return {
+                success: false,
+                message: "No pending unpaid purchase bills found for this supplier."
+            };
+        }
+
+        const allocatedPurchases: any[] = [];
+        let totalAllocated = 0;
+
+        for (const pur of purchases) {
+            if (lumpSumRemaining <= 0.001) break;
+
+            const invAmount = Number(pur.InvoiceAmount || 0);
+            const paidAmount = Number(pur.PaidAmount || 0);
+            const pendingBalance = Math.max(0, invAmount - paidAmount);
+
+            if (pendingBalance <= 0.001) continue;
+
+            const payForThisPur = Math.min(lumpSumRemaining, pendingBalance);
+            const newPaidTotal = Number((paidAmount + payForThisPur).toFixed(2));
+
+            await conn.query(
+                `INSERT INTO purchase_payment_details (PurchaseId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                [pur.PurchaseId, pDate ? new Date(pDate) : null, Number(payForThisPur.toFixed(2)), pType, pTo]
+            );
+
+            await conn.query(
+                `UPDATE purchases SET PaidAmount = ? WHERE PurchaseId = ?`,
+                [newPaidTotal, pur.PurchaseId]
+            );
+
+            lumpSumRemaining = Number((lumpSumRemaining - payForThisPur).toFixed(2));
+            totalAllocated += payForThisPur;
+
+            allocatedPurchases.push({
+                PurchaseId: pur.PurchaseId,
+                InvoiceNumber: pur.InvoiceNumber,
+                InvoiceDate: pur.InvoiceDate,
+                PaidAmount: Number(payForThisPur.toFixed(2)),
+                RemainingBalance: Number(Math.max(0, invAmount - newPaidTotal).toFixed(2))
+            });
+        }
+
+        await conn.commit();
+
+        return {
+            success: true,
+            totalAllocated: Number(totalAllocated.toFixed(2)),
+            excessRemaining: Number(lumpSumRemaining.toFixed(2)),
+            allocatedCount: allocatedPurchases.length,
+            allocatedInvoices: allocatedPurchases
+        };
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+

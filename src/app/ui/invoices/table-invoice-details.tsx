@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PrintInvoice, UpdateInvoice, DeleteInvoice, DownloadInvoice } from '@/app/ui/invoices/buttons';
+import { PrintInvoice, UpdateInvoice, DeleteInvoice, DownloadInvoice, PayInvoice } from '@/app/ui/invoices/buttons';
 import { formatCurrency, formatDateNew, getFinancialYearShortNew, invoiceTypeOptions } from '@/app/lib/utils';
 import InvoiceStatus from './status';
 import Link from 'next/link';
@@ -202,6 +202,9 @@ export default function TableInvoiceDetails({
             </td>
             <td className="whitespace-nowrap py-3 pl-6 pr-3 no-print">
                 <div className="flex justify-end gap-3">
+                    {Number(invoice?.InvoiceAmount) !== Number(invoice?.ReceivedAmount) && (
+                        <PayInvoice invoice={invoice} />
+                    )}
                     <UpdateInvoice id={invoice.InvoiceId} />
                     <PrintInvoice id={invoice.InvoiceId} />
                     <DownloadInvoice invoice={invoice} />

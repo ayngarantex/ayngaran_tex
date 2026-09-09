@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
-import { statesList } from '@/app/lib/utils';
+import { statesList, supplierTypes } from '@/app/lib/utils';
 import { updateSupplier } from '@/app/api/node/supplier';
 
 export default function EditForm({
@@ -108,11 +108,13 @@ export default function EditForm({
                 className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                 value={supplierType}
               >
-                <option value="" disabled>
-                  Select a Type
-                </option>
-                <option value="Yarn">Yarn</option>
-                <option value="Sizing">Sizing</option>
+                <option value="" disabled>Select a Type</option>
+                {supplierTypes().map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+
               </select>
               <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
             </div>
@@ -126,7 +128,7 @@ export default function EditForm({
                 id="gstNumber"
                 name="gstNumber"
                 type="text"
-                value={gstNumber}
+                value={gstNumber || ''}
                 onChange={(e) => {
                   setGstNumber(e.target.value)
                 }}
@@ -238,7 +240,7 @@ export default function EditForm({
                   name="address"
                   rows={5}
                   placeholder="Enter address"
-                  value={address}
+                  value={address || ''}
                   className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
                   onChange={(e) => {
                     setAddress(e.target.value)
@@ -259,7 +261,7 @@ export default function EditForm({
                 id="mobile"
                 name="mobile"
                 type="text"
-                value={mobile}
+                value={mobile || ''}
                 onChange={(e) => {
                   setMobile(e.target.value)
                 }}
@@ -277,7 +279,7 @@ export default function EditForm({
                 id="phone"
                 name="phone"
                 type="text"
-                value={phone}
+                value={phone || ''}
                 onChange={(e) => {
                   setPhone(e.target.value)
                 }}
@@ -297,7 +299,7 @@ export default function EditForm({
                 id="agent"
                 name="agent"
                 type="text"
-                value={agent}
+                value={agent || ''}
                 onChange={(e) => {
                   setAgent(e.target.value)
                 }}

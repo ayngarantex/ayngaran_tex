@@ -1,6 +1,7 @@
 import { UpdateSupplier, DeleteSupplier, SupplierLeader } from '@/app/ui/suppliers/buttons';
 import { fetchSuppliers } from '@/app/api/node/supplier';
 import { formatCurrency } from '@/app/lib/utils';
+import Link from 'next/link';
 
 export default async function SupplierTable({
   query,
@@ -58,8 +59,13 @@ export default async function SupplierTable({
                   key={`inv_${sup.SupplierId}`}
                   className="hover:bg-slate-50/80 transition-colors text-slate-900"
                 >
-                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3 font-semibold text-slate-900">
-                    {sup?.Name}
+                  <td className="whitespace-nowrap py-3.5 pl-6 pr-3">
+                    <div className="flex items-center gap-3 font-semibold">
+                      {sup?.Name}
+                    </div>
+                    <div className="flex items-center pt-2 text-slate-700">
+                      {sup?.Type}
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5 text-slate-800 font-mono text-xs font-semibold">
                     {sup?.GstNumber || '-'}

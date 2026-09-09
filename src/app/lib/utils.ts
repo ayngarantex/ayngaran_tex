@@ -138,6 +138,10 @@ export const loomsList = () => {
   return ['Angamuthu Modamangalam', 'Madeshwara Tex', 'R.karthikeya Tex', 'Vishnu Tex', 'Archana Tex', 'Elavarasan', 'Sri Angalaparamasewari Tex'];
 };
 
+export const supplierTypes = () => {
+  return ['Yarn', 'Sizing', 'Purchase']
+}
+
 export const generatePagination = (currentPage: number, totalPages: number) => {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);

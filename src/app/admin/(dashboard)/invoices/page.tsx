@@ -1,6 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
-import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices, ExportGstr1 } from '@/app/ui/invoices/buttons';
+import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices, ExportGstr1, LumpSumPaymentModal } from '@/app/ui/invoices/buttons';
 import Table from '@/app/ui/invoices/table';
 import Financialyear from '@/app/lib/financialyear';
 import InvoiceFilterModal from '@/app/ui/invoices/filter-modal';
@@ -105,6 +105,7 @@ export default async function Page(props: {
             <div className='no-print'>
               <PrintInvoices query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
             </div>
+            <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
             <CreateInvoice />
           </div>
         )}

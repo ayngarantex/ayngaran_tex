@@ -1,4 +1,7 @@
 import db from '../config/db';
+import { processSupplierLumpSumPaymentRepo } from './purchaseRepositories';
+import { processYarnLumpSumPaymentRepo } from './yarnRepositories';
+import { processSizingLumpSumPaymentRepo } from './sizingRepositories';
 
 export const getSuppliers = async (
     search: string | null,
@@ -16,6 +19,12 @@ export const getSuppliers = async (
                            FROM sizing Siz
                            WHERE Siz.SupplierId = S.SupplierId
                        ), 0)
+                   WHEN S.Type = 'Purchase' THEN
+                       COALESCE((
+                           SELECT SUM(COALESCE(P.InvoiceAmount, 0) - COALESCE(P.PaidAmount, 0))
+                           FROM purchases P
+                           WHERE P.SupplierId = S.SupplierId
+                       ), 0)
                    ELSE
                        COALESCE((
                            SELECT SUM(COALESCE(Y.InvoiceAmount, 0) - COALESCE(Y.PaidAmount, 0))
@@ -29,8 +38,8 @@ export const getSuppliers = async (
     let params: any[] = [];
 
     if (search != null && search !== "") {
-        sql += " AND (LOWER(S.Name) LIKE LOWER(?) OR LOWER(S.GstNumber) LIKE LOWER(?) OR LOWER(S.State) LIKE LOWER(?) OR LOWER(S.Agent) LIKE LOWER(?))";
-        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+        sql += " AND (LOWER(S.Name) LIKE LOWER(?) OR LOWER(S.Type) LIKE LOWER(?) OR LOWER(S.GstNumber) LIKE LOWER(?) OR LOWER(S.State) LIKE LOWER(?) OR LOWER(S.Agent) LIKE LOWER(?))";
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     if (type != null && type !== "" && type !== "All") {
@@ -59,8 +68,8 @@ export const getSupplierCount = async (search: string | null, type: string | nul
     let params: any[] = [];
 
     if (search != null && search !== "") {
-        sql += " AND (LOWER(S.Name) LIKE LOWER(?) OR LOWER(S.GstNumber) LIKE LOWER(?) OR LOWER(S.State) LIKE LOWER(?) OR LOWER(S.Agent) LIKE LOWER(?))";
-        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+        sql += " AND (LOWER(S.Name) LIKE LOWER(?) OR LOWER(S.Type) LIKE LOWER(?) OR LOWER(S.GstNumber) LIKE LOWER(?) OR LOWER(S.State) LIKE LOWER(?) OR LOWER(S.Agent) LIKE LOWER(?))";
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     if (type != null && type !== "" && type !== "All") {
@@ -235,4 +244,80 @@ export const getSizingPaymentsBySupplierId = async (
     const [rows]: any = await db.query(sql, params);
     return rows;
 };
+
+export const getPurchaseBySupplierId = async (
+    supplierId: number,
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = "SELECT * FROM purchases WHERE SupplierId = ?";
+    const params: any[] = [supplierId];
+    if (startDate && endDate) {
+        sql += " AND DATE(InvoiceDate) BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+    if (billType) {
+        sql += " AND BillType = ?";
+        params.push(billType);
+    }
+    sql += " ORDER BY InvoiceDate ASC, PurchaseId ASC";
+    const [rows]: any = await db.query(sql, params);
+    return rows;
+};
+
+export const getPurchasePaymentsBySupplierId = async (
+    supplierId: number,
+    startDate: string | null,
+    endDate: string | null,
+    billType: string | null
+) => {
+    let sql = `
+        SELECT PPD.*, P.InvoiceNumber, P.BillType
+        FROM purchase_payment_details PPD
+        JOIN purchases P ON PPD.PurchaseId = P.PurchaseId
+        WHERE P.SupplierId = ?
+    `;
+    const params: any[] = [supplierId];
+    if (startDate && endDate) {
+        sql += " AND DATE(P.InvoiceDate) BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+    if (billType) {
+        sql += " AND P.BillType = ?";
+        params.push(billType);
+    }
+    sql += " ORDER BY PPD.Date ASC";
+    const [rows]: any = await db.query(sql, params);
+    return rows;
+};
+
+export const processUnifiedSupplierLumpSumPaymentRepo = async (data: {
+    supplierId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+    category?: 'purchases' | 'yarn' | 'sizing' | null;
+}) => {
+    const supplier = await getSupplierById(Number(data.supplierId));
+    const supType = data.category || (supplier ? supplier.Type : null);
+
+    if (supType === 'Sizing' || supType === 'sizing') {
+        return processSizingLumpSumPaymentRepo(data);
+    } else if (supType === 'Purchase' || supType === 'purchases') {
+        return processSupplierLumpSumPaymentRepo(data);
+    } else if (supType === 'Yarn' || supType === 'yarn') {
+        return processYarnLumpSumPaymentRepo(data);
+    } else {
+        const resPur = await processSupplierLumpSumPaymentRepo(data);
+        if (resPur && resPur.success) return resPur;
+        const resYrn = await processYarnLumpSumPaymentRepo(data);
+        if (resYrn && resYrn.success) return resYrn;
+        return processSizingLumpSumPaymentRepo(data);
+    }
+};
+
+
 

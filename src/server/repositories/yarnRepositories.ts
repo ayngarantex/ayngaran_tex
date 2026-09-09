@@ -398,3 +398,146 @@ export const updateYarn = async (
         conn.release();
     }
 };
+
+export const updateYarnPaymentsRepo = async (yarnId: any, payments: any[]) => {
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+        const yId = Number(yarnId);
+
+        await conn.query(
+            "DELETE FROM yarn_payment_details WHERE YarnId = ?",
+            [yId]
+        );
+
+        let totalPaid = 0;
+        if (payments && payments.length > 0) {
+            for (const item of payments) {
+                if (item.date && item.date !== 'date') {
+                    const amountNum = Number(item.amount || 0);
+                    totalPaid += amountNum;
+                    await conn.query(
+                        `INSERT INTO yarn_payment_details (YarnId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                        [yId, item.date ? new Date(item.date) : null, amountNum, item.type || '', item.to || item.ReceivedBy || '']
+                    );
+                }
+            }
+        }
+
+        await conn.query(
+            "UPDATE yarns SET PaidAmount = ? WHERE YarnId = ?",
+            [Number(totalPaid.toFixed(2)), yId]
+        );
+
+        await conn.commit();
+        return true;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
+export const processYarnLumpSumPaymentRepo = async (data: {
+    supplierId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    paymentTo: string;
+    billType?: string | null;
+}) => {
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const supId = Number(data.supplierId);
+        let lumpSumRemaining = Number(data.amount);
+        const pDate = data.paymentDate;
+        const pType = data.paymentType || 'Bank';
+        const pTo = data.paymentTo || 'Prakash';
+
+        if (isNaN(lumpSumRemaining) || lumpSumRemaining <= 0) {
+            throw new Error("Invalid payment amount");
+        }
+
+        let query = `
+            SELECT Y.YarnId, Y.InvoiceNumber, Y.InvoiceDate, Y.InvoiceAmount, Y.PaidAmount, Y.BillType
+            FROM yarns Y
+            WHERE Y.SupplierId = ?
+              AND (Y.InvoiceAmount - Y.PaidAmount) > 0.01
+        `;
+        const params: any[] = [supId];
+
+        if (data.billType) {
+            query += ` AND Y.BillType = ?`;
+            params.push(data.billType);
+        }
+
+        query += ` ORDER BY Y.InvoiceDate ASC, Y.YarnId ASC`;
+
+        const [yarns]: any = await conn.query(query, params);
+
+        if (!yarns || yarns.length === 0) {
+            await conn.rollback();
+            return {
+                success: false,
+                message: "No pending unpaid yarn bills found for this supplier."
+            };
+        }
+
+        const allocatedYarns: any[] = [];
+        let totalAllocated = 0;
+
+        for (const yrn of yarns) {
+            if (lumpSumRemaining <= 0.001) break;
+
+            const invAmount = Number(yrn.InvoiceAmount || 0);
+            const paidAmount = Number(yrn.PaidAmount || 0);
+            const pendingBalance = Math.max(0, invAmount - paidAmount);
+
+            if (pendingBalance <= 0.001) continue;
+
+            const payForThisYrn = Math.min(lumpSumRemaining, pendingBalance);
+            const newPaidTotal = Number((paidAmount + payForThisYrn).toFixed(2));
+
+            await conn.query(
+                `INSERT INTO yarn_payment_details (YarnId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
+                [yrn.YarnId, pDate ? new Date(pDate) : null, Number(payForThisYrn.toFixed(2)), pType, pTo]
+            );
+
+            await conn.query(
+                `UPDATE yarns SET PaidAmount = ? WHERE YarnId = ?`,
+                [newPaidTotal, yrn.YarnId]
+            );
+
+            lumpSumRemaining = Number((lumpSumRemaining - payForThisYrn).toFixed(2));
+            totalAllocated += payForThisYrn;
+
+            allocatedYarns.push({
+                YarnId: yrn.YarnId,
+                InvoiceNumber: yrn.InvoiceNumber,
+                InvoiceDate: yrn.InvoiceDate,
+                PaidAmount: Number(payForThisYrn.toFixed(2)),
+                RemainingBalance: Number(Math.max(0, invAmount - newPaidTotal).toFixed(2))
+            });
+        }
+
+        await conn.commit();
+
+        return {
+            success: true,
+            totalAllocated: Number(totalAllocated.toFixed(2)),
+            excessRemaining: Number(lumpSumRemaining.toFixed(2)),
+            allocatedCount: allocatedYarns.length,
+            allocatedInvoices: allocatedYarns
+        };
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
