@@ -78,6 +78,46 @@ export default function SupplierLedgerInvoicePayment({ supplier, invoices, payme
     const totalPurchased = invoices.reduce((sum, item) => sum + (item?.InvoiceAmount || 0), 0);
     const totalPaid = payments.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
 
+    const getNormalizedDateStr = (dateVal: any) => {
+        if (!dateVal) return '';
+        if (typeof dateVal === 'string') {
+            return dateVal.split('T')[0].split(' ')[0];
+        }
+        try {
+            const d = new Date(dateVal);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        } catch {
+            return String(dateVal);
+        }
+    };
+
+    // Group payments by date and payment type
+    const groupedPaymentsMap = new Map<string, any>();
+
+    payments.forEach((pay) => {
+        const normDate = getNormalizedDateStr(pay.Date);
+        const payType = (pay.Type || 'Paid').trim();
+        const groupKey = `${normDate}_${payType.toLowerCase()}`;
+        const amt = Number(pay.Amount || 0);
+
+        if (groupedPaymentsMap.has(groupKey)) {
+            const existing = groupedPaymentsMap.get(groupKey);
+            existing.Amount = Number(existing.Amount || 0) + amt;
+        } else {
+            groupedPaymentsMap.set(groupKey, {
+                ...pay,
+                Date: pay.Date,
+                Type: payType,
+                Amount: amt,
+            });
+        }
+    });
+
+    const groupedPayments = Array.from(groupedPaymentsMap.values());
+
     // Merge and chronologically sort invoices and payments
     const combinedItems = [
         ...invoices.map((inv) => ({
@@ -89,16 +129,17 @@ export default function SupplierLedgerInvoicePayment({ supplier, invoices, payme
             debit: inv.InvoiceAmount || 0,
             credit: 0,
         })),
-        ...payments.map((pay, idx) => ({
+        ...groupedPayments.map((pay, idx) => ({
             date: new Date(pay.Date),
             dateStr: pay.Date,
             type: 'Payment',
-            refId: `payment_${pay.Date}_${idx}`,
+            refId: `payment_${pay.Date}_${pay.Type}_${idx}`,
             data: pay,
             debit: 0,
             credit: Number(pay.Amount || 0),
         }))
     ];
+
 
     combinedItems.sort((a, b) => {
         const timeDiff = a.date.getTime() - b.date.getTime();

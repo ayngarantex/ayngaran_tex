@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { processLumpSumPayment } from '@/app/api/node/invoice';
 import { BanknotesIcon, XMarkIcon, SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { formatCurrency, formatDateNew } from '@/app/lib/utils';
+import SearchDropdown from '@/app/ui/search-dropdown';
 
 const paymentTypes = ["Bank", "Gpay", "Cash", "PhonePay", "Check"];
 const paymentToOptions = ["Prakash", "Govinth", "Sekar"];
@@ -23,8 +24,27 @@ export default function LumpSumPaymentModal({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | string>(initialCustomerId || '');
+  const [selectedCustomerName, setSelectedCustomerName] = useState("")
   const [amount, setAmount] = useState<string>('');
-  
+
+  const dropdownCustomers = useMemo(() => {
+    return customers.map(c => ({
+      id: c.CustomerId,
+      label: c.CustomerName || '',
+    }));
+  }, [customers]);
+
+  const handleCustomerSelect = async (item: any) => {
+    if (!item) {
+      setSelectedCustomerId('');
+      return;
+    }
+    console.log("item", item)
+    const customerId = Number(item.id);
+    setSelectedCustomerId(customerId);
+    setSelectedCustomerName(item.label);
+  };
+
   const getTodayDateStr = () => {
     const d = new Date();
     const year = d.getFullYear();
@@ -115,7 +135,7 @@ export default function LumpSumPaymentModal({
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-emerald-50/60 rounded-t-2xl">
               <div className="flex items-center gap-2.5">
@@ -169,8 +189,8 @@ export default function LumpSumPaymentModal({
                             <tr key={idx} className="hover:bg-slate-50">
                               <td className="px-3 py-2 font-medium text-slate-800">#{item.InvoiceNumber}</td>
                               <td className="px-3 py-2 text-slate-500">{formatDateNew(item.InvoiceDate)}</td>
-                              <td className="px-3 py-2 text-right font-bold text-emerald-700">₹{formatCurrency(item.PaidAmount)}</td>
-                              <td className="px-3 py-2 text-right text-slate-600">₹{formatCurrency(item.RemainingBalance)}</td>
+                              <td className="px-3 py-2 text-right font-bold text-emerald-700">{formatCurrency(item.PaidAmount)}</td>
+                              <td className="px-3 py-2 text-right text-slate-600">{formatCurrency(item.RemainingBalance)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -199,19 +219,27 @@ export default function LumpSumPaymentModal({
                         className="w-full border border-slate-300 p-2.5 rounded-xl text-sm bg-slate-100 font-semibold text-slate-800"
                       />
                     ) : (
-                      <select
-                        value={selectedCustomerId}
-                        onChange={(e) => setSelectedCustomerId(e.target.value)}
-                        className="w-full border border-slate-300 p-2.5 rounded-xl text-sm bg-white font-medium focus:ring-2 focus:ring-emerald-500"
-                        required
-                      >
-                        <option value="">Select Customer...</option>
-                        {customers.map((c: any) => (
-                          <option key={c.CustomerId} value={c.CustomerId}>
-                            {c.CustomerName} {c.Mobile ? `(${c.Mobile})` : ''}
-                          </option>
-                        ))}
-                      </select>
+                      <SearchDropdown
+                        items={dropdownCustomers}
+                        onSelect={handleCustomerSelect}
+                        label="Choose customer"
+                        placeholder="Select a customer..."
+                        createLink="/admin/customers/create"
+                        value={selectedCustomerName || ''}
+                      />
+                      // <select
+                      //   value={selectedCustomerId}
+                      //   onChange={(e) => setSelectedCustomerId(e.target.value)}
+                      //   className="w-full border border-slate-300 p-2.5 rounded-xl text-sm bg-white font-medium focus:ring-2 focus:ring-emerald-500"
+                      //   required
+                      // >
+                      //   <option value="">Select Customer...</option>
+                      //   {customers.map((c: any) => (
+                      //     <option key={c.CustomerId} value={c.CustomerId}>
+                      //       {c.CustomerName} {c.Mobile ? `(${c.Mobile})` : ''}
+                      //     </option>
+                      //   ))}
+                      // </select>
                     )}
                   </div>
 

@@ -100,7 +100,7 @@ export function PrintCustomers({ query, startDate, endDate, billType, orderBy }:
       className="flex h-10 items-center rounded-lg bg-gray-100 border border-gray-300 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 no-print"
       title="Print List"
     >
-      <span className="hidden md:block">Print List</span>
+      <span className="hidden md:block pr-2">Print List</span>
       <PrinterIcon className="h-5 md: w-5 text-gray-500" />
     </button>
   );

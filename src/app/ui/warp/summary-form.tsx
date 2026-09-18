@@ -11,6 +11,7 @@ export default function EditForm({
 }: {
   summaryDetails: any;
 }) {
+  console.log("summaryDetails", summaryDetails)
   const router = useRouter();
   const [summaryProducts, setSummaryProducts] = useState<any[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -27,6 +28,7 @@ export default function EditForm({
         if (row.Date) {
           filteredProducts.push({
             DcId: row.DcId ? String(row.DcId) : undefined,
+            WarpId: row.WarpId ? Number(row.WarpId) : null,
             Dc: Number(row.Dc || 0),
             Date: formatDateToLocalNew(row.Date),
             Piece: Number(row.Piece || 0),
@@ -86,32 +88,6 @@ export default function EditForm({
             </div>
           </div>
 
-          {/* <div className="mb-8 w-full">
-            <label htmlFor="invoice meters" className="mb-2 block text-sm font-medium">
-              Warp
-            </label>
-            <div className="mt-2 rounded-md">
-              <p className='font-semibold text-lg'>{summaryDetails?.TotalWarps}</p>
-            </div>
-          </div>
-
-          <div className="mb-8 w-full">
-            <label htmlFor="invoice meters" className="mb-2 block text-sm font-medium">
-              Meters
-            </label>
-            <div className="mt-2 rounded-md">
-            <p className='font-semibold text-lg'>{summaryDetails?.TotalMeters}</p>
-            </div>
-            </div> */}
-
-          {/* <div className="mb-4 w-full">
-            <label htmlFor="weight" className="mb-2 block text-sm font-medium">
-              Weight
-            </label>
-            <div className="mt-2 rounded-md">
-              <p className='font-semibold text-lg'>{parseFloat(summaryDetails?.TotalWeight || 0).toFixed(2)}</p>
-            </div>
-          </div> */}
           <div className="mb-4 w-2/6">
             <label htmlFor="loom" className="mb-2 block text-sm font-medium">
               Loom
@@ -151,37 +127,37 @@ export default function EditForm({
               <p className='font-semibold text-lg w-1/2'>Weight <span className='ml-2 text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
             </div>
             {summaryDetails?.warp_detail?.length ?
-              summaryDetails?.warp_detail.map((row: any, rowIndex: number) => (
-                <div
-                  key={`selP_${rowIndex}`}
-                  className="flex gap-3 items-center mb-2"
-                >
+              summaryDetails?.warp_detail.map((row: any, rowIndex: number) => {
+                const warpReceivedDhoties = summaryProducts
+                  .filter((p: any) => String(p.WarpId) === String(row.WarpId))
+                  .reduce((sum: number, p: any) => sum + Number(p.Count || 0), 0);
 
-                  {/* Count */}
-                  {/* <input
-                    type="text"
-                    value={row.Color || ""}
-                    className="border p-2 rounded w-full bg-gray-50 text-gray-700"
-                    readOnly
-                  /> */}
-
-                  {/* weight */}
-                  <input
-                    type="text"
-                    value={row.Meters || ""}
-                    className="border p-2 rounded w-1/2 bg-gray-50 text-gray-700"
-                    readOnly
-                  />
-
-                  {/* Color */}
-                  <input
-                    type="text"
-                    value={row.Weight || ""}
-                    className="border p-2 rounded w-1/2 bg-gray-50 text-gray-700"
-                    readOnly
-                  />
-                </div>
-              ))
+                return (
+                  <div
+                    key={`selP_${rowIndex}`}
+                    className="flex flex-col mb-3 p-2 bg-gray-50 rounded border text-sm"
+                  >
+                    <div className="flex font-medium text-gray-800 mb-1">
+                      <span>Warp #{rowIndex + 1} (ID: {row.WarpId})</span>
+                      {warpReceivedDhoties > 0 && (
+                        <span className="text-blue-600 font-bold ml-2">Tot: ({(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) : Math.floor((row.Meters || 0) / 1.93)}) dhoties</span>
+                      )}
+                    </div>
+                    <div className="flex justify-between font-medium text-gray-800 mb-1">
+                      {warpReceivedDhoties > 0 && (
+                        <>
+                          <span className="text-blue-600 font-bold">Rcvd: {warpReceivedDhoties} dhoties</span>
+                          <span className="text-red-600 font-bold">Diff: {(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) - warpReceivedDhoties : Math.floor((row.Meters || 0) / 1.93) - warpReceivedDhoties} dhoties</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-1/2 text-gray-600">Meter: <span className="font-semibold text-gray-900">{row.Meters || 0}</span></div>
+                      <div className="w-1/2 text-gray-600">Weight: <span className="font-semibold text-gray-900">{row.Weight || 0}</span></div>
+                    </div>
+                  </div>
+                );
+              })
               : null}
           </div>
 
@@ -215,7 +191,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
   const handleChange = (
     index: number,
     field: string,
-    value: string | number
+    value: string | number | null
   ) => {
     setSummaryProducts((prev) =>
       prev.map((row, idx) =>
@@ -228,8 +204,24 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
     e.preventDefault();
     setSummaryProducts((prev) => [
       ...prev,
-      { DcId: undefined, Dc: "", Date: "", Piece: 0, Count: "", Weight: "" },
+      { DcId: undefined, WarpId: null, Dc: "", Date: "", Piece: 0, Count: "", Weight: "" },
     ]);
+  };
+
+  const autoFillWarps = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const warps = summaryDetails?.warp_detail || [];
+    if (!warps.length) return;
+    const newRows = warps.map((w: any) => ({
+      DcId: undefined,
+      WarpId: w.WarpId,
+      Dc: "",
+      Date: "",
+      Piece: 0,
+      Count: "",
+      Weight: ""
+    }));
+    setSummaryProducts((prev) => [...prev, ...newRows]);
   };
 
   const removeProduct = (indexToRemove: number) => {
@@ -251,28 +243,58 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
     0
   );
 
+  const warpList = summaryDetails?.warp_detail || [];
+
   return (
     <div className="p-4 border rounded-lg mb-4 w-2/3 bg-white">
-      <h2 className="text-xl font-bold mb-4">Piece Received Details</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Piece Received Details</h2>
+        {warpList.length > 0 && (
+          <button
+            type="button"
+            onClick={autoFillWarps}
+            className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded border border-blue-200 transition-colors"
+          >
+            + Add Row For Each Warp ({warpList.length})
+          </button>
+        )}
+      </div>
 
       {summaryProducts?.length ? (
         <div className="flex flex-col gap-2 mb-4 w-full">
-          <div className="flex gap-3 font-semibold text-sm text-gray-600 mb-1 w-full">
-            <span className="w-10">S.No</span>
-            <span className="w-[30%]">Date</span>
-            <span className="w-[18%]">DC No</span>
-            <span className="w-[15%]">Piece</span>
-            <span className="w-[15%]">Count</span>
-            <span className="w-[15%]">Weight</span>
-            <span className="w-16"></span>
+          <div className="flex gap-2 font-semibold text-xs text-gray-600 mb-1 w-full items-center">
+            <span className="w-6 text-center">S.No</span>
+            <span className="w-[20%]">Warp</span>
+            <span className="w-[22%]">Date</span>
+            <span className="w-[14%]">DC No</span>
+            <span className="w-[12%]">Piece</span>
+            <span className="w-[12%]">Count</span>
+            <span className="w-[12%]">Weight</span>
+            <span className="w-12"></span>
           </div>
 
           {summaryProducts.map((row, rowIndex: number) => (
             <div
               key={`summary_row_${rowIndex}`}
-              className="flex gap-3 items-center w-full"
+              className="flex gap-2 items-center w-full"
             >
-              <p className="w-10 text-center font-medium">{rowIndex + 1}</p>
+              <p className="w-6 text-center font-medium text-xs">{rowIndex + 1}</p>
+
+              {/* Warp Selector */}
+              <select
+                value={row.WarpId || ""}
+                onChange={(e) =>
+                  handleChange(rowIndex, "WarpId", e.target.value ? Number(e.target.value) : null)
+                }
+                className="border p-2 rounded w-[20%] text-xs bg-white"
+              >
+                <option value="">General / Unassigned</option>
+                {warpList.map((w: any, wIdx: number) => (
+                  <option key={`w_opt_${w.WarpId}`} value={w.WarpId}>
+                    Warp #{wIdx + 1}
+                  </option>
+                ))}
+              </select>
 
               {/* Date */}
               <input
@@ -281,7 +303,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 onChange={(e) =>
                   handleChange(rowIndex, "Date", e.target.value)
                 }
-                className="border p-2 rounded w-[30%] text-sm"
+                className="border p-2 rounded w-[22%] text-xs"
               />
 
               {/* Dc */}
@@ -291,7 +313,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 onChange={(e) =>
                   handleChange(rowIndex, "Dc", e.target.value)
                 }
-                className="border p-2 rounded w-[18%] text-sm"
+                className="border p-2 rounded w-[14%] text-xs"
                 placeholder="DC"
               />
 
@@ -302,7 +324,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 onChange={(e) =>
                   handleChange(rowIndex, "Piece", Number(e.target.value))
                 }
-                className="border p-2 rounded w-[15%] text-sm"
+                className="border p-2 rounded w-[12%] text-xs"
                 placeholder="Piece"
               />
 
@@ -313,7 +335,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 onChange={(e) =>
                   handleChange(rowIndex, "Count", e.target.value)
                 }
-                className="border p-2 rounded w-[15%] text-sm"
+                className="border p-2 rounded w-[12%] text-xs"
                 placeholder="Count"
               />
 
@@ -324,15 +346,15 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 onChange={(e) =>
                   handleChange(rowIndex, "Weight", e.target.value)
                 }
-                className="border p-2 rounded w-[15%] text-sm"
+                className="border p-2 rounded w-[12%] text-xs"
                 placeholder="Wt"
-              />{((Number(row.Weight) / Number(row.Count)).toFixed(3))}
+              /> {((Number(row.Weight) / Number(row.Count)).toFixed(3))}
 
               {/* Remove Button */}
               <button
                 type="button"
                 onClick={() => removeProduct(rowIndex)}
-                className="text-red-500 hover:text-red-700 text-sm underline w-16 text-left"
+                className="text-red-500 hover:text-red-700 text-xs underline w-12 text-left"
               >
                 Remove
               </button>
@@ -343,13 +365,16 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
         <p className="text-gray-500 text-sm mb-4">No pieces received records added yet.</p>
       )}
 
+
       {/* Add Product Button */}
-      <Button
-        type="button"
-        onClick={addProduct}
-      >
-        + Add Row
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          onClick={addProduct}
+        >
+          + Add Row
+        </Button>
+      </div>
 
       {/* Total */}
       <div className="flex border-t mt-4 pt-4">
@@ -360,7 +385,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
           Dhoties: {totalDhoties || 0}
         </div>
         <div className="mt-2 font-bold text-sm pr-8">
-          Meter {totalDhoties && ((summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? ((totalDhoties || 0) * 1.89) : ((totalDhoties || 0) * 1.93))}
+          Meter {totalDhoties ? ((summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? ((totalDhoties || 0) * 1.89) : ((totalDhoties || 0) * 1.93)) : 0}
         </div>
         <div className="mt-2 font-bold text-sm">
           Weight: {(totalWeight || 0).toFixed(2)}

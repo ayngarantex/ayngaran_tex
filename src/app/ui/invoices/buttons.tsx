@@ -100,12 +100,25 @@ export function PayInvoice({ invoice }: { invoice: any }) {
       const balanceVal = invoice?.BalanceAmount !== undefined && invoice?.BalanceAmount !== null
         ? Number(invoice.BalanceAmount)
         : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0));
-      const payAmount = balanceVal > 0 ? balanceVal : Number(invoice?.InvoiceAmount || 0);
+
+      if (balanceVal <= 0) {
+        alert("This invoice is already fully paid.");
+        setLoading(false);
+        return;
+      }
+
+      const existing = (invoice?.invoice_payment_details || []).map((row: any) => ({
+        date: row.Date ? formatDateNew(row.Date) : todayStr,
+        amount: row.Amount !== null && row.Amount !== undefined ? String(row.Amount) : '',
+        type: row.Type || (invoice?.BillType === 'gst' ? 'Bank' : 'Gpay'),
+        to: row.ReceivedBy || 'Prakash'
+      }));
 
       const quickPayments = [
+        ...existing,
         {
           date: todayStr,
-          amount: payAmount.toFixed(2),
+          amount: balanceVal.toFixed(2),
           type: invoice?.BillType === 'gst' ? 'Bank' : 'Gpay',
           to: 'Prakash'
         }

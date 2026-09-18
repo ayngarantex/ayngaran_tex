@@ -169,7 +169,9 @@ export const updateWarp = async (warpData: any) => {
 export const getWarpSummary = async (
     search: string | null,
     loomId: any,
-    sizingId: any
+    sizingId: any,
+    page: number | null = null,
+    limit: number | null = null
 ) => {
     let query = `SELECT         
         S.InvoiceDate,
@@ -254,6 +256,11 @@ export const getWarpSummary = async (
     ORDER BY S.InvoiceDate DESC
     `;
 
+
+    if (page && limit) {
+        query += ` LIMIT ${limit} OFFSET ${(page - 1) * limit}`;
+    }
+
     const [rows]: any = await db.query(query);
     return rows.map((row: any) => ({
         InvoiceDate: row.InvoiceDate || '',
@@ -276,6 +283,50 @@ export const getWarpSummary = async (
         Weight: row.Weight || 0,
         Piece: row.Piece || 0,
     }));
+};
+
+export const getWarpSummaryCount = async (
+    search: string | null,
+    loomId: any,
+    sizingId: any
+) => {
+    let query = `
+    SELECT COUNT(*) AS total FROM (
+        SELECT 1
+        FROM sizing_warp_details SWD     
+        LEFT JOIN loom_details L         
+            ON SWD.LoomId = L.LoomId     
+        LEFT JOIN sizing S         
+            ON SWD.SizingId = S.SizingId     
+        LEFT JOIN suppliers Sup         
+            ON S.SupplierId = Sup.SupplierId     
+        WHERE 1=1
+    `;
+
+    if (search) {
+        const searchEscaped = search.replace(/'/g, "''");
+        query += ` AND (
+            LOWER(Sup.Name) LIKE '%${searchEscaped}%'
+            OR LOWER(L.LoomName) LIKE '%${searchEscaped}%'
+            OR LOWER(SWD.Color) LIKE '%${searchEscaped}%'
+        ) `;
+    }
+
+    if (loomId) {
+        query += ` AND SWD.LoomId = ${Number(loomId)} `;
+    }
+
+    if (sizingId) {
+        query += ` AND SWD.SizingId = ${Number(sizingId)} `;
+    }
+
+    query += `
+        GROUP BY S.SizingId, L.LoomId, S.InvoiceDate, S.InvoiceNumber, S.Color, Sup.Name, L.LoomName
+    ) AS countTable
+    `;
+
+    const [rows]: any = await db.query(query);
+    return rows[0]?.total || 0;
 };
 
 export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
@@ -308,6 +359,7 @@ export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
         SSD.Weight,
         SSD.DcId,
         SSD.Dc,
+        SSD.WarpId,
         SSD.IsCompleted
         FROM sizing_summary_details SSD
         WHERE SSD.SizingId = ${sId} ${lId > 0 ? `AND SSD.LoomId = ${lId}` : ''}
@@ -358,7 +410,7 @@ export const updateWarpSummary = async (summaryData: any) => {
     const dcIdsToDelete = existingDcIds.filter((id: string) => !incomingDcIds.includes(id));
     if (dcIdsToDelete.length > 0) {
         await db.query(
-            "DELETE FROM sizing_summary_details WHERE DcId IN (?)",
+            "DELETE FROM sizing_summary_details WHERE DcId IN (?)" ,
             [dcIdsToDelete]
         );
     }
@@ -377,20 +429,40 @@ export const updateWarpSummary = async (summaryData: any) => {
             const pieceVal = detail.Piece ? Number(detail.Piece) : null;
             const countVal = detail.Count || null;
             const weightVal = detail.Weight || null;
+            const warpIdVal = detail.WarpId ? Number(detail.WarpId) : null;
 
             if (detail.DcId) {
                 await db.query(
-                    "UPDATE sizing_summary_details SET Dc=?, Date=?, Piece=?, Count=?, Weight=? WHERE DcId=?",
-                    [dcVal, dateVal, pieceVal, countVal, weightVal, Number(detail.DcId)]
+                    "UPDATE sizing_summary_details SET Dc=?, Date=?, Piece=?, Count=?, Weight=?, WarpId=? WHERE DcId=?",
+                    [dcVal, dateVal, pieceVal, countVal, weightVal, warpIdVal, Number(detail.DcId)]
                 );
             } else {
                 await db.query(
-                    "INSERT INTO sizing_summary_details (SizingId, LoomId, Dc, Date, Piece, Count, Weight, IsCompleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    [Number(SizingId), Number(LoomId), dcVal, dateVal, pieceVal, countVal, weightVal, IsCompleted ? 1 : 0]
+                    "INSERT INTO sizing_summary_details (SizingId, LoomId, WarpId, Dc, Date, Piece, Count, Weight, IsCompleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [Number(SizingId), Number(LoomId), warpIdVal, dcVal, dateVal, pieceVal, countVal, weightVal, IsCompleted ? 1 : 0]
                 );
             }
         }
     }
 
+
     return "Warp summary details updated successfully";
 };
+
+export const getWarpDetailsBySizingAndLoomRepo = async (sizingId: any, loomId: any) => {
+    const sId = Number(sizingId);
+    const lId = Number(loomId);
+    if (!sId || isNaN(sId)) return [];
+
+    let query = `
+        SELECT SWD.*
+        FROM sizing_warp_details SWD
+        WHERE SWD.SizingId = ${sId}
+    `;
+    if (lId && !isNaN(lId) && lId > 0) {
+        query += ` AND SWD.LoomId = ${lId} `;
+    }
+
+    const [rows]: any = await db.query(query);
+    return rows || [];
+};

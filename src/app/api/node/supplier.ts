@@ -90,7 +90,8 @@ export const fetchYarnBySupplierId = async (
     try {
         const supplier = await getSupplierById(supplierId);
         if (!supplier) return [];
-        if (supplier.Type === 'Sizing') {
+        const supType = (supplier.Type || '').toLowerCase();
+        if (supType === 'sizing') {
             const rows = await getSizingBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             const mapped = rows.map((r: any) => ({
                 ...r,
@@ -98,7 +99,7 @@ export const fetchYarnBySupplierId = async (
                 PaidAmount: r.ReceivedAmount || 0
             }));
             return JSON.parse(JSON.stringify(mapped));
-        } else if (supplier.Type === 'Purchase') {
+        } else if (supType === 'purchase' || supType === 'purchases') {
             const rows = await getPurchaseBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             const mapped = rows.map((r: any) => ({
                 ...r,
@@ -125,10 +126,11 @@ export const fetchPaymentBySupplierId = async (
     try {
         const supplier = await getSupplierById(supplierId);
         if (!supplier) return [];
-        if (supplier.Type === 'Sizing') {
+        const supType = (supplier.Type || '').toLowerCase();
+        if (supType === 'sizing') {
             const rows = await getSizingPaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             return JSON.parse(JSON.stringify(rows));
-        } else if (supplier.Type === 'Purchase') {
+        } else if (supType === 'purchase' || supType === 'purchases') {
             const rows = await getPurchasePaymentsBySupplierIdRepo(supplierId, startDate || null, endDate || null, billType || null);
             return JSON.parse(JSON.stringify(rows));
         } else {

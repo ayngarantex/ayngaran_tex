@@ -9,8 +9,7 @@ import {
     createPurchase as createPurchaseRepo,
     updatePurchase as updatePurchaseRepo,
     deletePurchase as deletePurchaseRepo,
-    updatePurchasePaymentsRepo,
-    processSupplierLumpSumPaymentRepo
+    updatePurchasePaymentsRepo
 } from '@/server/repositories/purchaseRepositories';
 
 export const fetchPurchases = async (
@@ -116,16 +115,3 @@ export const updatePurchasePayments = async (purchaseId: number, payments: any[]
     const res = await updatePurchasePaymentsRepo(purchaseId, payments);
     return JSON.parse(JSON.stringify(res));
 };
-
-export const processSupplierLumpSumPayment = async (data: {
-    supplierId: number;
-    amount: number;
-    paymentDate: string;
-    paymentType: string;
-    paymentTo: string;
-    billType?: string | null;
-}) => {
-    const res = await processSupplierLumpSumPaymentRepo(data);
-    return JSON.parse(JSON.stringify(res));
-};
-
