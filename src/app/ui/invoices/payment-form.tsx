@@ -3,7 +3,7 @@ import { PaymentRow } from '@/app/lib/types';
 import { formatDateToLocalNew } from "@/app/lib/utils";
 import { Button } from "../button";
 
-const paymentType = ["Bank", "Cash", "Check", "Gpay", "PhonePay"]
+const paymentType = ["Bank", "Cash", "Check", "Gpay", "PhonePay", "Purchase"]
 const paymentTo = ["Prakash", "Govinth", "Sekar"]
 
 interface PaymentProps {

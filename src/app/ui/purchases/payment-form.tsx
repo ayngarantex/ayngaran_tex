@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "../button";
 
-const paymentType = ["Bank", "Cash", "Check", "Gpay", "PhonePay"];
+const paymentType = ["Bank", "Cash", "Check", "Gpay", "PhonePay", "Purchase"];
 
 export interface PurchasePaymentRow {
   pId: number;

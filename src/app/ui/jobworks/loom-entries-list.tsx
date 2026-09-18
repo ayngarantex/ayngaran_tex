@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import React, { useState } from "react";
-import { deleteEntry } from "@/app/api/node/looms"
+import { deleteEntry } from "@/app/api/node/looms";
+import { fetchWarpDetails } from "@/app/api/node/warp";
 import { formatDateNew } from "@/app/lib/utils";
 
 export default function LoomEntriesList({ entries, loom }: { entries: any[], loom: any }) {
@@ -26,12 +27,15 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
 
     const handleMouseEnter = async (sizingId: number, loomId: number) => {
         setHoveredSizingId(sizingId);
-
-        const res = await fetch(`/api/create/details?sizingId=${sizingId}&loomId=${loomId}`);
-        const data = await res.json();
-
-        setWarpDetails(data);
+        try {
+            const data = await fetchWarpDetails(sizingId, loomId);
+            setWarpDetails(data || []);
+        } catch (err) {
+            console.error("fetchWarpDetails error:", err);
+            setWarpDetails([]);
+        }
     };
+
 
     const handleMouseLeave = () => {
         setHoveredSizingId(null);

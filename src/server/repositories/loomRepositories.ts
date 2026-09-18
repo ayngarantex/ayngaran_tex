@@ -151,10 +151,11 @@ export const getWarpSummaryEntriesByLoomId = async (loomId: any) => {
         Type: 'Vesti (Warp Summary)',
         LoomId: Number(loomId),
         Date: row.Date || null,
-        Details: `DC: ${row.Dc}, Count: ${row.Count} Color: ${row.SizingColor || ''} (Sizing #${row.SizingId})`,
+        Details: `DC: ${row.Dc}, Count: ${row.Count} Color: ${row.SizingColor || ''} (Sizing #${row.SizingId}${row.WarpId ? `, Warp #${row.WarpId}` : ''})`,
         Weight: parseFloat(row.weight || row.Weight) || 0,
         isSizingGroup: false,
         isWarpSummary: true,
         sizingId: row.SizingId,
+        warpId: row.WarpId || null,
     }));
 };

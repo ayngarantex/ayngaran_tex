@@ -342,7 +342,7 @@ export const createInvoice = async (invoiceData: any) => {
 
         if (invoiceData.payments && invoiceData.payments.length > 0) {
             for (const item of invoiceData.payments) {
-                if (item.date && item.date !== 'date') {
+                if (item.date && item.date !== 'date' && item.Amount > 0) {
                     await conn.query(
                         `INSERT INTO payment_details (InvoiceId, Date, Amount, Type, ReceivedBy) VALUES (?, ?, ?, ?, ?)`,
                         [invoiceId, item.date, item.amount, item.type, item.to]

@@ -109,12 +109,25 @@ export function PayPurchase({ purchase }: { purchase: any }) {
       const invAmt = Number(purchase?.InvoiceAmount || 0);
       const paidAmt = Number(purchase?.PaidAmount || 0);
       const balanceVal = invAmt - paidAmt;
-      const payAmount = balanceVal > 0 ? balanceVal : invAmt;
+
+      if (balanceVal <= 0) {
+        alert("This purchase is already fully paid.");
+        setLoading(false);
+        return;
+      }
+
+      const existing = (purchase?.purchase_payment_details || []).map((row: any) => ({
+        date: row.Date ? formatDateToLocal(row.Date) : todayStr,
+        amount: row.Amount !== null && row.Amount !== undefined ? String(row.Amount) : '',
+        type: row.Type || (purchase?.BillType === 'gst' ? 'Bank' : 'Gpay'),
+        to: row.ReceivedBy || 'Prakash'
+      }));
 
       const quickPayments = [
+        ...existing,
         {
           date: todayStr,
-          amount: payAmount.toFixed(2),
+          amount: balanceVal.toFixed(2),
           type: purchase?.BillType === 'gst' ? 'Bank' : 'Gpay',
           to: 'Prakash'
         }

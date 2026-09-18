@@ -1,9 +1,10 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getWarps, getWarpCount, getWarpById, updateWarp as updateWarpRepo, getWarpSummary, getWarpSummaryById, updateWarpSummary as updateWarpSummaryRepo } from "@/server/repositories/warpRepositories";
+import { getWarps, getWarpCount, getWarpById, updateWarp as updateWarpRepo, getWarpSummary, getWarpSummaryCount, getWarpSummaryById, updateWarpSummary as updateWarpSummaryRepo, getWarpDetailsBySizingAndLoomRepo } from "@/server/repositories/warpRepositories";
 
 export const fetchWarps = async (
+
     query: string,
     currentPage: number,
     loomId: string,
@@ -52,14 +53,29 @@ export const updateWarp = async (warpData: any) => {
 export const fetchWarpSummary = async (
     query: string,
     loomId: string,
-    sizingId: string
+    sizingId: string,
+    currentPage: number
 ) => {
     try {
-        const rows = await getWarpSummary(query || null, loomId || null, sizingId || null);
+        const rows = await getWarpSummary(query || null, loomId || null, sizingId || null, currentPage || 1, pageLimit);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchWarpSummary Error:", err);
         return [];
+    }
+};
+
+export const fetchWarpSummaryCount = async (
+    query: string,
+    loomId: string,
+    sizingId: string
+) => {
+    try {
+        const count = await getWarpSummaryCount(query || null, loomId || null, sizingId || null);
+        return count || 0;
+    } catch (err) {
+        console.error("fetchWarpSummaryCount Error:", err);
+        return 0;
     }
 };
 
@@ -77,3 +93,13 @@ export const updateWarpSummary = async (summaryData: any) => {
     const res = await updateWarpSummaryRepo(summaryData);
     return JSON.parse(JSON.stringify(res));
 };
+
+export const fetchWarpDetails = async (sizingId: number | string, loomId: number | string) => {
+    try {
+        const rows = await getWarpDetailsBySizingAndLoomRepo(sizingId, loomId);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchWarpDetails Error:", err);
+        return [];
+    }
+};

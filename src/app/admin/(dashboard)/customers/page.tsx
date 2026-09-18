@@ -5,6 +5,8 @@ import Table from '@/app/ui/customers/table';
 import Financialyear from '@/app/lib/financialyear';
 import { fetchCustomerCount, fetchTotalPending } from '@/app/api/node/customers';
 import { formatCurrency, pageLimit } from '@/app/lib/utils';
+import LumpSumPaymentModal from '@/app/ui/invoices/lump-sum-payment-modal';
+import { fetchCustomers } from '@/app/lib/data';
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -29,6 +31,7 @@ export default async function Page(props: {
   const totalCustomers = await fetchCustomerCount(query);
   const totalPages = Math.ceil(Number(totalCustomers) / pageLimit); //node query
   const totalPending = await fetchTotalPending(query, startDate, endDate);
+  const customers = await fetchCustomers("", 1, "", "", "", null);
 
   return (
     <div className="w-full">
@@ -78,6 +81,7 @@ export default async function Page(props: {
           </div>
         </div>
         <div className="flex gap-2">
+          <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
           <div className='no-print'>
             <PrintCustomers query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
           </div>

@@ -6,9 +6,13 @@ export const getWarps = async (search: any, loomId: any, loomStatus: any, sizing
 export const getWarpCount = async (search: any, loomId: any, loomStatus: any, sizingId: any) => {
     return await repo.getWarpCount(search, loomId, loomStatus, sizingId);
 };
-export const getWarpSummary = async (search: any, loomId: any, sizingId: any) => {
-    return await repo.getWarpSummary(search, loomId, sizingId);
+export const getWarpSummary = async (search: any, loomId: any, sizingId: any, page?: any, limit?: any) => {
+    return await repo.getWarpSummary(search, loomId, sizingId, page || null, limit || null);
 };
+export const getWarpSummaryCount = async (search: any, loomId: any, sizingId: any) => {
+    return await repo.getWarpSummaryCount(search, loomId, sizingId);
+};
+
 export const getWarpById = async (id: any) => {
     return await repo.getWarpById(id);
 };
