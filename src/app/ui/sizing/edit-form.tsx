@@ -406,7 +406,7 @@ export default function EditForm({
                 name="yarnId"
                 onChange={handelYarnDetails}
                 className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                value={yarnId}
+                value={yarnId || ''}
               >
                 <option value="" disabled>
                   Select

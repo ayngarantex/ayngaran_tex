@@ -97,8 +97,8 @@ export default function LoomEntryDetails({ looms, entry }: { looms: any[], entry
                 <option value="Weft">Weft</option>
                 <option value="Warp">Warp</option>
                 <option value="Babbin">Babbin</option>
-                <option value="Babbin Given">Babbin Given</option>
-                <option value="Babbin Return">Babbin Return</option>
+                {/* <option value="Babbin Given">Babbin Given</option>
+                <option value="Babbin Return">Babbin Return</option> */}
                 <option value="Kuri Cone">Kuri Cone</option>
                 <option value="Vesti">Vesti</option>
                 <option value="Return Cone">Return Cone</option>

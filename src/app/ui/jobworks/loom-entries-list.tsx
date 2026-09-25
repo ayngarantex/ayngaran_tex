@@ -160,7 +160,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
                                     <td className={`px-4 py-3 whitespace-nowrap ${entry.Type === 'Closed Negative' ? 'text-orange-600 font-bold text-base' : ''}`}>
                                         {entry.Date ? formatDateNew(entry.Date) : '-'}
                                     </td>
-                                    <td className={`px-4 py-3 max-w-xs truncate ${entry.Type === 'Closed Negative' ? 'text-orange-600 font-bold text-base' : ''}`} title={entry.Details || ''}
+                                    <td className={`px-4 py-3 max-w-xs truncate ${entry.Type === 'Closed Negative' ? 'text-orange-600 font-bold text-base' : ''} ${entry.isWarpSummary ? 'font-bold' : ''}`} title={entry.Details || ''}
                                         onMouseEnter={() => handleMouseEnter(entry.sizingId, entry.LoomId)}
                                         onMouseLeave={handleMouseLeave}
                                     >
