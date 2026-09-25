@@ -15,10 +15,12 @@ export default function EditForm({
   const router = useRouter();
   const [summaryProducts, setSummaryProducts] = useState<any[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [warpDetails, setWarpDetails] = useState<any[]>([]);
 
   useEffect(() => {
     setSummaryProducts(summaryDetails.warp_summary_details || []);
     setIsCompleted(!!summaryDetails.IsCompleted);
+    setWarpDetails(summaryDetails.warp_detail || []);
   }, [summaryDetails]);
 
   const handleSubmit = async () => {
@@ -42,7 +44,23 @@ export default function EditForm({
       SizingId: Number(summaryDetails.SizingId),
       LoomId: Number(summaryDetails.LoomId),
       IsCompleted: isCompleted ? 1 : 0,
-      warp_summary_details: filteredProducts
+      warp_summary_details: filteredProducts,
+      warp_detail: warpDetails.map((w: any) => {
+        const warpEntries = summaryProducts
+          .filter((p: any) => String(p.WarpId) === String(w.WarpId) && p.Date)
+          .map((p: any) => p.Date)
+          .sort((a: string, b: string) => new Date(a).getTime() - new Date(b).getTime());
+
+        const computedStartDate = warpEntries.length > 0 ? warpEntries[0] : (w.StartDate || null);
+        const computedEndDate = warpEntries.length > 0 ? warpEntries[warpEntries.length - 1] : (w.CompletedDate || null);
+
+        return {
+          WarpId: Number(w.WarpId),
+          LoomNumber: w.LoomNumber || null,
+          StartDate: computedStartDate ? formatDateToLocalNew(computedStartDate) : null,
+          CompletedDate: w.CompletedDate ? (computedEndDate ? formatDateToLocalNew(computedEndDate) : formatDateToLocalNew(new Date())) : null
+        };
+      })
     };
 
     const res = await updateWarpSummary(summaryData);
@@ -126,34 +144,107 @@ export default function EditForm({
               </div>
               <p className='font-semibold text-lg w-1/2'>Weight <span className='ml-2 text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
             </div>
-            {summaryDetails?.warp_detail?.length ?
-              summaryDetails?.warp_detail.map((row: any, rowIndex: number) => {
+            {warpDetails?.length ?
+              warpDetails.map((row: any, rowIndex: number) => {
+                const warpEntries = summaryProducts
+                  .filter((p: any) => String(p.WarpId) === String(row.WarpId) && p.Date)
+                  .map((p: any) => p.Date)
+                  .sort((a: string, b: string) => new Date(a).getTime() - new Date(b).getTime());
+
                 const warpReceivedDhoties = summaryProducts
                   .filter((p: any) => String(p.WarpId) === String(row.WarpId))
                   .reduce((sum: number, p: any) => sum + Number(p.Count || 0), 0);
 
+                const isWarpCompleted = !!row.CompletedDate;
+                const startDateToDisplay = warpEntries.length > 0 ? warpEntries[0] : (row.StartDate || null);
+                const endDateToDisplay = warpEntries.length > 0 ? warpEntries[warpEntries.length - 1] : (row.CompletedDate || null);
+
                 return (
                   <div
                     key={`selP_${rowIndex}`}
-                    className="flex flex-col mb-3 p-2 bg-gray-50 rounded border text-sm"
+                    className={`flex flex-col mb-3 p-3 rounded-lg border text-sm ${isWarpCompleted ? 'bg-green-200 border-green-200' : 'bg-gray-50 border-gray-200'}`}
                   >
+                    <div className="flex justify-between items-center font-medium text-gray-800 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold">Warp #{rowIndex + 1} (ID: {row.WarpId})</span>
+                        {/* {isWarpCompleted && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-300">
+                            Completed
+                          </span>
+                        )} */}
+                      </div>
+                      {/* Loom Number Input */}
+                      <div className="flex items-center gap-2 mb-2 text-xs">
+                        <span className="font-semibold text-gray-600">Loom No:</span>
+                        <input
+                          type="text"
+                          value={row.LoomNumber || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setWarpDetails((prev) =>
+                              prev.map((w, idx) =>
+                                idx === rowIndex ? { ...w, LoomNumber: val } : w
+                              )
+                            );
+                          }}
+                          className="border border-gray-300 px-2 py-1 rounded w-12 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          placeholder="Loom No"
+                        />
+                      </div>
+                      <label className="inline-flex items-center gap-1 cursor-pointer text-xs font-semibold text-gray-700 hover:text-blue-600 select-none self-center">
+                        <input
+                          type="checkbox"
+                          checked={isWarpCompleted}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setWarpDetails((prev) =>
+                              prev.map((w, idx) =>
+                                idx === rowIndex
+                                  ? { ...w, CompletedDate: checked ? formatDateToLocalNew(new Date()) : null }
+                                  : w
+                              )
+                            );
+                          }}
+                          className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span>Completed</span>
+                      </label>
+                    </div>
+
                     <div className="flex font-medium text-gray-800 mb-1">
-                      <span>Warp #{rowIndex + 1} (ID: {row.WarpId})</span>
                       {warpReceivedDhoties > 0 && (
-                        <span className="text-blue-600 font-bold ml-2">Tot: ({(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) : Math.floor((row.Meters || 0) / 1.93)}) dhoties</span>
+                        <span className="text-blue-600 font-bold">Tot: ({(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) : Math.floor((row.Meters || 0) / 1.93)}) dhoties</span>
                       )}
                     </div>
                     <div className="flex justify-between font-medium text-gray-800 mb-1">
                       {warpReceivedDhoties > 0 && (
                         <>
-                          <span className="text-blue-600 font-bold">Rcvd: {warpReceivedDhoties} dhoties</span>
                           <span className="text-red-600 font-bold">Diff: {(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) - warpReceivedDhoties : Math.floor((row.Meters || 0) / 1.93) - warpReceivedDhoties} dhoties</span>
+                          <span className="text-blue-600 font-bold">Rcvd: {warpReceivedDhoties} dhoties</span>
                         </>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <div className="w-1/2 text-gray-600">Meter: <span className="font-semibold text-gray-900">{row.Meters || 0}</span></div>
-                      <div className="w-1/2 text-gray-600">Weight: <span className="font-semibold text-gray-900">{row.Weight || 0}</span></div>
+                    <div className="flex gap-2 mb-1">
+                      <div className="w-1/2 text-gray-600 text-xs">Meter: <span className="font-semibold text-gray-900">{row.Meters || 0}</span></div>
+                      <div className="w-1/2 text-gray-600 text-xs">Weight: <span className="font-semibold text-gray-900">{row.Weight || 0}</span></div>
+                    </div>
+
+                    {/* Dates (Start & End) */}
+                    <div className="flex justify-between gap-10 mt-2 pt-2 border-t border-gray-200 text-xs text-gray-600">
+                      <>
+                        <span className="font-medium text-gray-600 mr-2">Start Date:</span>
+                        <span className="font-semibold text-blue-700 mr-2">
+                          {startDateToDisplay ? formatDateNew(startDateToDisplay) : '-'}
+                        </span>
+                      </>
+                      {isWarpCompleted && (
+                        <>
+                          <span className="font-medium text-gray-600 mr-2">End Date:</span>
+                          <span className="font-semibold text-green-700">
+                            {endDateToDisplay ? formatDateNew(endDateToDisplay) : '-'}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -165,6 +256,7 @@ export default function EditForm({
             summaryDetails={summaryDetails}
             summaryProducts={summaryProducts}
             setSummaryProducts={setSummaryProducts}
+            warpDetails={warpDetails}
           />
         </div>
       </div>
@@ -177,7 +269,7 @@ export default function EditForm({
         </Link>
         <Button type="button" onClick={handleSubmit}>Update</Button>
       </div>
-    </form>
+    </form >
   );
 }
 
@@ -185,9 +277,10 @@ interface PieceReceivedProps {
   summaryDetails: any;
   summaryProducts: any[];
   setSummaryProducts: React.Dispatch<React.SetStateAction<any[]>>;
+  warpDetails: any[];
 }
 
-function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProducts }: PieceReceivedProps) {
+function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProducts, warpDetails }: PieceReceivedProps) {
   const handleChange = (
     index: number,
     field: string,
@@ -208,11 +301,13 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
     ]);
   };
 
+  const activeWarps = warpDetails.filter((w: any) => !w.CompletedDate);
+
   const autoFillWarps = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const warps = summaryDetails?.warp_detail || [];
-    if (!warps.length) return;
-    const newRows = warps.map((w: any) => ({
+    const warpsToFill = activeWarps.length > 0 ? activeWarps : warpDetails;
+    if (!warpsToFill.length) return;
+    const newRows = warpsToFill.map((w: any) => ({
       DcId: undefined,
       WarpId: w.WarpId,
       Dc: "",
@@ -243,19 +338,17 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
     0
   );
 
-  const warpList = summaryDetails?.warp_detail || [];
-
   return (
     <div className="p-4 border rounded-lg mb-4 w-2/3 bg-white">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Piece Received Details</h2>
-        {warpList.length > 0 && (
+        {warpDetails.length > 0 && (
           <button
             type="button"
             onClick={autoFillWarps}
             className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded border border-blue-200 transition-colors"
           >
-            + Add Row For Each Warp ({warpList.length})
+            + Add Row For Each {activeWarps.length < warpDetails.length ? "Active " : ""}Warp ({activeWarps.length})
           </button>
         )}
       </div>
@@ -286,12 +379,13 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 onChange={(e) =>
                   handleChange(rowIndex, "WarpId", e.target.value ? Number(e.target.value) : null)
                 }
-                className="border p-2 rounded w-[20%] text-xs bg-white"
+                className={`border p-2 rounded w-[20%] text-xs ${!row.WarpId || activeWarps.map(w => w.WarpId).includes(row.WarpId) ? 'bg-white' : 'bg-green-300'}`}
+                disabled={row.WarpId && !activeWarps.map(w => w.WarpId).includes(row.WarpId)}
               >
                 <option value="">General / Unassigned</option>
-                {warpList.map((w: any, wIdx: number) => (
+                {warpDetails.map((w: any, wIdx: number) => (
                   <option key={`w_opt_${w.WarpId}`} value={w.WarpId}>
-                    Warp #{wIdx + 1}
+                    Warp #{wIdx + 1} {w?.LoomNumber ? '(' + w?.LoomNumber + ')' : ''} {w.CompletedDate ? " (Completed)" : ""}
                   </option>
                 ))}
               </select>
@@ -348,7 +442,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
                 }
                 className="border p-2 rounded w-[12%] text-xs"
                 placeholder="Wt"
-              /> {((Number(row.Weight) / Number(row.Count)).toFixed(3))}
+              /> {row.Weight ? ((Number(row.Weight) / Number(row.Count)).toFixed(3)) : "0.000"}
 
               {/* Remove Button */}
               <button

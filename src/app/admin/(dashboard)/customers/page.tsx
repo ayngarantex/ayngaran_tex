@@ -89,7 +89,7 @@ export default async function Page(props: {
         </div>
       </div>
       {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
-      <Table query={query} currentPage={currentPage} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} limit={printMode ? null : undefined} />
+      <Table query={query} currentPage={currentPage} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} limit={printMode ? null : pageLimit} />
       {/* </Suspense> */}
       {!printMode && (
         <div className="mt-5 flex w-full justify-center no-print">

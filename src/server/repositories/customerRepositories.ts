@@ -147,8 +147,19 @@ export const getCustomerCount = async (search: string) => {
     let sql = "SELECT COUNT(*) as total FROM customers";
     let params: any[] = [];
 
-    if (search) {
-        sql += " WHERE LOWER(CustomerName) LIKE ?";
+    if (search != "") {
+        sql += `
+        WHERE (
+            LOWER(CustomerName) LIKE LOWER(?)
+            OR LOWER(GstNumber) LIKE LOWER(?)
+            OR LOWER(Agent) LIKE LOWER(?)
+            OR LOWER(State) LIKE LOWER(?)
+        )
+    `;
+
+        params.push(`%${search}%`);
+        params.push(`%${search}%`);
+        params.push(`%${search}%`);
         params.push(`%${search}%`);
     }
 

@@ -445,6 +445,20 @@ export const updateWarpSummary = async (summaryData: any) => {
         }
     }
 
+    // 4. Update CompletedDate, StartDate, and LoomNumber for individual warps if provided
+    if (summaryData.warp_detail && Array.isArray(summaryData.warp_detail)) {
+        for (const w of summaryData.warp_detail) {
+            if (w.WarpId) {
+                const compDate = w.CompletedDate ? w.CompletedDate : null;
+                const startDate = w.StartDate ? w.StartDate : null;
+                const loomNo = w.LoomNumber || null;
+                await db.query(
+                    "UPDATE sizing_warp_details SET CompletedDate = ?, StartDate = ?, LoomNumber = ? WHERE WarpId = ?",
+                    [compDate, startDate, loomNo, Number(w.WarpId)]
+                );
+            }
+        }
+    }
 
     return "Warp summary details updated successfully";
 };
