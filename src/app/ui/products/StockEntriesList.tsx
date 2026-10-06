@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { deleteStockEntry } from '@/app/api/node/stock';
 import { formatDateNew, formatDateToLocalNew } from '@/app/lib/utils';
+import StockCreateModal from '@/app/ui/products/StockCreateModal';
+import StockEditModal from '@/app/ui/products/StockEditModal';
 
 interface StockEntry {
   Id: string;
@@ -89,12 +91,12 @@ export default function StockEntriesList({ initialEntries, product, stockDetails
           >
             Back to Products
           </Link>
-          <Link
-            href={`/admin/products/${product.Id}/stocks/create`}
-            className="flex h-10 items-center rounded-lg bg-slate-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-          >
-            + Add Stock Entry
-          </Link>
+          <StockCreateModal
+            product={{ Id: product.Id, Name: product.Name, HSNCode: product.HSNCode }}
+            buttonClassName="flex h-10 items-center rounded-lg bg-slate-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 shadow-xs gap-1.5"
+            buttonLabel="Add Stock Entry"
+            showIcon={true}
+          />
         </div>
       </div>
 
@@ -130,18 +132,15 @@ export default function StockEntriesList({ initialEntries, product, stockDetails
                         {entry.Quantity > 0 ? `+${entry.Quantity}` : entry.Quantity}
                       </td>
                       <td className="px-6 py-4 text-slate-500 whitespace-pre-wrap">{entry.Notes || '-'}</td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4">
                         <div className="flex justify-end gap-3">
-                          <Link
-                            href={`/admin/products/${product.Id}/stocks/${entry.Id}/edit`}
-                            className="rounded-md border p-1.5 hover:bg-gray-100 flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-700 transition-colors"
-                            title="Edit Entry"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                            Edit
-                          </Link>
+                          <StockEditModal
+                            product={{ Id: product.Id, Name: product.Name, HSNCode: product.HSNCode }}
+                            entry={entry}
+                            onSuccess={(updated) => {
+                              setEntries((prev) => prev.map((e) => (e.Id === updated.Id ? updated : e)));
+                            }}
+                          />
                           <button
                             type="button"
                             onClick={() => handleDelete(entry.Id)}

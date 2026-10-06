@@ -4,27 +4,29 @@ import { deleteCustomer } from '@/app/api/node/customers';
 import { BookOpenIcon, EyeIcon, PencilIcon, PlusIcon, TrashIcon, PrinterIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ActionLink, ActionButton } from '@/app/ui/action-button';
 
 export function CreateCustomer() {
   return (
-    <Link
+    <ActionLink
       href="/admin/customers/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
       <span className="hidden md:block">Create Customer</span>{' '}
       <PlusIcon className="h-5 md:" />
-    </Link>
+    </ActionLink>
   );
 }
 
 export function UpdateCustomer({ id }: { id: string }) {
   return (
-    <Link
+    <ActionLink
       href={`/admin/customers/${id}/edit`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
+      title="Edit"
     >
       <PencilIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -41,13 +43,13 @@ export function CustomerLeader({ id, startDate, endDate, billType }: { id: strin
     }
   }
   return (
-    <Link
+    <ActionLink
       href={`/admin/customers/${id}/ledger${string}`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
       title="ledger"
     >
       <BookOpenIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -61,23 +63,22 @@ export function DeleteCustomer({ id }: { id: string }) {
   }
 
   return (
-    <>
-      <button type="button" onClick={handleDelete} className="rounded-md border p-2 hover:bg-red-200">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </>
+    <ActionButton onClick={handleDelete} className="rounded-md border p-2 hover:bg-red-200 flex items-center justify-center" title="Delete">
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </ActionButton>
   );
 }
 
 export function UpdateCustomerProduct({ id }: { id: string }) {
   return (
-    <Link
+    <ActionLink
       href={`/admin/customers/${id}/product`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center text-xs font-semibold"
+      title="Product"
     >
       Prod
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -94,15 +95,14 @@ export function PrintCustomers({ query, startDate, endDate, billType, orderBy }:
   };
 
   return (
-    <button
-      type="button"
+    <ActionButton
       onClick={handlePrint}
       className="flex h-10 items-center rounded-lg bg-gray-100 border border-gray-300 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 no-print"
       title="Print List"
     >
       <span className="hidden md:block pr-2">Print List</span>
-      <PrinterIcon className="h-5 md: w-5 text-gray-500" />
-    </button>
+      <PrinterIcon className="h-5 w-5 text-gray-500" />
+    </ActionButton>
   );
 }
 

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDateNew, formatDateToLocalNew } from '@/app/lib/utils';
 import { updateWarpSummary } from '@/app/api/node/warp';
+import { useLoading } from '@/app/ui/loading-context';
 
 export default function EditForm({
   summaryDetails,
@@ -23,50 +24,63 @@ export default function EditForm({
     setWarpDetails(summaryDetails.warp_detail || []);
   }, [summaryDetails]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showLoading, hideLoading } = useLoading();
+
   const handleSubmit = async () => {
-    let filteredProducts: any = [];
-    if (summaryProducts?.length) {
-      summaryProducts.forEach((row: any) => {
-        if (row.Date) {
-          filteredProducts.push({
-            DcId: row.DcId ? String(row.DcId) : undefined,
-            WarpId: row.WarpId ? Number(row.WarpId) : null,
-            Dc: Number(row.Dc || 0),
-            Date: formatDateToLocalNew(row.Date),
-            Piece: Number(row.Piece || 0),
-            Count: String(row.Count || ""),
-            Weight: String(row.Weight || "")
-          });
-        }
-      });
-    }
-    const summaryData = {
-      SizingId: Number(summaryDetails.SizingId),
-      LoomId: Number(summaryDetails.LoomId),
-      IsCompleted: isCompleted ? 1 : 0,
-      warp_summary_details: filteredProducts,
-      warp_detail: warpDetails.map((w: any) => {
-        const warpEntries = summaryProducts
-          .filter((p: any) => String(p.WarpId) === String(w.WarpId) && p.Date)
-          .map((p: any) => p.Date)
-          .sort((a: string, b: string) => new Date(a).getTime() - new Date(b).getTime());
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    showLoading();
+    try {
+      let filteredProducts: any = [];
+      if (summaryProducts?.length) {
+        summaryProducts.forEach((row: any) => {
+          if (row.Date) {
+            filteredProducts.push({
+              DcId: row.DcId ? String(row.DcId) : undefined,
+              WarpId: row.WarpId ? Number(row.WarpId) : null,
+              Dc: Number(row.Dc || 0),
+              Date: formatDateToLocalNew(row.Date),
+              Piece: Number(row.Piece || 0),
+              Count: String(row.Count || ""),
+              Weight: String(row.Weight || "")
+            });
+          }
+        });
+      }
+      const summaryData = {
+        SizingId: Number(summaryDetails.SizingId),
+        LoomId: Number(summaryDetails.LoomId),
+        IsCompleted: isCompleted ? 1 : 0,
+        warp_summary_details: filteredProducts,
+        warp_detail: warpDetails.map((w: any) => {
+          const warpEntries = summaryProducts
+            .filter((p: any) => String(p.WarpId) === String(w.WarpId) && p.Date)
+            .map((p: any) => p.Date)
+            .sort((a: string, b: string) => new Date(a).getTime() - new Date(b).getTime());
 
-        const computedStartDate = warpEntries.length > 0 ? warpEntries[0] : (w.StartDate || null);
-        const computedEndDate = warpEntries.length > 0 ? warpEntries[warpEntries.length - 1] : (w.CompletedDate || null);
+          const computedStartDate = warpEntries.length > 0 ? warpEntries[0] : (w.StartDate || null);
+          const computedEndDate = warpEntries.length > 0 ? warpEntries[warpEntries.length - 1] : (w.CompletedDate || null);
 
-        return {
-          WarpId: Number(w.WarpId),
-          LoomNumber: w.LoomNumber || null,
-          StartDate: computedStartDate ? formatDateToLocalNew(computedStartDate) : null,
-          CompletedDate: w.CompletedDate ? (computedEndDate ? formatDateToLocalNew(computedEndDate) : formatDateToLocalNew(new Date())) : null
-        };
-      })
-    };
+          return {
+            WarpId: Number(w.WarpId),
+            LoomNumber: w.LoomNumber || null,
+            StartDate: computedStartDate ? formatDateToLocalNew(computedStartDate) : null,
+            CompletedDate: w.CompletedDate ? (computedEndDate ? formatDateToLocalNew(computedEndDate) : formatDateToLocalNew(new Date())) : null
+          };
+        })
+      };
 
-    const res = await updateWarpSummary(summaryData);
+      const res = await updateWarpSummary(summaryData);
 
-    if (res) {
-      router.push('/admin/warp');
+      if (res) {
+        router.push('/admin/warp');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+      hideLoading();
     }
   };
 
@@ -267,7 +281,7 @@ export default function EditForm({
         >
           Cancel
         </Link>
-        <Button type="button" onClick={handleSubmit}>Update</Button>
+        <Button type="button" onClick={handleSubmit} loading={isSubmitting}>Update</Button>
       </div>
     </form >
   );

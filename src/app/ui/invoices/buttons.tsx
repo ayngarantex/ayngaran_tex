@@ -9,39 +9,43 @@ import PaymentForm from '@/app/ui/invoices/payment-form';
 import { PaymentRow } from '@/app/lib/types';
 import LumpSumPaymentModal from '@/app/ui/invoices/lump-sum-payment-modal';
 
+import { ActionLink, ActionButton } from '@/app/ui/action-button';
+
 export { LumpSumPaymentModal };
 
 export function CreateInvoice() {
   return (
-    <Link
+    <ActionLink
       href="/admin/invoices/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
       <span className="hidden md:block">Create Invoice</span>{' '}
       <PlusIcon className="h-5 md:" />
-    </Link>
+    </ActionLink>
   );
 }
 
 export function PrintInvoice({ id }: { id: string }) {
   return (
-    <Link
+    <ActionLink
       href={`/admin/invoices/${id}/print`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
+      title="Print Invoice"
     >
       <PrinterIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
 export function UpdateInvoice({ id }: { id: string }) {
   return (
-    <Link
+    <ActionLink
       href={`/admin/invoices/${id}/edit`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
+      title="Edit Invoice"
     >
       <PencilIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -55,12 +59,10 @@ export function DeleteInvoice({ id }: { id: string }) {
   }
 
   return (
-    <>
-      <button type="button" onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </>
+    <ActionButton onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center" title="Delete Invoice">
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </ActionButton>
   );
 }
 

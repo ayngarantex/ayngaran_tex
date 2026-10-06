@@ -50,6 +50,9 @@ type WarpSummary {
   SupplierName: String,
   Color: String,
   TotalWarps: Int,
+  RunningWarps: Int,
+  CompletedWarps: Int,
+  PendingWarps: Int,
   TotalWeight: String,
   TotalMeters: String,
   LoomId: String,
@@ -81,6 +84,9 @@ type WarpSummaryDetails {
   SizingId: Int
   Color: String
   TotalWarps: Int
+  RunningWarps: Int
+  CompletedWarps: Int
+  PendingWarps: Int
   TotalWeight: String
   TotalMeters: String
   LoomId: Int

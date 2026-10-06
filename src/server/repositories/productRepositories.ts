@@ -4,6 +4,9 @@ export const getProducts = async (search: string | null, page: number | null, li
     let sql = `
         SELECT P.*, 
                CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) AS TotalStock,
+               (SELECT S1.EntryDate FROM product_stocks S1 WHERE S1.ProductId = P.Id ORDER BY S1.Id DESC LIMIT 1) AS LastEntryDate,
+               (SELECT S1.Quantity FROM product_stocks S1 WHERE S1.ProductId = P.Id ORDER BY S1.Id DESC LIMIT 1) AS LastQuantity,
+               (SELECT S1.Notes FROM product_stocks S1 WHERE S1.ProductId = P.Id ORDER BY S1.Id DESC LIMIT 1) AS LastNote,
                COALESCE((
                    SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
                    FROM invoice_details ID
