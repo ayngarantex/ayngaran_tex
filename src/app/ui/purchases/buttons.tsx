@@ -8,28 +8,31 @@ import { currentDate, formatDateToLocal, formatCurrency } from '@/app/lib/utils'
 import PaymentForm, { PurchasePaymentRow } from './payment-form';
 import SupplierLumpSumPaymentModal from '@/app/ui/suppliers/supplier-lump-sum-payment-modal';
 
+import { ActionLink, ActionButton } from '@/app/ui/action-button';
+
 export { SupplierLumpSumPaymentModal };
 
 export function CreatePurchase() {
   return (
-    <Link
+    <ActionLink
       href="/admin/purchases/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
       <span className="hidden md:block">Add Purchase</span>{' '}
       <PlusIcon className="h-5 md:" />
-    </Link>
+    </ActionLink>
   );
 }
 
 export function UpdatePurchase({ id }: { id: string }) {
   return (
-    <Link
+    <ActionLink
       href={`/admin/purchases/${id}/edit`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
+      title="Edit"
     >
       <PencilIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -44,10 +47,10 @@ export function DeletePurchase({ id }: { id: number }) {
   };
 
   return (
-    <button type="button" onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100 text-red-600 hover:text-red-800">
+    <ActionButton onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100 text-red-600 hover:text-red-800 flex items-center justify-center" title="Delete">
       <span className="sr-only">Delete</span>
       <TrashIcon className="w-5" />
-    </button>
+    </ActionButton>
   );
 }
 

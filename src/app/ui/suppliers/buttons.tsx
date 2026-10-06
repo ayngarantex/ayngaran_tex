@@ -4,29 +4,31 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { deleteSupplier } from '@/app/api/node/supplier';
 import SupplierLumpSumPaymentModal from '@/app/ui/suppliers/supplier-lump-sum-payment-modal';
+import { ActionLink, ActionButton } from '@/app/ui/action-button';
 
 export { SupplierLumpSumPaymentModal };
 
 export function CreateSupplier() {
   return (
-    <Link
+    <ActionLink
       href="/admin/suppliers/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
       <span className="hidden md:block">Create Supplier</span>{' '}
       <PlusIcon className="h-5 md:" />
-    </Link>
+    </ActionLink>
   );
 }
 
 export function UpdateSupplier({ id }: { id: string }) {
   return (
-    <Link
+    <ActionLink
       href={`/admin/suppliers/${id}/edit`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
+      title="Edit"
     >
       <PencilIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -43,13 +45,13 @@ export function SupplierLeader({ id, startDate, endDate, billType }: { id: strin
     }
   }
   return (
-    <Link
+    <ActionLink
       href={`/admin/suppliers/${id}/ledger${string}`}
-      className="rounded-md border p-2 hover:bg-blue-100"
+      className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
       title="ledger"
     >
       <BookOpenIcon className="w-5" />
-    </Link>
+    </ActionLink>
   );
 }
 
@@ -64,11 +66,9 @@ export function DeleteSupplier({ id }: { id: number }) {
     }
   
     return (
-      <>
-        <button type="button" onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100">
-          <span className="sr-only">Delete</span>
-          <TrashIcon className="w-5" />
-        </button>
-      </>
+      <ActionButton onClick={handleDelete} className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center" title="Delete">
+        <span className="sr-only">Delete</span>
+        <TrashIcon className="w-5" />
+      </ActionButton>
     );
 }

@@ -82,7 +82,26 @@ export default function WarpSummaryTable({
                       )}
                     </td>
                     <td className="whitespace-nowrap py-4 pl-6 pr-3 font-bold text-blue-700">
-                      {row.TotalWarps}
+                      <div>{row.TotalWarps}</div>
+                      {row.IsCompleted !== 1 ?
+                        <div className="flex gap-2 font-normal space-y-0.5 mt-1">
+                          {row.RunningWarps > 0 ? (
+                            <span className="text-blue-600 font-semibold">
+                              {row.RunningWarps} Run
+                            </span>
+                          ) : null}
+                          {row.PendingWarps > 0 ? (
+                            <span className="text-amber-600 font-semibold">
+                              {row.PendingWarps} Pen
+                            </span>
+                          ) : null}
+                          {row.CompletedWarps > 0 ? (
+                            <span className="text-emerald-600 font-semibold">
+                              {row.CompletedWarps} Com
+                            </span>
+                          ) : null}
+                        </div>
+                        : null}
                     </td>
                     <td className="whitespace-nowrap py-4 pl-6 pr-3 font-bold text-blue-700">
                       {row.TotalWeight}
