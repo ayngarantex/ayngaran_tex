@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, memo } from 'react';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 
 export interface DropdownItem {
@@ -22,7 +22,7 @@ interface SearchDropdownProps {
     className?: string;
 }
 
-export default function SearchDropdown({
+function SearchDropdown({
     items,
     onSelect,
     label = 'Choose an option',
@@ -52,9 +52,11 @@ export default function SearchDropdown({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filtered = items.filter(item =>
-        item.label.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = useMemo(() => {
+        return items.filter(item =>
+            item.label.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [items, search]);
 
     return (
         <div className={`${className || (hideLabel ? "" : "")}`} >
@@ -116,3 +118,5 @@ export default function SearchDropdown({
         </div>
     );
 }
+
+export default memo(SearchDropdown);

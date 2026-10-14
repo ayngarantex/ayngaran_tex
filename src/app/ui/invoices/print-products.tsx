@@ -54,7 +54,7 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
                           ({products.filter(e => e.Id === row.ItemId)?.[0].ProductCode})
                         </div>
                         : ""}
-                      {row?.Type === 'Unfold' ?
+                      {(row?.Type === 'Unfold' || row?.Type === 'Without Kuri') ?
                         <span className="pl-2 italic text-sm">( {row.Type === 'Unfold' ? 'Unfolded' : row.Type} )</span>
                         : null}
                     </div>

@@ -1,7 +1,7 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getYarns, getYarnCount, getYarnTotal, getYarnById, createYarn as createYarnRepo, updateYarn as updateYarnRepo, deleteYarn as deleteYarnRepo } from '@/server/repositories/yarnRepositories';
+import { getYarns, getYarnCount, getYarnTotal, getYarnById, createYarn as createYarnRepo, updateYarn as updateYarnRepo, deleteYarn as deleteYarnRepo, updateYarnPaymentsRepo } from '@/server/repositories/yarnRepositories';
 
 export const fetchYarns = async (
     query: string,
@@ -99,5 +99,10 @@ export const updateYarn = async (payload: {
     const products = payload.products || payload.yarnDetailsList || [];
     const payments = payload.payments || payload.paymentDetailsList || [];
     const res = await updateYarnRepo(invoiceData, products, payments);
+    return JSON.parse(JSON.stringify(res));
+};
+
+export const updateYarnPayments = async (yarnId: number, payments: any[]) => {
+    const res = await updateYarnPaymentsRepo(yarnId, payments);
     return JSON.parse(JSON.stringify(res));
 };

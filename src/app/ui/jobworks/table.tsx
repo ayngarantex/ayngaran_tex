@@ -24,6 +24,12 @@ export default async function Table({
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
                   Looms
                 </th>
+                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                  Wage Rate (₹/Dhoti)
+                </th>
+                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                  Opening Balance (₹)
+                </th>
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6 flex justify-end">
                   &nbsp;
                 </th>
@@ -35,7 +41,7 @@ export default async function Table({
                   key={`inv-'${loom.LoomId}`}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3 font-semibold">
                     <div className="flex items-center gap-3">
                       {loom?.LoomName}
                     </div>
@@ -53,6 +59,16 @@ export default async function Table({
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
                       {loom?.Count}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3 font-bold text-indigo-700">
+                    <div className="flex items-center gap-1">
+                      ₹ {parseFloat(loom?.WageRate || 0).toFixed(2)}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3 font-bold text-amber-800">
+                    <div className="flex items-center gap-1">
+                      ₹ {parseFloat(loom?.OpeningBalance || 0).toFixed(2)}
                     </div>
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">

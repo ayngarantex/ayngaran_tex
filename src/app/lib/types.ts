@@ -16,7 +16,8 @@ export interface SizingRow {
   color: any;
   date: string;
   weight: any;
-  loomId: any
+  loomId: any;
+  wageRate?: number;
 }
 
 export interface PaymentRow {

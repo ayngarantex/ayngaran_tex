@@ -283,3 +283,16 @@ export const expenseTypeOptions = () => {
     'Yarn', 'Wages', 'Sizing', 'Transaction Charges', 'Purchase', 'Transport', 'Loan', 'Cheet', 'Comission', 'Gst Charges', 'Stationary', 'Bill', 'Others'
   ];
 };
+
+export const Folders = () => {
+  return [
+    'R Tex Folding',
+    'R Tex'
+  ]
+}
+
+export const FoldingItems = () => {
+  return [
+    'White', 'L Kavi', 'D kavi', 'White Cross', 'Cream', 'Black Cross', 'Ash', 'Black', 'VK Black', 'VK White', 'VK BC', 'VK WC', 'VK Kavi', '2/40s BC'
+  ]
+}
