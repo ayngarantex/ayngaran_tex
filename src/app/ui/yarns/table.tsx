@@ -1,4 +1,4 @@
-import { UpdateYarn, DeleteYarn } from '@/app/ui/yarns/buttons';
+import { UpdateYarn, DeleteYarn, PayYarn } from '@/app/ui/yarns/buttons';
 import { formatCurrency, formatDate, formatDateNew } from '@/app/lib/utils';
 import YarnStatus from './status';
 
@@ -93,6 +93,9 @@ export default async function YarnTable({
                   </td>
                   <td className="whitespace-nowrap py-3.5 pl-6 pr-3 text-right">
                     <div className="flex justify-end items-center gap-2">
+                      {Number(yrn?.InvoiceAmount) !== Number(yrn?.PaidAmount) && (
+                        <PayYarn yarn={yrn} />
+                      )}
                       <UpdateYarn id={yrn.YarnId} />
                       <DeleteYarn id={yrn.YarnId} />
                     </div>

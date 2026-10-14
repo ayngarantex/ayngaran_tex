@@ -281,12 +281,17 @@ export const createSizing = async (
 
         const sizingId = sizingRes.insertId;
 
+
         // 2. Insert products (warp details)
         for (const p of products) {
+            const wageVal = (p.wageRate !== undefined && p.wageRate !== null && p.wageRate !== '')
+                ? parseFloat(String(p.wageRate))
+                : null;
+
             await conn.query(
                 `INSERT INTO sizing_warp_details (
-                    SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId, WageRate
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     sizingId,
                     p.meters || 0,
@@ -294,9 +299,18 @@ export const createSizing = async (
                     p.date ? new Date(p.date) : null,
                     p.price ? parseFloat(String(p.price)) : null,
                     p.weight ? parseFloat(String(p.weight)) : null,
-                    p.loomId ? parseInt(p.loomId) : null
+                    p.loomId ? parseInt(p.loomId) : null,
+                    wageVal
                 ]
             );
+
+            if (wageVal !== null && wageVal > 0) {
+                await conn.query(
+                    `INSERT INTO warp_wage_rates (SizingId, WageRate) VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE WageRate = VALUES(WageRate)`,
+                    [sizingId, wageVal]
+                );
+            }
         }
 
         // 3. Insert sizingYarn (yarn details)
@@ -380,10 +394,14 @@ export const updateSizing = async (
 
         // 3. Update or Insert products (warp details)
         for (const p of products) {
+            const wageVal = (p.wageRate !== undefined && p.wageRate !== null && p.wageRate !== '')
+                ? parseFloat(String(p.wageRate))
+                : null;
+
             if (p.warpId) {
                 await conn.query(
                     `UPDATE sizing_warp_details SET
-                        Meters = ?, Color = ?, DeliveredDate = ?, Price = ?, Weight = ?, LoomId = ?
+                        Meters = ?, Color = ?, DeliveredDate = ?, Price = ?, Weight = ?, LoomId = ?, WageRate = ?
                      WHERE WarpId = ?`,
                     [
                         p.meters || 0,
@@ -392,14 +410,15 @@ export const updateSizing = async (
                         p.price ? parseFloat(String(p.price)) : null,
                         p.weight ? parseFloat(String(p.weight)) : null,
                         p.loomId ? parseInt(p.loomId) : null,
+                        wageVal,
                         Number(p.warpId)
                     ]
                 );
             } else {
                 await conn.query(
                     `INSERT INTO sizing_warp_details (
-                        SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId, WageRate
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         sizingId,
                         p.meters || 0,
@@ -407,8 +426,17 @@ export const updateSizing = async (
                         p.date ? new Date(p.date) : null,
                         p.price ? parseFloat(String(p.price)) : null,
                         p.weight ? parseFloat(String(p.weight)) : null,
-                        p.loomId ? parseInt(p.loomId) : null
+                        p.loomId ? parseInt(p.loomId) : null,
+                        wageVal
                     ]
+                );
+            }
+
+            if (wageVal !== null && wageVal > 0) {
+                await conn.query(
+                    `INSERT INTO warp_wage_rates (SizingId, WageRate) VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE WageRate = VALUES(WageRate)`,
+                    [sizingId, wageVal]
                 );
             }
         }

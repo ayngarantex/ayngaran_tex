@@ -30,6 +30,8 @@ const links = [
   { name: 'Suppliers', href: '/admin/suppliers', icon: BuildingStorefrontIcon },
   { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon },
   { name: 'Warp', href: '/admin/warp', icon: MapIcon },
+  { name: 'Folding', href: '/admin/folding', icon: AdjustmentsVerticalIcon },
+  { name: 'Loom Wages', href: '/admin/loom-wages', icon: BanknotesIcon },
   { name: 'Payments', href: '/admin/payments', icon: BanknotesIcon },
   { name: 'Expenses', href: '/admin/expenses', icon: CurrencyRupeeIcon },
   { name: 'Investments', href: '/admin/investments', icon: BanknotesIcon }

@@ -3,7 +3,7 @@ import { CustomerField, ProductField } from '@/app/lib/definitions';
 import { ProductRow, PaymentRow } from '@/app/lib/types';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import ProductForm from './products-form';
 import SearchDropdown from '@/app/ui/search-dropdown';
 import PaymentForm from './payment-form';
@@ -29,7 +29,7 @@ export default function Form({
     }));
   }, [customers]);
 
-  const handleCustomerSelect = async (item: any) => {
+  const handleCustomerSelect = useCallback(async (item: any) => {
     setProducts([]);
     if (!item) {
       setSelectedCustomer(null);
@@ -41,7 +41,8 @@ export default function Form({
     setSelectedCustomer(customer);
     let data = await fetchProductsWithCode(customerId, 0, "");
     setProducts(data);
-  };
+  }, [customers]);
+
   const [invoiceNumber, setInvoiceNumber] = useState(String(Number(lastInvoiceDcNumber) + 1));
   const [invoiceDate, setInvoiceDate] = useState(
     currentDate()

@@ -2,12 +2,10 @@
 import { CustomerField, ProductField, } from '@/app/lib/definitions';
 import { ProductRow, PaymentRow } from '@/app/lib/types';
 import Link from 'next/link';
-import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import ProductForm from './products-form';
 import PaymentForm from './payment-form';
-import { redirect } from 'next/navigation';
 import { formatDateToLocalNew, invoiceTypeOptions } from '@/app/lib/utils';
 import ReturnProducts from './return-products';
 import { updateInvoice } from '@/app/api/node/invoice';
@@ -30,7 +28,7 @@ export default function EditForm({
     }));
   }, [customers]);
 
-  const handleCustomerSelect = async (item: any) => {
+  const handleCustomerSelect = useCallback(async (item: any) => {
     if (!item) {
       setSelectedCustomer(null);
       setCustomerId(0);
@@ -44,7 +42,8 @@ export default function EditForm({
 
     let data = await fetchProductsWithCode(Id, 0, "");
     setProducts(data);
-  };
+  }, [customers]);
+
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [invoiceType, setInvoiceType] = useState("");
@@ -376,7 +375,7 @@ export default function EditForm({
                   className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
                   value={invoiceType || ""}
                 >
-                  <option value="" disabled>Select a Type</option>
+                  <option value="">Select a Type</option>
                   {invoiceTypeOptions().map((type) => (
                     <option
                       key={type}

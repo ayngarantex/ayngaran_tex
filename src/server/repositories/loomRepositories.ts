@@ -14,8 +14,6 @@ export const getLooms = async (search: string | null, page: number | null, limit
         params.push(limit, (page - 1) * limit);
     }
 
-    console.log("sql", sql)
-
     const [rows]: any = await db.query(sql, params);
     return rows;
 };
@@ -39,19 +37,33 @@ export const getLoomById = async (Id: any) => {
 };
 
 export const createLoom = async (loomData: any) => {
-    const { LoomName, Address, ContactNumber, Count } = loomData;
+    const { LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance } = loomData;
+    try {
+        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
+        if (cols.length === 0) {
+            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
+        }
+    } catch (e) { }
+
     const [result]: any = await db.query(
-        "INSERT INTO loom_details (LoomName, Address, ContactNumber, Count) VALUES (?, ?, ?, ?)",
-        [LoomName, Address, ContactNumber, Count]
+        "INSERT INTO loom_details (LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance) VALUES (?, ?, ?, ?, ?, ?)",
+        [LoomName, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0]
     );
     return result;
 };
 
 export const updateLoom = async (loomData: any) => {
-    const { LoomId, LoomName, Address, ContactNumber, Count } = loomData;
+    const { LoomId, LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance } = loomData;
+    try {
+        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
+        if (cols.length === 0) {
+            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
+        }
+    } catch (e) { }
+
     const [result]: any = await db.query(
-        "UPDATE loom_details SET LoomName = ?, Address = ?, ContactNumber = ?, Count = ? WHERE LoomId = ?",
-        [LoomName, Address, ContactNumber, Count, LoomId]
+        "UPDATE loom_details SET LoomName = ?, Address = ?, ContactNumber = ?, Count = ?, WageRate = ?, OpeningBalance = ? WHERE LoomId = ?",
+        [LoomName, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0, LoomId]
     );
     return result.affectedRows;
 };

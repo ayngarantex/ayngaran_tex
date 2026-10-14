@@ -11,6 +11,14 @@ interface PaymentProps {
   setYrnPayments: React.Dispatch<React.SetStateAction<PaymentRow[]>>;
 }
 
+const getTodayDateStr = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function PaymentForm({ yrnPayment, invoiceAmount, setYrnPayments }: PaymentProps) {
 
   const [selectedPayment, setSelectedPayment] = useState<PaymentRow[]>([
@@ -20,19 +28,21 @@ export default function PaymentForm({ yrnPayment, invoiceAmount, setYrnPayments 
   useEffect(() => {
     let formPayments = []
     let pId = 0
-    yrnPayment.forEach((row: any, rowIndex: number) => {
-      formPayments.push(
-        {
-          pId: rowIndex,
-          date: formatDateToLocal(row.Date),
-          amount: row.Amount,
-          type: row.Type,
-          to: row.ReceivedBy
-        }
-      )
-      pId = rowIndex + 1
-    });
-    formPayments.push({ pId: pId, date: "date", amount: "", type: "Bank", to: "" },)
+    if (yrnPayment?.length) {
+      yrnPayment.forEach((row: any, rowIndex: number) => {
+        formPayments.push(
+          {
+            pId: rowIndex,
+            date: formatDateToLocal(row.Date),
+            amount: row.Amount,
+            type: row.Type,
+            to: row.ReceivedBy
+          }
+        )
+        pId = rowIndex + 1
+      });
+    }
+    formPayments.push({ pId: pId, date: "date", amount: "", type: "Bank", to: "" })
     setSelectedPayment(formPayments)
   }, [yrnPayment?.length])
 
@@ -54,6 +64,28 @@ export default function PaymentForm({ yrnPayment, invoiceAmount, setYrnPayments 
       ...prev,
       { pId: rowIndex, date: "date", amount: "", type: "Bank", to: "" },
     ]);
+  };
+
+  const fillFullBalance = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const todayStr = getTodayDateStr();
+    const invAmtNum = Number(invoiceAmount || 0);
+
+    setSelectedPayment((prev) => {
+      if (!prev || prev.length === 0) {
+        return [{ pId: 0, date: todayStr, amount: invAmtNum > 0 ? invAmtNum.toFixed(2) : "", type: "Bank", to: "" }];
+      }
+      const updated = [...prev];
+      const lastIdx = updated.length - 1;
+      const otherPaid = updated.slice(0, lastIdx).reduce((sum, r) => sum + Number(r.amount || 0), 0);
+      const rem = Math.max(0, invAmtNum - otherPaid);
+      updated[lastIdx] = {
+        ...updated[lastIdx],
+        date: todayStr,
+        amount: rem > 0 ? rem.toFixed(2) : String(invAmtNum || "")
+      };
+      return updated;
+    });
   };
 
   const removePayment = (rowIndex: number) => {
@@ -82,14 +114,14 @@ export default function PaymentForm({ yrnPayment, invoiceAmount, setYrnPayments 
 
       {selectedPayment.map((row, rowIndex: number) => (
         <div
-          key={row.date}
+          key={row.pId ?? rowIndex}
           className="flex gap-3 items-center mb-2"
         >
           <p className="w-16">{rowIndex + 1}</p>
 
           <input
             type="date"
-            value={row.date || ""}
+            value={row.date && row.date !== "date" ? row.date : ""}
             onChange={(e) =>
               handleChange(rowIndex, "date", e.target.value)
             }
@@ -148,14 +180,23 @@ export default function PaymentForm({ yrnPayment, invoiceAmount, setYrnPayments 
         </div>
       ))}
 
-      {/* Add Product Button */}
-      <div className="flex justify-between">
-        <Button type="button" color={'blue'} onClick={(e) => addPayment(e, selectedPayment?.length)}>+ Add Payment</Button>
+      {/* Add Payment & Fill Today & Full Balance */}
+      <div className="flex flex-wrap gap-4 justify-between items-center mt-4">
+        <div className="flex gap-2 items-center">
+          <Button type="button" color={'blue'} onClick={(e) => addPayment(e, selectedPayment?.length)}>+ Add Payment</Button>
+          <button
+            type="button"
+            onClick={fillFullBalance}
+            className="px-3 py-2 text-xs font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-lg transition-colors cursor-pointer"
+          >
+            Fill Today & Full Balance
+          </button>
+        </div>
         {/* Total */}
-        <div className="mt-4 font-bold text-lg">
+        <div className="font-bold text-lg">
           Total: ₹{totalAmount?.toFixed(2)}
         </div>
-        <div className="mt-4 font-bold text-lg text-red-600">
+        <div className="font-bold text-lg text-red-600">
           Balance: ₹{(parseFloat(String(invoiceAmount)) - totalAmount)?.toFixed(2)}
         </div>
       </div>

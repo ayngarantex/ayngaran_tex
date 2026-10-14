@@ -39,7 +39,7 @@ export default function LumpSumPaymentModal({
       setSelectedCustomerId('');
       return;
     }
-    console.log("item", item)
+
     const customerId = Number(item.id);
     setSelectedCustomerId(customerId);
     setSelectedCustomerName(item.label);
