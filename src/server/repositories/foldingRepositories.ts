@@ -27,6 +27,7 @@ export const getFoldingEntries = async (
             FE.DcNumber,
             FE.LoomId,
             FE.Type,
+            COALESCE(FE.FoldedStatus, 'unfolded') AS FoldedStatus,
             COALESCE(L.LoomName, FE.Folder) AS Folder,
             FE.TotalCount,
             FE.Items,
@@ -99,6 +100,7 @@ export const getFoldingById = async (id: number) => {
             FE.DcNumber,
             FE.LoomId,
             FE.Type,
+            COALESCE(FE.FoldedStatus, 'unfolded') AS FoldedStatus,
             COALESCE(L.LoomName, FE.Folder) AS Folder,
             FE.TotalCount,
             FE.Items,
@@ -136,11 +138,18 @@ export const createFoldingEntry = async (data: {
     LoomId?: number;
     Type?: string;
     Folder?: string;
+    FoldedStatus?: string;
     Items: Record<string, number>;
     Notes?: string;
 }) => {
+    try {
+        const [cols]: any = await db.query("SHOW COLUMNS FROM folding_entries LIKE 'FoldedStatus'");
+        if (cols.length === 0) {
+            await db.query("ALTER TABLE folding_entries ADD COLUMN FoldedStatus VARCHAR(20) NOT NULL DEFAULT 'unfolded' AFTER Type");
+        }
+    } catch (e) { }
 
-    const { Date, DcNumber, LoomId, Type, Folder, Items, Notes } = data;
+    const { Date, DcNumber, LoomId, Type, Folder, FoldedStatus, Items, Notes } = data;
     const itemsJson = typeof Items === 'string' ? Items : JSON.stringify(Items || {});
 
     let totalCount = 0;
@@ -152,10 +161,11 @@ export const createFoldingEntry = async (data: {
 
     // Default LoomId to 30036 ("R Tex Folding") if folder is R Tex and no LoomId specified
     const finalLoomId = LoomId || (Folder === 'R Tex' || Folder === 'R Tex Folding' ? 30036 : null);
+    const finalFoldedStatus = FoldedStatus || 'unfolded';
 
     const [result]: any = await db.query(
-        `INSERT INTO folding_entries (Date, DcNumber, LoomId, Type, Folder, TotalCount, Items, Notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [Date, DcNumber || null, finalLoomId, Type || 'Given', Folder || null, totalCount, itemsJson, Notes || null]
+        `INSERT INTO folding_entries (Date, DcNumber, LoomId, Type, FoldedStatus, Folder, TotalCount, Items, Notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [Date, DcNumber || null, finalLoomId, Type || 'Given', finalFoldedStatus, Folder || null, totalCount, itemsJson, Notes || null]
     );
 
     return result;
@@ -169,12 +179,19 @@ export const updateFoldingEntry = async (
         LoomId?: number;
         Type?: string;
         Folder?: string;
+        FoldedStatus?: string;
         Items: Record<string, number>;
         Notes?: string;
     }
 ) => {
+    try {
+        const [cols]: any = await db.query("SHOW COLUMNS FROM folding_entries LIKE 'FoldedStatus'");
+        if (cols.length === 0) {
+            await db.query("ALTER TABLE folding_entries ADD COLUMN FoldedStatus VARCHAR(20) NOT NULL DEFAULT 'unfolded' AFTER Type");
+        }
+    } catch (e) { }
 
-    const { Date, DcNumber, LoomId, Type, Folder, Items, Notes } = data;
+    const { Date, DcNumber, LoomId, Type, Folder, FoldedStatus, Items, Notes } = data;
     const itemsJson = typeof Items === 'string' ? Items : JSON.stringify(Items || {});
 
     let totalCount = 0;
@@ -185,10 +202,11 @@ export const updateFoldingEntry = async (
     }
 
     const finalLoomId = LoomId || (Folder === 'R Tex' || Folder === 'R Tex Folding' ? 30036 : null);
+    const finalFoldedStatus = FoldedStatus || 'unfolded';
 
     const [result]: any = await db.query(
-        `UPDATE folding_entries SET Date = ?, DcNumber = ?, LoomId = ?, Type = ?, Folder = ?, TotalCount = ?, Items = ?, Notes = ? WHERE FoldingId = ?`,
-        [Date, DcNumber || null, finalLoomId, Type || 'Given', Folder || null, totalCount, itemsJson, Notes || null, Number(id)]
+        `UPDATE folding_entries SET Date = ?, DcNumber = ?, LoomId = ?, Type = ?, FoldedStatus = ?, Folder = ?, TotalCount = ?, Items = ?, Notes = ? WHERE FoldingId = ?`,
+        [Date, DcNumber || null, finalLoomId, Type || 'Given', finalFoldedStatus, Folder || null, totalCount, itemsJson, Notes || null, Number(id)]
     );
 
     return result.affectedRows;
@@ -236,6 +254,7 @@ export const getFoldingWagesConsolidated = async (
             COALESCE(FE.LoomId, 30036) AS LoomId,
             COALESCE(L.LoomName, FE.Folder, 'R Tex Folding') AS LoomName,
             COALESCE(FE.Type, 'Given') AS Type,
+            COALESCE(FE.FoldedStatus, 'unfolded') AS FoldedStatus,
             FE.Folder,
             FE.TotalCount,
             FE.Items,
@@ -276,9 +295,13 @@ export const getFoldingWagesConsolidated = async (
         WeekEndDate: string;
         TotalGivenCount: number;
         TotalReturnCount: number;
+        TotalPayableReturnCount: number;
+        TotalFoldedReturnCount: number;
+        TotalFoldedGivenCount: number;
+        TotalFoldedCount: number;
         NetPieces: number;
         TotalCalculatedWages: number;
-        ItemsSummary: Record<string, { given: number; return: number; net: number }>;
+        ItemsSummary: Record<string, { given: number; return: number; net: number; folded: number; foldedGiven: number; foldedReturn: number }>;
         Entries: any[];
     }> = {};
 
@@ -306,6 +329,10 @@ export const getFoldingWagesConsolidated = async (
                 WeekEndDate: weekEnd,
                 TotalGivenCount: 0,
                 TotalReturnCount: 0,
+                TotalPayableReturnCount: 0,
+                TotalFoldedReturnCount: 0,
+                TotalFoldedGivenCount: 0,
+                TotalFoldedCount: 0,
                 NetPieces: 0,
                 TotalCalculatedWages: 0,
                 ItemsSummary: {},
@@ -316,23 +343,41 @@ export const getFoldingWagesConsolidated = async (
         const group = weeklyGroupMap[weekKey];
         const count = Number(row.TotalCount) || 0;
         const isReturn = row.Type === 'Return';
+        const isFolded = (row.FoldedStatus || 'unfolded').toLowerCase() === 'folded';
 
         if (isReturn) {
             group.TotalReturnCount += count;
+            // Only unfolded returns are payable for wages; folded returns are already folded and not paid
+            group.TotalPayableReturnCount += count;
         } else {
             group.TotalGivenCount += count;
+            if (isFolded) {
+                group.TotalFoldedGivenCount += count;
+            }
+        }
+
+        if (isFolded) {
+            group.TotalFoldedCount += count;
         }
 
         // Update item by item summary (Given adds, Return reduces)
         for (const [itemName, itemQty] of Object.entries(parsedItems)) {
             const qty = Number(itemQty) || 0;
             if (!group.ItemsSummary[itemName]) {
-                group.ItemsSummary[itemName] = { given: 0, return: 0, net: 0 };
+                group.ItemsSummary[itemName] = { given: 0, return: 0, net: 0, folded: 0, foldedGiven: 0, foldedReturn: 0 };
             }
             if (isReturn) {
                 group.ItemsSummary[itemName].return += qty;
+                if (isFolded) {
+                    group.ItemsSummary[itemName].folded += qty;
+                    group.ItemsSummary[itemName].foldedReturn += qty;
+                }
             } else {
                 group.ItemsSummary[itemName].given += qty;
+                if (isFolded) {
+                    group.ItemsSummary[itemName].folded += qty;
+                    group.ItemsSummary[itemName].foldedGiven += qty;
+                }
             }
             group.ItemsSummary[itemName].net = group.ItemsSummary[itemName].given - group.ItemsSummary[itemName].return;
         }
@@ -346,7 +391,8 @@ export const getFoldingWagesConsolidated = async (
     // Calculate wages and net pieces for each group
     for (const group of Object.values(weeklyGroupMap)) {
         group.NetPieces = group.TotalGivenCount - group.TotalReturnCount;
-        group.TotalCalculatedWages = Number((group.TotalReturnCount * group.WageRate).toFixed(2));
+        // Folded pieces do NOT have wages paid, so calculate wages only on unfolded return pieces
+        group.TotalCalculatedWages = Number(((group.TotalPayableReturnCount - group.TotalFoldedGivenCount) * group.WageRate).toFixed(2));
     }
 
     // 3. Fetch folding payments
@@ -405,6 +451,10 @@ export const getFoldingWagesConsolidated = async (
             WeekEndDate: group.WeekEndDate,
             TotalGivenCount: group.TotalGivenCount,
             TotalReturnCount: group.TotalReturnCount,
+            TotalPayableReturnCount: group.TotalPayableReturnCount,
+            TotalFoldedReturnCount: group.TotalFoldedReturnCount,
+            TotalFoldedGivenCount: group.TotalFoldedGivenCount,
+            TotalFoldedCount: group.TotalFoldedCount,
             NetPieces: group.NetPieces,
             TotalCalculatedWages: group.TotalCalculatedWages,
             TotalPaidAmount: Number(totalPaidAmount.toFixed(2)),

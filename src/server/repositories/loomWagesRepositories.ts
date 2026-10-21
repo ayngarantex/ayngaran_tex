@@ -24,13 +24,32 @@ export const updateLoomDefaultWageRate = async (loomId: number, rate: number) =>
     return true;
 };
 
-// Save or Update specific wage rate for a Sizing/Warp
-export const updateSizingWarpWageRate = async (sizingId: number, rate: number) => {
-    await db.query(
-        `INSERT INTO warp_wage_rates (SizingId, WageRate) VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE WageRate = VALUES(WageRate)`,
-        [Number(sizingId), Number(rate) || 0]
-    );
+// Save or Update specific wage rate for a Sizing/Warp on a Loom
+export const updateSizingWarpWageRate = async (
+    sizingId: number,
+    rate: number,
+    warpId?: number | null,
+    loomId?: number | null
+) => {
+    const wageRate = Number(rate) || 0;
+
+    if (warpId) {
+        await db.query(
+            `UPDATE sizing_warp_details SET WageRate = ? WHERE WarpId = ?`,
+            [wageRate, Number(warpId)]
+        );
+    } else if (sizingId && loomId) {
+        await db.query(
+            `UPDATE sizing_warp_details SET WageRate = ? WHERE SizingId = ? AND LoomId = ?`,
+            [wageRate, Number(sizingId), Number(loomId)]
+        );
+    } else if (sizingId) {
+        await db.query(
+            `UPDATE sizing_warp_details SET WageRate = ? WHERE SizingId = ?`,
+            [wageRate, Number(sizingId)]
+        );
+    }
+
     return true;
 };
 
@@ -79,27 +98,23 @@ export const getLoomWagesConsolidated = async (
         hasWarpWageRateCol = cols.length > 0;
     } catch (e) { }
 
-    // Fetch custom warp wage rates from warp_wage_rates and sizing_warp_details without duplicating rows
-    const warpRateQueries = [
-        `SELECT SizingId, WageRate FROM warp_wage_rates WHERE WageRate > 0`
-    ];
-    if (hasWarpWageRateCol) {
-        warpRateQueries.push(`SELECT SizingId, WageRate FROM sizing_warp_details WHERE WageRate > 0`);
-    }
-
-    const [warpRatesList]: any = await db.query(
-        `SELECT SizingId, MAX(WageRate) AS WageRate FROM (
-            ${warpRateQueries.join(' UNION ALL ')}
-         ) combined GROUP BY SizingId`
-    );
+    // Map custom warp wage rates per WarpId and per (SizingId + LoomId)
+    // A warp assigned to different looms must use the rate specific to that warp/loom!
     const warpWageMap: Record<number, number> = {};
-    for (const w of warpRatesList) {
-        if (w.SizingId) {
-            warpWageMap[w.SizingId] = parseFloat(w.WageRate) || 0;
+    const sizingLoomWageMap: Record<string, number> = {};
+
+    if (hasWarpWageRateCol) {
+        const [swdRates]: any = await db.query(
+            `SELECT WarpId, SizingId, LoomId, WageRate FROM sizing_warp_details WHERE WageRate > 0`
+        );
+        for (const w of swdRates) {
+            const rate = parseFloat(w.WageRate) || 0;
+            if (w.WarpId) warpWageMap[w.WarpId] = rate;
+            if (w.SizingId && w.LoomId) sizingLoomWageMap[`${w.SizingId}_${w.LoomId}`] = rate;
         }
     }
 
-    // Direct 1:1 SELECT on sizing_summary_details (No Cartesian product joins!)
+    // Direct 1:1 SELECT on sizing_summary_details with exact warp wage rate (No Cartesian product joins!)
     let sql = `
         SELECT 
             SSD.DcId,
@@ -110,12 +125,14 @@ export const getLoomWagesConsolidated = async (
             SSD.SizingId,
             S.Color,
             SSD.WarpId,
+            ${hasWarpWageRateCol ? 'SWD.WageRate AS DirectWarpWageRate,' : 'NULL AS DirectWarpWageRate,'}
             COALESCE(CAST(SSD.Piece AS UNSIGNED), 0) AS Piece,
             COALESCE(CAST(SSD.Count AS UNSIGNED), 0) AS Count,
             ROUND(COALESCE(CAST(SSD.Weight AS DECIMAL(10,2)), 0), 2) AS Weight
         FROM sizing_summary_details SSD
         LEFT JOIN loom_details L ON SSD.LoomId = L.LoomId
         LEFT JOIN sizing S ON SSD.SizingId = S.SizingId
+        ${hasWarpWageRateCol ? 'LEFT JOIN sizing_warp_details SWD ON SSD.WarpId = SWD.WarpId' : ''}
         WHERE SSD.Date >= ?
     `;
 
@@ -165,7 +182,26 @@ export const getLoomWagesConsolidated = async (
         const weekKey = `${row.LoomId}_${weekStart}`;
         const loomDefaultRate = loomDefaultWageMap[row.LoomId] || 0;
 
-        const customRate = row.SizingId ? warpWageMap[row.SizingId] : undefined;
+        // 1. Direct rate from the specific warp
+        const directWarpRate = (row.DirectWarpWageRate !== null && row.DirectWarpWageRate !== undefined)
+            ? parseFloat(row.DirectWarpWageRate)
+            : 0;
+
+        // 2. Warp lookup rate by WarpId
+        const warpLookupRate = row.WarpId ? (warpWageMap[row.WarpId] || 0) : 0;
+
+        // 3. Sizing + Loom rate lookup (in case WarpId was not recorded in SSD)
+        const sizingLoomKey = (row.SizingId && row.LoomId) ? `${row.SizingId}_${row.LoomId}` : '';
+        const sizingLoomRate = sizingLoomKey ? (sizingLoomWageMap[sizingLoomKey] || 0) : 0;
+
+        let customRate: number | undefined = undefined;
+        if (directWarpRate > 0) {
+            customRate = directWarpRate;
+        } else if (warpLookupRate > 0) {
+            customRate = warpLookupRate;
+        } else if (sizingLoomRate > 0) {
+            customRate = sizingLoomRate;
+        }
 
         const effectiveWageRate = (customRate !== undefined && customRate > 0)
             ? customRate
@@ -221,6 +257,7 @@ export const getLoomWagesConsolidated = async (
             Weight: Number(row.Weight) || 0,
             WarpId: row.WarpId,
             SizingId: row.SizingId,
+            LoomId: row.LoomId,
             Color: row.Color || '-',
             WageRate: effectiveWageRate,
             HasCustomWarpRate: customRate !== undefined && customRate > 0,

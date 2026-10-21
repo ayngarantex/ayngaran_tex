@@ -140,7 +140,7 @@ export default function LoomWagesTable({
     const [tempOpeningBalance, setTempOpeningBalance] = useState<string>('');
 
     // Editing Warp Rate state
-    const [editingSizingId, setEditingSizingId] = useState<number | null>(null);
+    const [editingPieceKey, setEditingPieceKey] = useState<string | null>(null);
     const [tempWarpRate, setTempWarpRate] = useState<string>('');
 
     // Modal state
@@ -195,16 +195,16 @@ export default function LoomWagesTable({
         }
     };
 
-    const handleSaveWarpRate = async (sizingId: number) => {
+    const handleSaveWarpRate = async (sizingId?: number, warpId?: number, loomId?: number) => {
         const rate = parseFloat(tempWarpRate);
         if (isNaN(rate) || rate < 0) {
             alert('Please enter a valid wage rate');
             return;
         }
 
-        const res = await saveWarpCustomRate(sizingId, rate);
+        const res = await saveWarpCustomRate(sizingId || 0, rate, warpId, loomId);
         if (res.success) {
-            setEditingSizingId(null);
+            setEditingPieceKey(null);
             handleReload();
         } else {
             alert(res.error || 'Failed to save warp wage rate');
@@ -659,7 +659,8 @@ export default function LoomWagesTable({
                                                                                             </thead>
                                                                                             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                                                                                                 {dcItem.Pieces.map((p, pIdx) => {
-                                                                                                    const isEditingWarp = editingSizingId === p.SizingId;
+                                                                                                    const pieceKey = p.WarpId ? `warp_${p.WarpId}` : `piece_${dcItem.Dc}_${pIdx}`;
+                                                                                                    const isEditingWarp = editingPieceKey === pieceKey;
 
                                                                                                     return (
                                                                                                         <tr key={`p-${pIdx}`} className="hover:bg-slate-50">
@@ -689,14 +690,14 @@ export default function LoomWagesTable({
                                                                                                                             className="w-16 rounded border border-indigo-300 px-1.5 py-0.5 text-xs font-bold"
                                                                                                                         />
                                                                                                                         <button
-                                                                                                                            onClick={() => p.SizingId && handleSaveWarpRate(p.SizingId)}
-                                                                                                                            className="p-0.5 rounded bg-emerald-600 text-white"
+                                                                                                                            onClick={() => handleSaveWarpRate(p.SizingId, p.WarpId, rec.LoomId)}
+                                                                                                                            className="p-0.5 rounded bg-emerald-600 text-white cursor-pointer"
                                                                                                                         >
                                                                                                                             <CheckIcon className="h-3 w-3" />
                                                                                                                         </button>
                                                                                                                         <button
-                                                                                                                            onClick={() => setEditingSizingId(null)}
-                                                                                                                            className="p-0.5 rounded bg-slate-200 text-slate-600"
+                                                                                                                            onClick={() => setEditingPieceKey(null)}
+                                                                                                                            className="p-0.5 rounded bg-slate-200 text-slate-600 cursor-pointer"
                                                                                                                         >
                                                                                                                             <XMarkIcon className="h-3 w-3" />
                                                                                                                         </button>
@@ -707,14 +708,14 @@ export default function LoomWagesTable({
                                                                                                                         {p.HasCustomWarpRate && (
                                                                                                                             <span className="text-[10px] px-1 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold">Custom</span>
                                                                                                                         )}
-                                                                                                                        {p.SizingId && (
+                                                                                                                        {(p.WarpId || p.SizingId) && (
                                                                                                                             <button
                                                                                                                                 onClick={() => {
-                                                                                                                                    setEditingSizingId(p.SizingId!);
+                                                                                                                                    setEditingPieceKey(pieceKey);
                                                                                                                                     setTempWarpRate(String(p.WageRate));
                                                                                                                                 }}
                                                                                                                                 title="Edit rate for this warp"
-                                                                                                                                className="text-slate-400 hover:text-indigo-600"
+                                                                                                                                className="text-slate-400 hover:text-indigo-600 cursor-pointer"
                                                                                                                             >
                                                                                                                                 <PencilSquareIcon className="h-3.5 w-3.5" />
                                                                                                                             </button>

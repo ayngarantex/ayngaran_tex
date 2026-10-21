@@ -55,6 +55,7 @@ export interface FoldingData {
     LoomId?: number;
     Type?: string;
     Folder?: string;
+    FoldedStatus?: string;
     Items: Record<string, number>;
     Notes?: string;
 }
