@@ -67,9 +67,14 @@ export const saveLoomDefaultRate = async (loomId: number, rate: number) => {
     }
 };
 
-export const saveWarpCustomRate = async (sizingId: number, rate: number) => {
+export const saveWarpCustomRate = async (
+    sizingId: number,
+    rate: number,
+    warpId?: number | null,
+    loomId?: number | null
+) => {
     try {
-        await updateSizingWarpWageRate(sizingId, rate);
+        await updateSizingWarpWageRate(sizingId, rate, warpId, loomId);
         return { success: true };
     } catch (err: any) {
         console.error("saveWarpCustomRate Error:", err);

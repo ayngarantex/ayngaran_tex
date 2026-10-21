@@ -141,71 +141,71 @@ export default function ProductCatalog({ initialProducts }: ProductCatalogProps)
             {filteredProducts.map((product) => {
               const meta = getProductMetadata(product);
               return (
-                <div
-                  key={product.Id}
-                  className="bg-white rounded-2xl border border-slate-150 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group animate-fadeIn"
+                <Link
+                  href={`/products/${product.Id}`}
+                  className="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-700 hover:border-blue-600 text-xs font-bold transition-all"
                 >
-                  {/* Image Aspect ratio 4:3 */}
-                  <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                    <img
-                      src={meta.imageUrl}
-                      alt={product.Name + ' ' + product.Details || 'Fabric Image'}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md text-[10px] font-bold text-slate-900 shadow-xs tracking-wider uppercase border border-slate-200/30">
-                      {product.HSNCode ? `HSN: ${product.HSNCode}` : 'Textile'}
+                  <div
+                    key={product.Id}
+                    className="bg-white rounded-2xl border border-slate-150 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group animate-fadeIn"
+                  >
+                    {/* Image Aspect ratio 4:3 */}
+                    <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                      <img
+                        src={meta.imageUrl}
+                        alt={product.Name + ' ' + product.Details || 'Fabric Image'}
+                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md text-[10px] font-bold text-slate-900 shadow-xs tracking-wider uppercase border border-slate-200/30">
+                        {product.HSNCode ? `HSN: ${product.HSNCode}` : 'Textile'}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Product Details inside Card */}
-                  <div className="p-5 flex-grow flex flex-col justify-between">
-                    <div>
-                      {/* Name */}
-                      <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                        {product.Name + ' ' + product.Details || 'Premium Fabric'}
-                      </h3>
+                    {/* Product Details inside Card */}
+                    <div className="p-5 flex-grow flex flex-col justify-between">
+                      <div>
+                        {/* Name */}
+                        <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                          {product.Name + ' ' + product.Details || 'Premium Fabric'}
+                        </h3>
 
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1 mt-2.5">
-                        {meta.tags.slice(0, 2).map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-100/30"
-                          >
-                            # {tag}
-                          </span>
-                        ))}
-                        {/* {product.AvailableStock !== undefined && (() => {
-                          const netStock = (product.AvailableStock || 0);
-                          return (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${netStock > 0
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100/30'
-                                : 'bg-rose-50 text-rose-700 border-rose-100/30'
-                              }`}>
-                              {netStock > 0 ? `In Stock` : 'Out of Stock'}
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1 mt-2.5">
+                          {meta.tags.slice(0, 2).map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-100/30"
+                            >
+                              # {tag}
                             </span>
-                          );
-                        })()} */}
+                          ))}
+                          {/* {product.AvailableStock !== undefined && (() => {
+                            const netStock = (product.AvailableStock || 0);
+                            return (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${netStock > 0
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-100/30'
+                                  : 'bg-rose-50 text-rose-700 border-rose-100/30'
+                                }`}>
+                                {netStock > 0 ? `In Stock` : 'Out of Stock'}
+                              </span>
+                            );
+                          })()} */}
+                        </div>
+
+                        {/* Description Preview */}
+                        <p className="text-xs text-slate-500 mt-3.5 line-clamp-2 leading-relaxed">
+                          {meta.description}
+                        </p>
                       </div>
 
-                      {/* Description Preview */}
-                      <p className="text-xs text-slate-500 mt-3.5 line-clamp-2 leading-relaxed">
-                        {meta.description}
-                      </p>
-                    </div>
-
-                    {/* View Details Link */}
-                    <div className="mt-5 border-t border-slate-100 pt-4">
-                      <Link
-                        href={`/products/${product.Id}`}
-                        className="w-full inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white px-4 py-2 text-xs font-bold transition-all"
-                      >
+                      {/* View Details Link */}
+                      <div className="mt-5 border-t border-slate-100 pt-4">
                         View Details
-                      </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

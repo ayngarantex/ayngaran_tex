@@ -15,10 +15,11 @@ export default async function Table({
   const entries = await fetchFoldingEntries(query, currentPage);
 
   // Compute column totals for current page (Given adds, Return reduces)
-  const columnTotals: Record<string, { given: number; return: number; net: number }> = {};
+  const columnTotals: Record<string, { given: number; return: number; net: number; folded: number }> = {};
   foldingItemList.forEach(item => {
     let given = 0;
     let ret = 0;
+    let folded = 0;
     entries.forEach((entry: any) => {
       const val = Number(entry.Items?.[item]) || 0;
       if (entry.Type === 'Return') {
@@ -26,8 +27,11 @@ export default async function Table({
       } else {
         given += val;
       }
+      if (entry.FoldedStatus?.toLowerCase() === 'folded') {
+        folded += val;
+      }
     });
-    columnTotals[item] = { given, return: ret, net: given - ret };
+    columnTotals[item] = { given, return: ret, net: given - ret, folded };
   });
 
   const totalPageGiven = entries.reduce((sum: number, entry: any) => {
@@ -35,6 +39,9 @@ export default async function Table({
   }, 0);
   const totalPageReturn = entries.reduce((sum: number, entry: any) => {
     return sum + (entry.Type === 'Return' ? Number(entry.TotalCount || 0) : 0);
+  }, 0);
+  const totalPageFolded = entries.reduce((sum: number, entry: any) => {
+    return sum + (entry.FoldedStatus?.toLowerCase() === 'folded' ? Number(entry.TotalCount || 0) : 0);
   }, 0);
   const grandTotalPieces = totalPageGiven - totalPageReturn;
 
@@ -72,8 +79,8 @@ export default async function Table({
                   <div className="text-[10px] text-slate-400 font-normal">Given / Return / Net</div>
                 </td>
                 {foldingItemList.map((item: string) => {
-                  const stats = columnTotals[item] || { given: 0, return: 0, net: 0 };
-                  const hasActivity = stats.given > 0 || stats.return > 0;
+                  const stats = columnTotals[item] || { given: 0, return: 0, net: 0, folded: 0 };
+                  const hasActivity = stats.given > 0 || stats.return > 0 || stats.folded > 0;
                   return (
                     <td key={item} className="px-3 py-2 text-right whitespace-nowrap">
                       {hasActivity ? (
@@ -83,6 +90,9 @@ export default async function Table({
                           )}
                           {stats.return > 0 && (
                             <span className="text-amber-700 font-bold text-[10px]">-{stats.return.toLocaleString()}</span>
+                          )}
+                          {stats.folded > 0 && (
+                            <span className="text-purple-700 font-bold text-[9px]">({stats.folded.toLocaleString()} fld)</span>
                           )}
                           <span className={`font-black pt-0.5 border-t border-slate-200 ${stats.net > 0 ? 'text-emerald-800' : stats.net < 0 ? 'text-amber-800' : 'text-slate-500'}`}>
                             {stats.net.toLocaleString()}
@@ -98,6 +108,11 @@ export default async function Table({
                   <div className="flex flex-col items-end text-[11px] leading-tight">
                     <span className="text-blue-800 font-bold text-[10px]">+{totalPageGiven.toLocaleString()}</span>
                     <span className="text-amber-800 font-bold text-[10px]">-{totalPageReturn.toLocaleString()}</span>
+                    {totalPageFolded > 0 && (
+                      <span className="text-purple-800 font-black text-[10px] bg-purple-100 px-1.5 py-0.5 rounded border border-purple-200 mt-0.5">
+                        {totalPageFolded.toLocaleString()} Pcs Folded
+                      </span>
+                    )}
                     <span className="font-black text-emerald-900 text-sm pt-0.5 border-t border-emerald-300">
                       {grandTotalPieces.toLocaleString()} Pcs
                     </span>
@@ -134,9 +149,18 @@ export default async function Table({
                       ) : (
                         <span className="text-slate-300">-</span>
                       )}
-                      <span className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded ${'bg-amber-50 text-amber-700 border border-amber-200'}`}>
-                        {entry.Folder}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                          {entry.Folder}
+                        </span>
+                        <span className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          entry.FoldedStatus?.toLowerCase() === 'folded'
+                            ? 'bg-purple-100 text-purple-800 border border-purple-200 font-extrabold'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {entry.FoldedStatus?.toLowerCase() === 'folded' ? 'Folded (No Wage)' : 'Unfolded'}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   {foldingItemList.map((item: string) => {
@@ -153,8 +177,17 @@ export default async function Table({
                       </td>
                     );
                   })}
-                  <td className="px-4 py-3 text-right font-extrabold text-emerald-700 whitespace-nowrap bg-emerald-50/30">
-                    {(Number(entry.TotalCount) || 0).toLocaleString()} <span className="text-[10px] font-normal text-slate-400">Pcs</span>
+                  <td className="px-4 py-3 text-right font-extrabold whitespace-nowrap bg-emerald-50/30">
+                    <div className="flex flex-col items-end">
+                      <span className={`font-black ${entry.Type === 'Return' ? 'text-amber-800' : 'text-blue-800'}`}>
+                        {entry.Type === 'Return' ? '-' : '+'}{(Number(entry.TotalCount) || 0).toLocaleString()} <span className="text-[10px] font-normal text-slate-400">Pcs</span>
+                      </span>
+                      {entry.FoldedStatus?.toLowerCase() === 'folded' && (
+                        <span className="inline-flex items-center text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-200 mt-0.5">
+                          Folded: {(Number(entry.TotalCount) || 0).toLocaleString()} Pcs (No Wage)
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 pl-3 pr-6 text-center whitespace-nowrap">
                     <div className="inline-flex items-center gap-1">
