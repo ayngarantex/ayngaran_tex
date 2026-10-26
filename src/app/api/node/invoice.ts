@@ -71,7 +71,7 @@ export const fetchInvoiceTotal = async (
         return JSON.parse(JSON.stringify(totals));
     } catch (err) {
         console.error("fetchInvoiceTotal Error:", err);
-        return { TotalInvoiceAmount: 0, TotalReceivedAmount: 0, TotalBalanceAmount: 0, TotalCancelledAmount: 0 };
+        return { TotalInvoiceAmount: 0, TotalReceivedAmount: 0, TotalBalanceAmount: 0, TotalCancelledAmount: 0, TotalTdsAmount: 0 };
     }
 };
 

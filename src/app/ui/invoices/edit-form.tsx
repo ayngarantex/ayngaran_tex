@@ -69,6 +69,8 @@ export default function EditForm({
   const [billType, setBillType] = useState("");
   const [roundOff, setRoundOff] = useState("");
   const [discount, setDiscount] = useState("");
+  const [tdsPercentage, setTdsPercentage] = useState<number | string>("");
+  const [tds, setTds] = useState<number | string>("");
   const [invoiceAmount, setInvoiceAmount] = useState(0);
   const [receivedAmount, setReceivedAmount] = useState(0);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -96,6 +98,8 @@ export default function EditForm({
     setBillType(invoice?.BillType);
     setRoundOff(invoice?.RoundOff);
     setDiscount(invoice?.Discount);
+    setTdsPercentage(invoice?.TdsPercentage !== undefined && invoice?.TdsPercentage !== null && invoice?.TdsPercentage != 0 ? invoice?.TdsPercentage : "1");
+    setTds(invoice?.Tds !== undefined && invoice?.Tds !== null ? invoice.Tds : "");
     setInvoiceAmount(invoice?.InvoiceAmount);
     setReceivedAmount(invoice?.ReceivedAmount);
 
@@ -159,6 +163,8 @@ export default function EditForm({
         BillType: billType,
         RoundOff: roundOff ? Number(roundOff).toFixed(2) : '0.00',
         Discount: discount ? Number(discount).toFixed(2) : '0.00',
+        TdsPercentage: invoiceType?.trim().toLowerCase() === 'job work' && tdsPercentage !== '' ? Number(tdsPercentage) : 0,
+        Tds: invoiceType?.trim().toLowerCase() === 'job work' && tds !== '' ? Number(tds) : 0,
         InvoiceAmount: Number(invoiceAmount.toFixed(2)),
         ReceivedAmount: receivedAmount,
         IsCancel: isCancel,
@@ -229,6 +235,19 @@ export default function EditForm({
   }, [billType, beforeTax, cgstAmount, sgstAmount, igstAmount, selectedCustomer])
 
   useEffect(() => {
+    if (invoiceType?.trim().toLowerCase() === 'job work') {
+      if (beforeTax > 0 && tdsPercentage !== '' && !isNaN(Number(tdsPercentage))) {
+        const calculated = Math.round((beforeTax * Number(tdsPercentage)) / 100);
+        setTds(calculated);
+      } else if (tdsPercentage === '') {
+        setTds('');
+      }
+    } else {
+      setTds('');
+    }
+  }, [invoiceType, beforeTax, tdsPercentage]);
+
+  useEffect(() => {
     let invoiceAmountVal = afterTax
     if (roundOff) {
       invoiceAmountVal += parseFloat(String(roundOff))
@@ -237,6 +256,7 @@ export default function EditForm({
     if (discount) {
       invoiceAmountVal -= parseFloat(String(discount))
     }
+
     setInvoiceAmount(Number(invoiceAmountVal.toFixed(2)))
   }, [afterTax, roundOff, discount])
 
@@ -670,6 +690,50 @@ export default function EditForm({
               </div>
             </div>
           </div>
+
+          {invoiceType?.trim().toLowerCase() === 'job work' && (
+            <>
+              <div>
+                <label htmlFor="tdsPercentage" className="mb-2 block text-sm font-medium">
+                  TDS Percentage (%)
+                </label>
+                <div className="relative mt-2 rounded-md">
+                  <div className="relative">
+                    <input
+                      id="tdsPercentage"
+                      name="tdsPercentage"
+                      type="number"
+                      step="any"
+                      placeholder="e.g. 1 or 2"
+                      value={tdsPercentage}
+                      onChange={(e) => setTdsPercentage(e.target.value)}
+                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="tds" className="mb-2 block text-sm font-medium">
+                  TDS (₹)
+                </label>
+                <div className="relative mt-2 rounded-md">
+                  <div className="relative">
+                    <input
+                      id="tds"
+                      name="tds"
+                      type="number"
+                      step="any"
+                      placeholder="TDS Amount"
+                      value={tds}
+                      onChange={(e) => setTds(e.target.value)}
+                      className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
@@ -695,7 +759,7 @@ export default function EditForm({
         <PaymentForm
           invPayment={invoicePaymentData}
           billType={billType}
-          invoiceAmount={invoiceAmount}
+          invoiceAmount={invoiceType?.trim().toLowerCase() === 'job work' && tds ? Number((invoiceAmount - Number(tds)).toFixed(2)) : invoiceAmount}
           setInvPayments={setInvPayments}
         />
       </div>

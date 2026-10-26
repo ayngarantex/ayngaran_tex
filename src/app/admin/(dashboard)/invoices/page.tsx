@@ -131,6 +131,14 @@ export default async function Page(props: {
             </div>
             <div className="w-full flex justify-center">
               <label htmlFor="mobile" className="text-sm self-center font-bold">
+                TDS
+              </label>
+              <div className="relative pl-4 tex-2xl w-40 text-right text-indigo-700 text-lg text-center font-bold">
+                {formatCurrency(Number(parseFloat(invoiceTotalDetatils?.TotalTdsAmount || 0).toFixed(2)))}
+              </div>
+            </div>
+            <div className="w-full flex justify-center">
+              <label htmlFor="mobile" className="text-sm self-center font-bold">
                 Cancelled
               </label>
               <div className="relative pl-4 tex-2xl w-40 text-right text-red-600 text-lg text-center">

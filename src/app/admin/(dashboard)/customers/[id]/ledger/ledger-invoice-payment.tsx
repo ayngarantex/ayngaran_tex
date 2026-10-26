@@ -87,10 +87,9 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
     };
 
     // Calculate totals
-    const totalPurchased = invoices
-        .filter((inv) => inv.InvoiceType !== 'Credit Note')
-        .reduce((sum, item) => sum + (item?.InvoiceAmount || 0), 0);
-
+    const nonCreditNoteInvoices = invoices.filter((inv) => inv.InvoiceType !== 'Credit Note');
+    const totalPurchased = nonCreditNoteInvoices.reduce((sum, item) => sum + (Number(item?.InvoiceAmount) || 0), 0);
+    const totalTds = nonCreditNoteInvoices.reduce((sum, item) => sum + Number(item?.Tds || 0), 0);
     const totalPaid = payments.reduce((sum, item) => sum + item.TotalPaid, 0);
 
     // Merge and chronologically sort invoices and payments
@@ -101,7 +100,9 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
             type: 'Invoice',
             refId: `invoice_${inv.InvoiceId}`,
             data: inv,
-            debit: inv.InvoiceType === 'Credit Note' ? 0 : inv.InvoiceAmount,
+            grossAmount: inv.InvoiceType === 'Credit Note' ? 0 : (Number(inv.InvoiceAmount) || 0),
+            tdsAmount: Number(inv.Tds || 0),
+            debit: inv.InvoiceType === 'Credit Note' ? 0 : ((Number(inv.InvoiceAmount) || 0) - Number(inv.Tds || 0)),
             credit: inv.InvoiceType === 'Credit Note' ? inv.InvoiceAmount : 0,
         })),
         ...payments.map((pay) => ({
@@ -110,6 +111,8 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
             type: 'Payment',
             refId: `payment_${pay.Date}_${pay.BillType}`,
             data: pay,
+            grossAmount: 0,
+            tdsAmount: 0,
             debit: 0,
             credit: pay.TotalPaid,
         }))
@@ -260,11 +263,14 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                             <div className="text-blue-600 font-bold text-md">
                                 Purchased: {formatCurrency(totalPurchased)}
                             </div>
+                            <div className="text-indigo-600 font-bold text-md pl-4">
+                                TDS: {formatCurrency(totalTds)}
+                            </div>
                             <div className="text-blue-600 font-bold text-md pl-4">
                                 Paid: {formatCurrency(totalPaid)}
                             </div>
                             <div className="text-red-600 font-bold text-md pl-4">
-                                Balance: {formatCurrency(totalPurchased - totalPaid)}
+                                Balance: {formatCurrency(totalPurchased - totalTds - totalPaid)}
                             </div>
                         </div>
                     </>
@@ -277,7 +283,8 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                             const isFirstPage = pageIdx === 0;
                             const isLastPage = pageIdx === pages.length - 1;
 
-                            const pageDebit = pageRows.reduce((sum, r) => sum + r.debit, 0);
+                            const pageGross = pageRows.reduce((sum, r) => sum + (r.type === 'Invoice' ? (r.grossAmount || 0) : 0), 0);
+                            const pageTds = pageRows.reduce((sum, r) => sum + (r.type === 'Invoice' ? (r.tdsAmount || 0) : 0), 0);
                             const pageCredit = pageRows.reduce((sum, r) => sum + r.credit, 0);
                             const openingBalance = isFirstPage ? 0 : pages[pageIdx - 1][pages[pageIdx - 1].length - 1].balance;
                             const closingBalance = pageRows[pageRows.length - 1].balance;
@@ -294,22 +301,23 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                         <table className="min-w-full text-gray-900 table-fixed">
                                             <thead className="rounded-lg text-left text-sm font-normal">
                                                 <tr className='font-bold text-gray-700 border-b border-gray-200'>
-                                                    <th scope="col" style={{ width: '110px' }} className="px-4 py-5 font-bold">Date</th>
-                                                    <th scope="col" className="px-3 py-5 font-bold">Details</th>
-                                                    <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Invoice</th>
-                                                    <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Payment</th>
-                                                    <th scope="col" style={{ width: '140px' }} className="px-3 py-5 font-bold text-right">Balance</th>
+                                                    <th scope="col" style={{ width: '105px' }} className="px-3 py-4 font-bold">Date</th>
+                                                    <th scope="col" className="px-3 py-4 font-bold">Details</th>
+                                                    <th scope="col" style={{ width: '115px' }} className="px-3 py-4 font-bold text-right">Invoice</th>
+                                                    <th scope="col" style={{ width: '95px' }} className="px-3 py-4 font-bold text-right">TDS</th>
+                                                    <th scope="col" style={{ width: '115px' }} className="px-3 py-4 font-bold text-right">Payment</th>
+                                                    <th scope="col" style={{ width: '125px' }} className="px-3 py-4 font-bold text-right">Balance</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="bg-white">
                                                 {!isFirstPage && (
                                                     <tr className="bg-gray-50 text-xs italic text-gray-600 border-b">
-                                                        <td className="px-4 py-2"></td>
+                                                        <td className="px-3 py-2"></td>
                                                         <td className="px-3 py-2 font-medium">Balance Brought Forward (b/f)</td>
                                                         <td className="px-3 py-2 text-right">-</td>
                                                         <td className="px-3 py-2 text-right">-</td>
+                                                        <td className="px-3 py-2 text-right">-</td>
                                                         <td className="px-3 py-2 text-right font-semibold">{formatCurrency(openingBalance)}</td>
-                                                        <td className="px-3 py-2 print:hidden"></td>
                                                     </tr>
                                                 )}
 
@@ -325,8 +333,8 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
 
                                                     return (
                                                         <tr key={item.refId} className={`w-full border-b py-4 text-sm last-of-type:border-none ${rowBg}`}>
-                                                            <td className="whitespace-nowrap px-4 py-4">{formatDateNew(item.dateStr)}</td>
-                                                            <td className="px-3 py-4 relative">
+                                                            <td className="whitespace-nowrap px-3 py-3">{formatDateNew(item.dateStr)}</td>
+                                                            <td className="px-3 py-3 relative">
                                                                 {isInvoice ? (
                                                                     <div>
                                                                         <div className="flex items-center">
@@ -350,9 +358,10 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                                     </div>
                                                                 )}
                                                             </td>
-                                                            <td className="whitespace-nowrap px-3 py-4 text-right">{isInvoice && item.debit ? formatCurrency(item.debit) : "-"}</td>
-                                                            <td className="whitespace-nowrap px-3 py-4 text-right text-emerald-700 font-medium">{item.credit ? formatCurrency(item.credit) : "-"}</td>
-                                                            <td className="whitespace-nowrap px-3 py-4 text-right font-semibold">{formatCurrency(item.balance)}</td>
+                                                            <td className="whitespace-nowrap px-3 py-3 text-right">{isInvoice && item.grossAmount ? formatCurrency(item.grossAmount) : "-"}</td>
+                                                            <td className="whitespace-nowrap px-3 py-3 text-right text-indigo-700 font-medium">{isInvoice && item.tdsAmount ? formatCurrency(item.tdsAmount) : "-"}</td>
+                                                            <td className="whitespace-nowrap px-3 py-3 text-right text-emerald-700 font-medium">{item.credit ? formatCurrency(item.credit) : "-"}</td>
+                                                            <td className="whitespace-nowrap px-3 py-3 text-right font-semibold">{formatCurrency(item.balance)}</td>
                                                         </tr>
                                                     );
                                                 })}
@@ -360,29 +369,33 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                             <tfoot className="border-t-2 border-gray-300 font-bold bg-blue-50/50">
                                                 {isLastPage ? (
                                                     <tr className="text-sm text-gray-800 border-t border-gray-300">
-                                                        <td className="px-4 py-4">Grand Total</td>
-                                                        <td className="px-3 py-4 text-xs italic text-gray-500">
+                                                        <td className="px-3 py-3">Grand Total</td>
+                                                        <td className="px-3 py-3 text-xs italic text-gray-500">
                                                             Closing Balance
                                                         </td>
-                                                        <td className="px-3 py-4 text-right">
-                                                            {formatCurrency(filteredRows.reduce((sum, r) => sum + r.debit, 0))}
+                                                        <td className="px-3 py-3 text-right">
+                                                            {formatCurrency(filteredRows.reduce((sum, r) => sum + (r.type === 'Invoice' ? (r.grossAmount || 0) : 0), 0))}
                                                         </td>
-                                                        <td className="px-3 py-4 text-right text-emerald-800">
+                                                        <td className="px-3 py-3 text-right text-indigo-800">
+                                                            {formatCurrency(filteredRows.reduce((sum, r) => sum + (r.type === 'Invoice' ? (r.tdsAmount || 0) : 0), 0))}
+                                                        </td>
+                                                        <td className="px-3 py-3 text-right text-emerald-800">
                                                             {formatCurrency(filteredRows.reduce((sum, r) => sum + r.credit, 0))}
                                                         </td>
-                                                        <td className="px-3 py-4 text-right text-red-800">
+                                                        <td className="px-3 py-3 text-right text-red-800">
                                                             {formatCurrency(filteredRows[filteredRows.length - 1]?.balance || 0)}
                                                         </td>
                                                     </tr>
                                                 ) :
                                                     <tr className="text-sm text-gray-800">
-                                                        <td className="px-4 py-4">Page Total</td>
-                                                        <td className="px-3 py-4 text-xs italic text-gray-500">
+                                                        <td className="px-3 py-3">Page Total</td>
+                                                        <td className="px-3 py-3 text-xs italic text-gray-500">
                                                             Balance Carried Forward (c/f)
                                                         </td>
-                                                        <td className="px-3 py-4 text-right">{formatCurrency(pageDebit)}</td>
-                                                        <td className="px-3 py-4 text-right text-emerald-800">{formatCurrency(pageCredit)}</td>
-                                                        <td className="px-3 py-4 text-right text-red-800">{formatCurrency(closingBalance)}</td>
+                                                        <td className="px-3 py-3 text-right">{formatCurrency(pageGross)}</td>
+                                                        <td className="px-3 py-3 text-right text-indigo-800">{formatCurrency(pageTds)}</td>
+                                                        <td className="px-3 py-3 text-right text-emerald-800">{formatCurrency(pageCredit)}</td>
+                                                        <td className="px-3 py-3 text-right text-red-800">{formatCurrency(closingBalance)}</td>
                                                     </tr>
                                                 }
                                             </tfoot>
@@ -402,12 +415,13 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                     <table className="min-w-full text-gray-900 table-fixed">
                                         <thead className="rounded-lg text-left text-sm font-normal">
                                             <tr className='font-bold text-gray-700 border-b border-gray-200'>
-                                                <th scope="col" style={{ width: '110px' }} className="px-4 py-5 font-bold">Date</th>
+                                                <th scope="col" style={{ width: '105px' }} className="px-4 py-5 font-bold">Date</th>
                                                 <th scope="col" className="px-3 py-5 font-bold">Details</th>
-                                                <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Invoice</th>
-                                                <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Payment</th>
-                                                <th scope="col" style={{ width: '140px' }} className="px-3 py-5 font-bold text-right">Balance</th>
-                                                <th scope="col" style={{ width: '110px' }} className="px-3 py-5 font-bold text-left">Status</th>
+                                                <th scope="col" style={{ width: '120px' }} className="px-3 py-5 font-bold text-right">Invoice</th>
+                                                <th scope="col" style={{ width: '105px' }} className="px-3 py-5 font-bold text-right">TDS</th>
+                                                <th scope="col" style={{ width: '120px' }} className="px-3 py-5 font-bold text-right">Payment</th>
+                                                <th scope="col" style={{ width: '130px' }} className="px-3 py-5 font-bold text-right">Balance</th>
+                                                <th scope="col" style={{ width: '105px' }} className="px-3 py-5 font-bold text-left">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white">
@@ -488,10 +502,13 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                             )}
                                                         </td>
 
-                                                        {/* Debit */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-right">{isInvoice && item.debit ? formatCurrency(item.debit) : "-"}</td>
+                                                        {/* Gross Invoice */}
+                                                        <td className="whitespace-nowrap px-3 py-4 text-right">{isInvoice && item.grossAmount ? formatCurrency(item.grossAmount) : "-"}</td>
 
-                                                        {/* Credit */}
+                                                        {/* TDS */}
+                                                        <td className="whitespace-nowrap px-3 py-4 text-right text-indigo-700 font-medium">{isInvoice && item.tdsAmount ? formatCurrency(item.tdsAmount) : "-"}</td>
+
+                                                        {/* Payment */}
                                                         <td className="whitespace-nowrap px-3 py-4 text-right text-emerald-700 font-medium">{item.credit ? formatCurrency(item.credit) : "-"}</td>
 
                                                         {/* Balance */}
@@ -522,8 +539,9 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                                 <td className="px-4 py-4">Total</td>
                                                 <td className="px-3 py-4"></td>
                                                 <td className="px-3 py-4 text-right">{formatCurrency(totalPurchased)}</td>
+                                                <td className="px-3 py-4 text-right text-indigo-800">{formatCurrency(totalTds)}</td>
                                                 <td className="px-3 py-4 text-right text-emerald-800">{formatCurrency(totalPaid)}</td>
-                                                <td className="px-3 py-4 text-right text-red-800">{formatCurrency(totalPurchased - totalPaid)}</td>
+                                                <td className="px-3 py-4 text-right text-red-800">{formatCurrency(totalPurchased - totalTds - totalPaid)}</td>
                                                 <td className="px-3 py-4"></td>
                                             </tr>
                                         </tfoot>
@@ -547,6 +565,14 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                     </div>
                                     <div>
                                         <label className="block text-sm font-bold text-gray-500">
+                                            Total TDS
+                                        </label>
+                                        <div className="mt-1 text-2xl font-semibold text-indigo-600">
+                                            {formatCurrency(totalTds)}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-500">
                                             Total Paid
                                         </label>
                                         <div className="mt-1 text-2xl font-semibold text-blue-600">
@@ -558,7 +584,7 @@ export default function LedgerInvoicePayment({ customer, invoices, payments, sta
                                             Closing Balance
                                         </label>
                                         <div className="mt-1 text-2xl font-semibold text-red-600">
-                                            {formatCurrency(totalPurchased - totalPaid)}
+                                            {formatCurrency(totalPurchased - totalTds - totalPaid)}
                                         </div>
                                     </div>
                                 </div>

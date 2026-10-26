@@ -49,8 +49,8 @@ export const getInvoices = async (
     }
 
     if (orderBy === "pending") {
-        query += ` AND (I.InvoiceAmount - I.ReceivedAmount) > 0`
-        query += ` ORDER BY I.IsCancel, CASE WHEN (I.InvoiceAmount - I.ReceivedAmount) > 0 THEN 0 ELSE 1 END,
+        query += ` AND ((I.InvoiceAmount - COALESCE(I.Tds, 0)) - I.ReceivedAmount) > 0`
+        query += ` ORDER BY I.IsCancel, CASE WHEN ((I.InvoiceAmount - COALESCE(I.Tds, 0)) - I.ReceivedAmount) > 0 THEN 0 ELSE 1 END,
             I.InvoiceDate ASC`;
     } else if (orderBy === "InvoiceNumberASC") {
         query += ` ORDER BY I.InvoiceNumber ASC`;
@@ -92,7 +92,7 @@ export const getInvoices = async (
             EwayBillNumber: row.EwayBillNumber,
             InvoiceAmount: row.InvoiceAmount,
             ReceivedAmount: row.ReceivedAmount,
-            BalanceAmount: row.InvoiceAmount - row.ReceivedAmount,
+            BalanceAmount: Number(((row.InvoiceAmount - Number(row.Tds || 0)) - row.ReceivedAmount).toFixed(2)),
             BillType: row.BillType,
             BeforeTax: row.BeforeTax,
             Cgst: row.Cgst,
@@ -101,6 +101,8 @@ export const getInvoices = async (
             AfterTax: row.AfterTax,
             RoundOff: row.RoundOff,
             Discount: row.Discount,
+            TdsPercentage: row.TdsPercentage,
+            Tds: row.Tds,
             InvoiceType: row.InvoiceType,
             CustomerId: row.CustomerId,
             CustomerName: row.CustomerName,
@@ -211,7 +213,8 @@ export const getInvoicesTotal = async (
     let query = `
     SELECT SUM(I.InvoiceAmount) AS TotalInvoiceAmount,
            SUM(I.ReceivedAmount) AS TotalReceivedAmount,
-           SUM(I.InvoiceAmount - I.ReceivedAmount) AS TotalBalanceAmount,
+           SUM((I.InvoiceAmount - COALESCE(I.Tds, 0)) - I.ReceivedAmount) AS TotalBalanceAmount,
+           SUM(COALESCE(I.Tds, 0)) AS TotalTdsAmount,
            SUM(CASE WHEN I.IsCancel = 1 THEN I.InvoiceAmount ELSE 0 END) AS TotalCancelledAmount
   `;
 
@@ -309,8 +312,8 @@ export const createInvoice = async (invoiceData: any) => {
         const customerId = Number(invoiceData.CustomerId) > 0 ? Number(invoiceData.CustomerId) : null;
 
         const [result]: any = await conn.query(
-            "INSERT INTO invoice (InvoiceNumber, InvoiceDate, InvoiceType, CustomerId, EwayBillNumber, BillType, BeforeTax, TaxPercentage, Cgst, Sgst, Igst, AfterTax, RoundOff, Discount, InvoiceAmount, ReceivedAmount, IsCancel, CancelReason, DeliveryNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.DeliveryNote]
+            "INSERT INTO invoice (InvoiceNumber, InvoiceDate, InvoiceType, CustomerId, EwayBillNumber, BillType, BeforeTax, TaxPercentage, Cgst, Sgst, Igst, AfterTax, RoundOff, Discount, TdsPercentage, Tds, InvoiceAmount, ReceivedAmount, IsCancel, CancelReason, DeliveryNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, Number(invoiceData.TdsPercentage || 0), Number(invoiceData.Tds || 0), invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.DeliveryNote]
         );
 
         const invoiceId = result.insertId;
@@ -415,8 +418,8 @@ export const updateInvoice = async (invoiceData: any) => {
         const invId = Number(invoiceData.InvoiceId || invoiceData.id);
 
         await conn.query(
-            "UPDATE invoice SET InvoiceNumber = ?, InvoiceDate = ?, InvoiceType = ?, CustomerId = ?, EwayBillNumber = ?, BillType = ?, BeforeTax = ?, TaxPercentage = ?, Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, Discount = ?, InvoiceAmount = ?, ReceivedAmount = ?, IsCancel = ?, CancelReason = ?, DeliveryNote = ? WHERE InvoiceId = ?",
-            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.DeliveryNote, invId]
+            "UPDATE invoice SET InvoiceNumber = ?, InvoiceDate = ?, InvoiceType = ?, CustomerId = ?, EwayBillNumber = ?, BillType = ?, BeforeTax = ?, TaxPercentage = ?, Cgst = ?, Sgst = ?, Igst = ?, AfterTax = ?, RoundOff = ?, Discount = ?, TdsPercentage = ?, Tds = ?, InvoiceAmount = ?, ReceivedAmount = ?, IsCancel = ?, CancelReason = ?, DeliveryNote = ? WHERE InvoiceId = ?",
+            [invoiceData.InvoiceNumber, invoiceData.InvoiceDate, invoiceData.InvoiceType, customerId, invoiceData.EwayBillNumber, invoiceData.BillType, invoiceData.BeforeTax, invoiceData.TaxPercentage, invoiceData.Cgst, invoiceData.Sgst, invoiceData.Igst, invoiceData.AfterTax, invoiceData.RoundOff, invoiceData.Discount, Number(invoiceData.TdsPercentage || 0), Number(invoiceData.Tds || 0), invoiceData.InvoiceAmount, invoiceData.ReceivedAmount, invoiceData.IsCancel, invoiceData.CancelReason, invoiceData.DeliveryNote, invId]
         );
 
         await conn.query(
@@ -565,7 +568,7 @@ export const getCustomerInvoices = async (CustomerId: any, startDate: string | n
             SELECT 
                 I.*,
                 CASE WHEN I.IsCancel = 1 THEN 0 ELSE I.InvoiceAmount END AS InvoiceAmount,  
-                CASE WHEN I.IsCancel = 1 THEN 0 ELSE I.InvoiceAmount - I.ReceivedAmount END AS BalanceAmount
+                CASE WHEN I.IsCancel = 1 THEN 0 ELSE (I.InvoiceAmount - COALESCE(I.Tds, 0)) - I.ReceivedAmount END AS BalanceAmount
             FROM invoice I 
             WHERE I.CustomerId = ?
         `;
@@ -726,12 +729,12 @@ export const processLumpSumPaymentRepo = async (data: {
         }
 
         let query = `
-            SELECT I.InvoiceId, I.InvoiceNumber, I.InvoiceDate, I.InvoiceAmount, I.ReceivedAmount, I.BillType, I.InvoiceType
+            SELECT I.InvoiceId, I.InvoiceNumber, I.InvoiceDate, I.InvoiceAmount, I.ReceivedAmount, I.BillType, I.InvoiceType, I.Tds
             FROM invoice I
             WHERE I.CustomerId = ?
               AND (I.IsCancel IS NULL OR I.IsCancel = 0)
               AND (I.InvoiceType IS NULL OR I.InvoiceType != 'Credit Note')
-              AND (I.InvoiceAmount - I.ReceivedAmount) > 0.01
+              AND ((I.InvoiceAmount - COALESCE(I.Tds, 0)) - I.ReceivedAmount) > 0.01
         `;
         const params: any[] = [custId];
 
@@ -759,8 +762,9 @@ export const processLumpSumPaymentRepo = async (data: {
             if (lumpSumRemaining <= 0.001) break;
 
             const invAmount = Number(inv.InvoiceAmount || 0);
+            const netAmount = invAmount - Number(inv.Tds || 0);
             const receivedAmount = Number(inv.ReceivedAmount || 0);
-            const pendingBalance = Math.max(0, invAmount - receivedAmount);
+            const pendingBalance = Math.max(0, netAmount - receivedAmount);
 
             if (pendingBalance <= 0.001) continue;
 
@@ -785,7 +789,7 @@ export const processLumpSumPaymentRepo = async (data: {
                 InvoiceNumber: inv.InvoiceNumber,
                 InvoiceDate: inv.InvoiceDate,
                 PaidAmount: Number(payForThisInv.toFixed(2)),
-                RemainingBalance: Number(Math.max(0, invAmount - newReceivedTotal).toFixed(2))
+                RemainingBalance: Number(Math.max(0, netAmount - newReceivedTotal).toFixed(2))
             });
         }
 

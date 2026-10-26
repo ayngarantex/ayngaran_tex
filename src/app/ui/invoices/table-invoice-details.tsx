@@ -90,6 +90,11 @@ export default function TableInvoiceDetails({
                 onMouseLeave={handleMouseLeave}
             >
                 <span className='flex w-full'>{invoice?.InvoiceAmount ? formatCurrency(invoice.InvoiceAmount) : ""}</span>
+                {Number(invoice?.Tds || 0) > 0 && (
+                    <span className='flex w-full text-xs text-indigo-600 font-medium' title="Net Payable after TDS">
+                        No Tds: {formatCurrency(Number(invoice?.InvoiceAmount || 0) - Number(invoice?.Tds || 0))}
+                    </span>
+                )}
                 <span className='flex w-full pt-2 text-sm italic font-semibold'>Dot: {invoice?.invoice_details?.reduce((total: number, detail: any) => total + detail.Quantity, 0)}</span>
 
                 {Number(hoverInvoiceId) === Number(invoice.InvoiceId) && (
@@ -147,6 +152,22 @@ export default function TableInvoiceDetails({
                                     <span className="min-w-[20%] pr-4 text-right font-semibold">Total</span>
                                     <span className="min-w-[30%] pr-4 text-right font-semibold">{formatCurrency(invoice?.InvoiceAmount)}</span>
                                 </li>
+                                {Number(invoice?.Tds || 0) > 0 && (
+                                    <>
+                                        <li key='tds' className="pb-2 border-b border-gray-200 mb-2 flex">
+                                            <span className="min-w-[30%] pr-4">&nbsp;</span>
+                                            <span className="min-w-[20%] pr-4">&nbsp;</span>
+                                            <span className="min-w-[20%] pr-4 text-right font-semibold">TDS ({invoice?.TdsPercentage}%)</span>
+                                            <span className="min-w-[30%] pr-4 text-right font-semibold text-indigo-600">-{formatCurrency(Number(invoice?.Tds || 0))}</span>
+                                        </li>
+                                        <li key='netPayable' className="pb-2 border-b border-gray-200 mb-2 flex">
+                                            <span className="min-w-[30%] pr-4">&nbsp;</span>
+                                            <span className="min-w-[20%] pr-4">&nbsp;</span>
+                                            <span className="min-w-[20%] pr-4 text-right font-bold text-gray-900">Net Payable</span>
+                                            <span className="min-w-[30%] pr-4 text-right font-bold text-gray-900">{formatCurrency(Number(invoice?.InvoiceAmount || 0) - Number(invoice?.Tds || 0))}</span>
+                                        </li>
+                                    </>
+                                )}
                             </ul>
                         )}
                     </div>
@@ -202,7 +223,7 @@ export default function TableInvoiceDetails({
             </td>
             <td className="whitespace-nowrap py-3 pl-6 pr-3 no-print">
                 <div className="flex justify-end gap-3">
-                    {Number(invoice?.InvoiceAmount) !== Number(invoice?.ReceivedAmount) && (
+                    {Number(invoice?.BalanceAmount) > 0 && (
                         <PayInvoice invoice={invoice} />
                     )}
                     <UpdateInvoice id={invoice.InvoiceId} />

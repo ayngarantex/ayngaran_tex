@@ -64,6 +64,8 @@ type Invoice {
   AfterTax: Float
   RoundOff: String
   Discount: String
+  TdsPercentage: Float
+  Tds: Float
   CustomerName: String
   CustomerMobile: String
   GstNumber: String
@@ -117,6 +119,8 @@ type InvoiceById {
   AfterTax: Float
   RoundOff: String
   Discount: String
+  TdsPercentage: Float
+  Tds: Float
   IsCancel: Int
   CancelReason: String
   invoice_details: [InvoiceDetail]
@@ -129,6 +133,7 @@ type InvoicesTotal {
   TotalReceivedAmount: Float
   TotalBalanceAmount: Float
   TotalCancelledAmount: Float
+  TotalTdsAmount: Float
 }
 
 type Query {
@@ -210,6 +215,8 @@ input InvoiceInput {
   BillType: String
   RoundOff: String
   Discount: String
+  TdsPercentage: Float
+  Tds: Float
   InvoiceAmount: Float
   ReceivedAmount: Float
   IsCancel: Int

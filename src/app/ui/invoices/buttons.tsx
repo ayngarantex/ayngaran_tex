@@ -71,6 +71,14 @@ export function PayInvoice({ invoice }: { invoice: any }) {
   const [invPayments, setInvPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const netTotal = invoice?.InvoiceType?.trim().toLowerCase() === 'job work' && invoice?.Tds
+    ? (Number(invoice.InvoiceAmount || 0) - Number(invoice.Tds || 0))
+    : Number(invoice?.InvoiceAmount || 0);
+
+  const balanceVal = invoice?.BalanceAmount !== undefined && invoice?.BalanceAmount !== null
+    ? Number(invoice.BalanceAmount)
+    : (netTotal - Number(invoice?.ReceivedAmount || 0));
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -98,10 +106,6 @@ export function PayInvoice({ invoice }: { invoice: any }) {
       const month = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       const todayStr = `${year}-${month}-${day}`;
-
-      const balanceVal = invoice?.BalanceAmount !== undefined && invoice?.BalanceAmount !== null
-        ? Number(invoice.BalanceAmount)
-        : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0));
 
       if (balanceVal <= 0) {
         alert("This invoice is already fully paid.");
@@ -184,7 +188,7 @@ export function PayInvoice({ invoice }: { invoice: any }) {
             {/* Body */}
             <div className="p-6 overflow-y-auto space-y-4">
               <PaymentForm
-                invoiceAmount={invoice?.InvoiceAmount || 0}
+                invoiceAmount={netTotal}
                 billType={invoice?.BillType || 'gst'}
                 invPayment={invoice?.invoice_payments || invoice?.payment_details || []}
                 setInvPayments={setInvPayments}
@@ -199,7 +203,7 @@ export function PayInvoice({ invoice }: { invoice: any }) {
                 disabled={loading}
                 className="px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
-                ⚡ Pay Full (₹{((invoice?.BalanceAmount !== undefined ? Number(invoice.BalanceAmount) : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0))) > 0 ? (invoice?.BalanceAmount !== undefined ? Number(invoice.BalanceAmount) : (Number(invoice?.InvoiceAmount || 0) - Number(invoice?.ReceivedAmount || 0))) : Number(invoice?.InvoiceAmount || 0)).toFixed(2)}) & Today
+                ⚡ Pay Full (₹{(balanceVal > 0 ? balanceVal : netTotal).toFixed(2)}) & Today
               </button>
 
               <div className="flex items-center gap-3">

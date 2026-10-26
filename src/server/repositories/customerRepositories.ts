@@ -10,7 +10,7 @@ export const getCustomers = async (
 ) => {
     let sql = "";
     let params: any[] = [];
-    sql = `SELECT SUM(IF(I.IsCancel = 1, 0, I.InvoiceAmount) - I.ReceivedAmount) as pending, C.* FROM customers C
+    sql = `SELECT SUM(IF(I.IsCancel = 1, 0, (I.InvoiceAmount - COALESCE(I.Tds, 0))) - I.ReceivedAmount) as pending, C.* FROM customers C
     LEFT JOIN invoice I ON I.CustomerId = C.CustomerId `;
 
     if (startDate && endDate) {
@@ -56,7 +56,7 @@ export const customerPendingPayment = async (
     startDate: string | null,
     endDate: string | null
 ) => {
-    let sql = `SELECT SUM(IF(I.IsCancel = 1, 0, I.InvoiceAmount) - I.ReceivedAmount) as pending FROM customers C
+    let sql = `SELECT SUM(IF(I.IsCancel = 1, 0, (I.InvoiceAmount - COALESCE(I.Tds, 0))) - I.ReceivedAmount) as pending FROM customers C
                 LEFT JOIN invoice I ON I.CustomerId = C.CustomerId `;
     let params: any[] = [];
 
