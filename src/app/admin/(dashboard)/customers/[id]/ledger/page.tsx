@@ -57,6 +57,12 @@ export default async function Page(props:
 
     const payments = Object.values(grouped);
 
+    const nonCreditNoteInvoices = invoices.filter((invoice: any) => invoice.InvoiceType !== 'Credit Note');
+    const totalPurchased = nonCreditNoteInvoices.reduce((sum: number, item: any) => sum + (item?.InvoiceAmount || 0), 0);
+    const totalTds = nonCreditNoteInvoices.reduce((sum: number, item: any) => sum + Number(item?.Tds || 0), 0);
+    const totalPaid = payments.reduce((sum: number, item: any) => sum + item.TotalPaid, 0);
+    const balance = totalPurchased - totalTds - totalPaid;
+
     return (
         <main>
             {!isPrint && (
@@ -123,27 +129,35 @@ export default async function Page(props:
                         </div>
                         <div className='flex flex-wrap mb-6'>
                             <div className="mb-4 w-1/4">
-                                <label htmlFor="mobile" className="mb-2 block f text-sm font-bold">
+                                <label htmlFor="totalPurchased" className="mb-2 block text-sm font-bold">
                                     Total Purchased
                                 </label>
-                                <div className="relative mt-2 tex-2xl text-blue-600">
-                                    {formatCurrency(invoices.filter((invoice: any) => invoice.InvoiceType !== 'Credit Note').reduce((sum: number, item: any) => sum + (item?.InvoiceAmount || 0), 0))}
+                                <div className="relative mt-2 text-2xl text-blue-600 font-semibold">
+                                    {formatCurrency(totalPurchased)}
                                 </div>
                             </div>
                             <div className="mb-4 w-1/4">
-                                <label htmlFor="mobile" className="mb-2 block f text-sm font-bold">
+                                <label htmlFor="totalTds" className="mb-2 block text-sm font-bold">
+                                    Total TDS
+                                </label>
+                                <div className="relative mt-2 text-2xl text-indigo-600 font-semibold">
+                                    {formatCurrency(totalTds)}
+                                </div>
+                            </div>
+                            <div className="mb-4 w-1/4">
+                                <label htmlFor="totalPaid" className="mb-2 block text-sm font-bold">
                                     Total Paid
                                 </label>
-                                <div className="relative mt-2 tex-2xl text-blue-600">
-                                    {formatCurrency(payments.reduce((sum, item) => sum + item.TotalPaid, 0))}
+                                <div className="relative mt-2 text-2xl text-blue-600 font-semibold">
+                                    {formatCurrency(totalPaid)}
                                 </div>
                             </div>
                             <div className="mb-4 w-1/4">
-                                <label htmlFor="mobile" className="mb-2 block f text-sm font-bold">
+                                <label htmlFor="balance" className="mb-2 block text-sm font-bold">
                                     Balance
                                 </label>
-                                <div className="relative mt-2 tex-2xl text-red-600">
-                                    {formatCurrency(invoices.filter((invoice: any) => invoice.InvoiceType !== 'Credit Note').reduce((sum: number, item: any) => sum + (item?.InvoiceAmount || 0), 0) - payments.reduce((sum: number, item: any) => sum + item.TotalPaid, 0))}
+                                <div className="relative mt-2 text-2xl text-red-600 font-semibold">
+                                    {formatCurrency(balance)}
                                 </div>
                             </div>
                         </div>

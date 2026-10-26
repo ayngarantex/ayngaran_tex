@@ -6,6 +6,8 @@ import { fetchSizingPages, fetchSizing, fetchSizingTotal } from '@/app/api/node/
 import Financialyear from '@/app/lib/financialyear';
 import { formatCurrency } from '@/app/lib/utils';
 
+import Link from 'next/link';
+
 export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
@@ -45,7 +47,15 @@ export default async function Page(props: {
             />
           </div>
         </div>
-        <CreateSizing />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/design-sheets"
+            className="flex h-10 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+          >
+            <span>Design Sheets</span>
+          </Link>
+          <CreateSizing />
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">

@@ -150,6 +150,18 @@ export default function PrintProduct({ invoice, invProducts, products, customer,
               <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}> {invoice?.BillType === 'gst' ? 'Total Amount After Tax' : 'Total Amount'}</span>
               <span className="pt-1 pr-2 text-right" style={{ width: "120px" }}>{invoice?.InvoiceAmount ? formatCurrency(invoice?.InvoiceAmount) : ""}</span>
             </div>
+            {invoice?.Tds && Number(invoice?.Tds) > 0 ? (
+              <>
+                <div className="border-0 pl-2 align-top justify-end w-full flex">
+                  <span className='text-sm py-1 text-sm text-left pl-4 border-l' style={{ width: "180px" }}>Less: TDS ({invoice?.TdsPercentage}%)</span>
+                  <span className="pl-4 pt-1 pr-2 text-right" style={{ width: "120px" }}>-{Number(invoice?.Tds).toFixed(2)}</span>
+                </div>
+                <div className="border-0 pl-2 align-top justify-end w-full flex font-bold">
+                  <span className='text-sm py-1 text-sm text-left pl-4 border-l font-bold' style={{ width: "180px" }}>Net Amount Payable</span>
+                  <span className="pt-1 pr-2 text-right font-bold" style={{ width: "120px" }}>{formatCurrency(Number(invoice?.InvoiceAmount || 0) - Number(invoice?.Tds || 0))}</span>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
         {invoice?.BillType === 'gst' ?

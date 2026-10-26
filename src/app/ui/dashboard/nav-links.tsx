@@ -13,7 +13,8 @@ import {
   MapIcon,
   AdjustmentsVerticalIcon,
   UserPlusIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,6 +27,7 @@ const links = [
   { name: 'Purchases', href: '/admin/purchases', icon: ShoppingBagIcon },
   { name: 'Yarns', href: '/admin/yarns', icon: NumberedListIcon },
   { name: 'Sizing', href: '/admin/sizing', icon: AdjustmentsVerticalIcon },
+  { name: 'Design Sheets', href: '/admin/design-sheets', icon: DocumentTextIcon },
   { name: 'Customers', href: '/admin/customers', icon: UserGroupIcon },
   { name: 'Suppliers', href: '/admin/suppliers', icon: BuildingStorefrontIcon },
   { name: 'Job Works', href: '/admin/jobworks', icon: UserGroupIcon },
@@ -68,7 +70,10 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
     <>
       {visibleLinks.map((link) => {
         const LinkIcon = link.icon;
-        const isActive = pathname === link.href;
+        const isActive =
+          link.href === '/admin'
+            ? pathname === '/admin'
+            : pathname === link.href || pathname.startsWith(`${link.href}/`);
         return (
           <Link
             key={link.name}

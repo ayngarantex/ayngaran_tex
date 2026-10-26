@@ -85,3 +85,35 @@ export interface FinancialyearNewProps {
     loomName: string,
   ) => void;
 };
+
+export interface DesignSheetItem {
+  id: string;
+  color: string;
+  value: number;
+  isGrouped?: boolean;
+  groupId?: string;
+  groupRepeat?: number;
+  groupDescription?: string;
+}
+
+export interface DesignSheet {
+  Id: number;
+  DesignNumber: string;
+  DesignName: string;
+  ItemWidth: string;
+  TotalEnds: number;
+  ColorSummary: Record<string, number> | null;
+  Notes: string | null;
+  Items: DesignSheetItem[];
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface DesignSheetPayload {
+  DesignNumber: string;
+  DesignName: string;
+  ItemWidth: string;
+  Notes?: string | null;
+  Items: DesignSheetItem[];
+}
+
