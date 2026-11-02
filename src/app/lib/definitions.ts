@@ -5,8 +5,9 @@
 export type CustomerField = {
   CustomerId: number;
   CustomerName: string | null;
+  Address: String | null;
   GstNumber: string | null;
-  State: string | null
+  State: string | null;
 };
 
 export type InvoiceField = {

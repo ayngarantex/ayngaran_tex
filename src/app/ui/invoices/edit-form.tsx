@@ -24,7 +24,7 @@ export default function EditForm({
   const dropdownCustomers = useMemo(() => {
     return customers.map(c => ({
       id: c.CustomerId,
-      label: c.CustomerName || '',
+      label: (c.CustomerName + " - " + c.Address),
     }));
   }, [customers]);
 

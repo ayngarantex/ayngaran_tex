@@ -63,7 +63,15 @@ export default async function YarnTable({
                       <div className="space-y-0.5">
                         {yrn.yarn_details.map((row: any, idx: number) => (
                           <div key={idx} className="whitespace-nowrap">
-                            <span className="font-semibold text-slate-900">{row.Count}</span> - {row.Color} ({row.Bag} bags, {row.Quantity ? Number(row.Quantity).toFixed(3) : '0.000'}kg) @ ₹{row.Price}
+                            {row.Count.toLowerCase() === 'freight' ?
+                              <>
+                                <span className="font-semibold text-slate-900">{row.Count}</span>{row.Bag} @ ₹{row.Price}
+                              </>
+                              :
+                              <>
+                                <span className="font-semibold text-slate-900">{row.Count}</span> - {row.Color} ({row.Bag} bags, {row.Quantity ? Number(row.Quantity).toFixed(3) : '0.000'}kg) @ ₹{row.Price}
+                              </>
+                            }
                           </div>
                         ))}
                       </div>
