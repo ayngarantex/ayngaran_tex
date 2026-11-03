@@ -26,15 +26,16 @@ export const getPayments = async (
             ) as InvoiceNumber, I.BillType FROM payment_details PD
             JOIN invoice I ON PD.InvoiceId = I.InvoiceId
             JOIN customers C ON I.CustomerId = C.CustomerId`;
+
+    let conditions: string[] = [];
+
     if (search != null && search != "") {
-        sql += `
-        WHERE (
+        conditions.push(`(
             LOWER(C.CustomerName) LIKE ?
             OR LOWER(C.GstNumber) LIKE ?
             OR LOWER(C.Agent) LIKE ?
             OR LOWER(C.State) LIKE ?
-        )
-    `;
+        )`);
 
         params.push(`%${search}%`);
         params.push(`%${search}%`);
@@ -43,11 +44,12 @@ export const getPayments = async (
     }
 
     if (startDate && endDate) {
-        sql += `
-            AND PD.Date >= ? AND PD.Date <= ?
-        `;
-
+        conditions.push(`PD.Date >= ? AND PD.Date <= ?`);
         params.push(startDate, endDate);
+    }
+
+    if (conditions.length > 0) {
+        sql += ` WHERE ` + conditions.join(" AND ");
     }
 
     sql += ' GROUP BY PD.Date, C.CustomerId, I.BillType ORDER BY PD.Date DESC';

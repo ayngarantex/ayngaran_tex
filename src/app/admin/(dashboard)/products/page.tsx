@@ -61,7 +61,12 @@ export default async function Page(props: {
         <div className="rounded-xl p-6 shadow-sm border border-purple-200/60 bg-purple-50/70 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-purple-700 uppercase tracking-wider">Available Stock</p>
-            <p className="text-3xl font-extrabold text-purple-900 mt-1">{totalAvailableSum.toLocaleString()}</p>
+            <p className="text-3xl font-extrabold text-purple-900 mt-1">
+              {totalAvailableSum.toLocaleString()}
+              {totalAvailableSum && (
+                <span className='text-green-600 text-xl font-semibold ml-2'>({(totalAvailableSum / 50).toLocaleString()} Bales)</span>
+              )}
+            </p>
           </div>
           <div className="p-3 bg-white/85 rounded-lg text-purple-600 shadow-sm flex items-center justify-center">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
