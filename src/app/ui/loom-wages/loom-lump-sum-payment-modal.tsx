@@ -216,13 +216,13 @@ export default function LoomLumpSumPaymentModal({
                                     <div className="flex items-center gap-2.5 text-emerald-800 font-bold text-base">
                                         <CheckCircleIcon className="w-7 h-7 text-emerald-600 shrink-0" />
                                         <span>
-                                            Successfully allocated (FormatCurrency(resultSummary.totalAllocated)} across {resultSummary.allocatedCount} Bill(s)!
+                                            Successfully allocated {formatCurrency(resultSummary.totalAllocated)} across {resultSummary.allocatedCount} Bill(s)!
                                         </span>
                                     </div>
 
                                     {resultSummary.excessRemaining > 0 && (
                                         <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-semibold">
-                                            Excess Remaining Unallocated: (FormatCurrency(resultSummary.excessRemaining)}
+                                            Excess Remaining Unallocated: {formatCurrency(resultSummary.excessRemaining)}
                                         </div>
                                     )}
 
@@ -248,16 +248,16 @@ export default function LoomLumpSumPaymentModal({
                                                                 {formatDateNew(item.WeekStartDate)} – {formatDateNew(item.WeekEndDate)}
                                                             </td>
                                                             <td className="px-3 py-2 text-right text-slate-600">
-                                                                (FormatCurrency(item.TotalCalculatedWages)}
+                                                                {formatCurrency(item.TotalCalculatedWages)}
                                                             </td>
                                                             <td className="px-3 py-2 text-right text-slate-500">
-                                                                (FormatCurrency(item.PreviousPaid)}
+                                                                {formatCurrency(item.PreviousPaid)}
                                                             </td>
                                                             <td className="px-3 py-2 text-right font-black text-emerald-700">
-                                                                (FormatCurrency(item.AllocatedAmount)}
+                                                                {formatCurrency(item.AllocatedAmount)}
                                                             </td>
                                                             <td className="px-3 py-2 text-right font-bold text-slate-700">
-                                                                (FormatCurrency(item.NewBalanceDue)}
+                                                                {formatCurrency(item.NewBalanceDue)}
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -378,13 +378,13 @@ export default function LoomLumpSumPaymentModal({
                                                                             {b.TotalDcsCount} DC(s) • {b.TotalCount} pcs
                                                                         </td>
                                                                         <td className="px-3 py-2 text-right text-slate-600">
-                                                                            (FormatCurrency(b.TotalCalculatedWages)}
+                                                                            {formatCurrency(b.TotalCalculatedWages)}
                                                                         </td>
                                                                         <td className="px-3 py-2 text-right text-emerald-700">
-                                                                            (FormatCurrency(b.TotalPaidAmount)}
+                                                                            {formatCurrency(b.TotalPaidAmount)}
                                                                         </td>
                                                                         <td className="px-3 py-2 text-right font-black text-rose-700 whitespace-nowrap">
-                                                                            (FormatCurrency(b.BalanceDue)}
+                                                                            {formatCurrency(b.BalanceDue)}
                                                                         </td>
                                                                     </tr>
                                                                 );

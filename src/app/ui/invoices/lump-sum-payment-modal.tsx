@@ -225,13 +225,13 @@ export default function LumpSumPaymentModal({
                   <div className="flex items-center gap-2 text-emerald-800 font-bold text-base">
                     <CheckCircleIcon className="w-6 h-6 text-emerald-600 shrink-0" />
                     <span>
-                      Successfully Allocated (FormatCurrency(resultSummary.totalAllocated)} across {resultSummary.allocatedCount} Bill(s)!
+                      Successfully Allocated {formatCurrency(resultSummary.totalAllocated)} across {resultSummary.allocatedCount} Bill(s)!
                     </span>
                   </div>
 
                   {resultSummary.excessRemaining > 0 && (
                     <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm font-semibold">
-                      Excess Remaining Unallocated: (FormatCurrency(resultSummary.excessRemaining)}
+                      Excess Remaining Unallocated: {formatCurrency(resultSummary.excessRemaining)}
                     </div>
                   )}
 
@@ -385,20 +385,20 @@ export default function LumpSumPaymentModal({
                                     </td>
                                     <td className="px-3 py-2 whitespace-nowrap">
                                       <span className={`px-2 py-0.5 text-[11px] font-bold rounded-full ${(b.BillType || '').toLowerCase() === 'gst'
-                                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                          : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
                                         }`}>
                                         {(b.BillType || 'Normal').toUpperCase()}
                                       </span>
                                     </td>
                                     <td className="px-3 py-2 text-right text-slate-600 whitespace-nowrap">
-                                      (FormatCurrency(b.NetAmount || b.InvoiceAmount)}
+                                      {formatCurrency(b.NetAmount || b.InvoiceAmount)}
                                     </td>
                                     <td className="px-3 py-2 text-right text-emerald-700 whitespace-nowrap">
-                                      (FormatCurrency(b.ReceivedAmount)}
+                                      {formatCurrency(b.ReceivedAmount)}
                                     </td>
                                     <td className="px-3 py-2 text-right font-black text-rose-700 whitespace-nowrap">
-                                      (FormatCurrency(b.BalanceDue)}
+                                      {formatCurrency(b.BalanceDue)}
                                     </td>
                                   </tr>
                                 );
