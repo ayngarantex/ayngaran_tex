@@ -5,6 +5,7 @@ import {
     MagnifyingGlassIcon,
     CalendarIcon
 } from '@heroicons/react/24/outline';
+import FoldingLumpSumPaymentModal from './folding-lump-sum-payment-modal';
 
 interface WeeklyFiltersProps {
     searchQuery: string;
@@ -27,6 +28,8 @@ export default function WeeklyFilters({
     looms,
     recordsCount
 }: WeeklyFiltersProps) {
+    const selectedLoom = selectedLoomId ? looms.find((l: any) => String(l.LoomId) === String(selectedLoomId)) : null;
+
     return (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-3.5 border border-slate-200 shadow-sm">
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
@@ -70,6 +73,11 @@ export default function WeeklyFilters({
             </div>
 
             <div className="flex items-center gap-3">
+                <FoldingLumpSumPaymentModal
+                    looms={looms}
+                    initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}
+                    initialLoomName={selectedLoom?.LoomName}
+                />
                 <div className="text-xs font-semibold text-slate-400">
                     {recordsCount} Weekly Period{recordsCount === 1 ? '' : 's'}
                 </div>

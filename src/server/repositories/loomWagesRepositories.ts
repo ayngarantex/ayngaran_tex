@@ -402,3 +402,97 @@ export const deleteLoomWagePayment = async (paymentId: number) => {
 
     return result.affectedRows;
 };
+
+
+export const getUnpaidLoomWageBills = async (loomId: number, startDate: string = '2026-09-27') => {
+    const list = await getLoomWagesConsolidated(null, loomId, startDate);
+    const unpaid = list
+        .filter(r => r.BalanceDue > 0.01)
+        .sort((a, b) => a.WeekStartDate.localeCompare(b.WeekStartDate));
+    return unpaid;
+};
+
+export const processLoomWageLumpSumPaymentRepo = async (data: {
+    loomId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    note?: string;
+    selectedWeekStartDates?: string[];
+}) => {
+    const { loomId, amount, paymentDate, paymentType, note, selectedWeekStartDates } = data;
+    const unpaidBills = await getUnpaidLoomWageBills(Number(loomId));
+
+    if (!unpaidBills || unpaidBills.length === 0) {
+        return {
+            success: false,
+            message: "No pending unpaid wage bills found for this loom."
+        };
+    }
+
+    let targetBills = unpaidBills;
+    if (selectedWeekStartDates && selectedWeekStartDates.length > 0) {
+        const selectedSet = new Set(selectedWeekStartDates);
+        targetBills = unpaidBills.filter(b => selectedSet.has(b.WeekStartDate));
+        if (targetBills.length === 0) {
+            return {
+                success: false,
+                message: "None of the selected bills have an outstanding balance."
+            };
+        }
+    }
+
+    let remainingAmount = Number(amount);
+    if (isNaN(remainingAmount) || remainingAmount <= 0) {
+        return {
+            success: false,
+            message: "Please enter a valid payment amount greater than 0."
+        };
+    }
+
+    const allocatedBills: any[] = [];
+    let totalAllocated = 0;
+
+    for (const bill of targetBills) {
+        if (remainingAmount <= 0.001) break;
+
+        const balanceDue = Number(bill.BalanceDue || 0);
+        if (balanceDue <= 0.001) continue;
+
+        const payForThisBill = Math.min(remainingAmount, balanceDue);
+        const payAmountRounded = Number(payForThisBill.toFixed(2));
+
+        const paymentNote = note && note.trim() !== ''
+            ? `${note.trim()} (Lump-sum)`
+            : 'Lump-sum payment';
+
+        await addLoomWagePayment({
+            LoomId: Number(loomId),
+            WeekStartDate: bill.WeekStartDate,
+            PaymentDate: paymentDate,
+            Amount: payAmountRounded,
+            PaymentType: paymentType || 'Cash',
+            Note: paymentNote
+        });
+
+        remainingAmount = Number((remainingAmount - payAmountRounded).toFixed(2));
+        totalAllocated = Number((totalAllocated + payAmountRounded).toFixed(2));
+
+        allocatedBills.push({
+            WeekStartDate: bill.WeekStartDate,
+            WeekEndDate: bill.WeekEndDate,
+            TotalCalculatedWages: bill.TotalCalculatedWages,
+            PreviousPaid: bill.TotalPaidAmount,
+            AllocatedAmount: payAmountRounded,
+            NewBalanceDue: Number(Math.max(0, balanceDue - payAmountRounded).toFixed(2))
+        });
+    }
+
+    return {
+        success: true,
+        totalAllocated,
+        excessRemaining: Number(Math.max(0, remainingAmount).toFixed(2)),
+        allocatedCount: allocatedBills.length,
+        allocatedBills
+    };
+};

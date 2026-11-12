@@ -11,6 +11,8 @@ interface WeeklyMetricsProps {
     totalGivenCount: number;
     totalReturnCount: number;
     totalFoldedGivenCount: number;
+    totalShortageGivenCount: number;
+    totalExcessGivenCount: number;
     netPiecesRemaining: number;
     totalCalculatedWagesSum: number;
     totalPaymentsSum: number;
@@ -21,6 +23,8 @@ export default function WeeklyMetrics({
     totalGivenCount,
     totalReturnCount,
     totalFoldedGivenCount,
+    totalShortageGivenCount,
+    totalExcessGivenCount,
     netPiecesRemaining,
     totalCalculatedWagesSum,
     totalPaymentsSum,
@@ -40,6 +44,16 @@ export default function WeeklyMetrics({
                 {totalFoldedGivenCount > 0 && (
                     <p className="text-[10px] font-bold text-purple-700 mt-1 inline-flex items-center gap-1 bg-purple-100/80 px-1.5 py-0.5 rounded border border-purple-200">
                         {totalFoldedGivenCount.toLocaleString()} Pcs Folded
+                    </p>
+                )}
+                {totalShortageGivenCount > 0 && (
+                    <p className="text-[10px] font-bold text-purple-700 mt-1 inline-flex items-center gap-1 bg-purple-100/80 px-1.5 py-0.5 rounded border border-purple-200">
+                        {totalShortageGivenCount.toLocaleString()} Pcs Shortage
+                    </p>
+                )}
+                {totalExcessGivenCount > 0 && (
+                    <p className="text-[10px] font-bold text-purple-700 mt-1 inline-flex items-center gap-1 bg-purple-100/80 px-1.5 py-0.5 rounded border border-purple-200">
+                        {totalExcessGivenCount.toLocaleString()} Pcs Excess
                     </p>
                 )}
             </div>

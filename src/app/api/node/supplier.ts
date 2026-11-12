@@ -14,6 +14,7 @@ import {
     getSizingPaymentsBySupplierId as getSizingPaymentsBySupplierIdRepo,
     getPurchaseBySupplierId as getPurchaseBySupplierIdRepo,
     getPurchasePaymentsBySupplierId as getPurchasePaymentsBySupplierIdRepo,
+    getUnpaidSupplierBills,
     processUnifiedSupplierLumpSumPaymentRepo
 } from "@/server/repositories/supplierRepositories";
 
@@ -143,6 +144,20 @@ export const fetchPaymentBySupplierId = async (
     }
 };
 
+export const fetchUnpaidSupplierBills = async (
+    supplierId: number,
+    category?: 'purchases' | 'yarn' | 'sizing' | null,
+    billType?: string | null
+) => {
+    try {
+        const rows = await getUnpaidSupplierBills(Number(supplierId), category, billType);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchUnpaidSupplierBills Error:", err);
+        return [];
+    }
+};
+
 export const processUnifiedSupplierLumpSumPayment = async (data: {
     supplierId: number;
     amount: number;
@@ -151,7 +166,13 @@ export const processUnifiedSupplierLumpSumPayment = async (data: {
     paymentTo: string;
     billType?: string | null;
     category?: 'purchases' | 'yarn' | 'sizing' | null;
+    selectedBillIds?: number[];
 }) => {
-    const res = await processUnifiedSupplierLumpSumPaymentRepo(data);
-    return JSON.parse(JSON.stringify(res));
+    try {
+        const res = await processUnifiedSupplierLumpSumPaymentRepo(data);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err: any) {
+        console.error("processUnifiedSupplierLumpSumPayment Error:", err);
+        return { success: false, message: err?.message || "Failed to process supplier lump-sum payment" };
+    }
 };

@@ -298,6 +298,8 @@ export const getFoldingWagesConsolidated = async (
         TotalPayableReturnCount: number;
         TotalFoldedReturnCount: number;
         TotalFoldedGivenCount: number;
+        TotalShortageGivenCount: number,
+        TotalExcessGivenCount: number,
         TotalFoldedCount: number;
         NetPieces: number;
         TotalCalculatedWages: number;
@@ -332,6 +334,8 @@ export const getFoldingWagesConsolidated = async (
                 TotalPayableReturnCount: 0,
                 TotalFoldedReturnCount: 0,
                 TotalFoldedGivenCount: 0,
+                TotalShortageGivenCount: 0,
+                TotalExcessGivenCount: 0,
                 TotalFoldedCount: 0,
                 NetPieces: 0,
                 TotalCalculatedWages: 0,
@@ -344,20 +348,35 @@ export const getFoldingWagesConsolidated = async (
         const count = Number(row.TotalCount) || 0;
         const isReturn = row.Type === 'Return';
         const isFolded = (row.FoldedStatus || 'unfolded').toLowerCase() === 'folded';
+        const isShortage = (row.FoldedStatus || 'unfolded').toLowerCase() === 'shortage';
+        const isExcess = (row.FoldedStatus || 'unfolded').toLowerCase() === 'excess';
+
+        console.log("row.FoldedStatus", row.FoldedStatus, count)
 
         if (isReturn) {
-            group.TotalReturnCount += count;
-            // Only unfolded returns are payable for wages; folded returns are already folded and not paid
-            group.TotalPayableReturnCount += count;
+            // Only unfolded returns are payable for wages; folded returns are already folded and not paid            
+            if (isShortage) {
+                group.TotalShortageGivenCount += count;
+            } else {
+                group.TotalPayableReturnCount += count;
+                group.TotalReturnCount += count;
+            }
         } else {
-            group.TotalGivenCount += count;
+            // group.TotalGivenCount += count;
+            if (isShortage) {
+                group.TotalGivenCount -= count;
+            }
             if (isFolded) {
                 group.TotalFoldedGivenCount += count;
             }
         }
 
-        if (isFolded) {
+
+        if (isFolded || isExcess) {
             group.TotalFoldedCount += count;
+        }
+        if (isShortage) {
+            group.TotalFoldedCount -= count;
         }
 
         // Update item by item summary (Given adds, Return reduces)
@@ -387,6 +406,8 @@ export const getFoldingWagesConsolidated = async (
             Items: parsedItems
         });
     }
+
+    console.log("weeklyGroupMap", weeklyGroupMap)
 
     // Calculate wages and net pieces for each group
     for (const group of Object.values(weeklyGroupMap)) {
@@ -454,6 +475,8 @@ export const getFoldingWagesConsolidated = async (
             TotalPayableReturnCount: group.TotalPayableReturnCount,
             TotalFoldedReturnCount: group.TotalFoldedReturnCount,
             TotalFoldedGivenCount: group.TotalFoldedGivenCount,
+            TotalExcessGivenCount: group.TotalExcessGivenCount,
+            TotalShortageGivenCount: group.TotalShortageGivenCount,
             TotalFoldedCount: group.TotalFoldedCount,
             NetPieces: group.NetPieces,
             TotalCalculatedWages: group.TotalCalculatedWages,
@@ -532,4 +555,98 @@ export const updateFoldingLoomOpeningBalance = async (loomId: number, balance: n
         [Number(balance) || 0, Number(loomId)]
     );
     return true;
+};
+
+
+export const getUnpaidFoldingBills = async (loomId: number, startDate: string = '2026-09-27') => {
+    const list = await getFoldingWagesConsolidated(null, loomId, startDate);
+    const unpaid = list
+        .filter(r => r.BalanceDue > 0.01)
+        .sort((a, b) => a.WeekStartDate.localeCompare(b.WeekStartDate));
+    return unpaid;
+};
+
+export const processFoldingLumpSumPaymentRepo = async (data: {
+    loomId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    note?: string;
+    selectedWeekStartDates?: string[];
+}) => {
+    const { loomId, amount, paymentDate, paymentType, note, selectedWeekStartDates } = data;
+    const unpaidBills = await getUnpaidFoldingBills(Number(loomId));
+
+    if (!unpaidBills || unpaidBills.length === 0) {
+        return {
+            success: false,
+            message: "No pending unpaid folding bills found for this loom/folder."
+        };
+    }
+
+    let targetBills = unpaidBills;
+    if (selectedWeekStartDates && selectedWeekStartDates.length > 0) {
+        const selectedSet = new Set(selectedWeekStartDates);
+        targetBills = unpaidBills.filter(b => selectedSet.has(b.WeekStartDate));
+        if (targetBills.length === 0) {
+            return {
+                success: false,
+                message: "None of the selected folding bills have an outstanding balance."
+            };
+        }
+    }
+
+    let remainingAmount = Number(amount);
+    if (isNaN(remainingAmount) || remainingAmount <= 0) {
+        return {
+            success: false,
+            message: "Please enter a valid payment amount greater than 0."
+        };
+    }
+
+    const allocatedBills: any[] = [];
+    let totalAllocated = 0;
+
+    for (const bill of targetBills) {
+        if (remainingAmount <= 0.001) break;
+
+        const balanceDue = Number(bill.BalanceDue || 0);
+        if (balanceDue <= 0.001) continue;
+
+        const payForThisBill = Math.min(remainingAmount, balanceDue);
+        const payAmountRounded = Number(payForThisBill.toFixed(2));
+
+        const paymentNote = note && note.trim() !== ''
+            ? `${note.trim()} (Lump-sum)`
+            : 'Lump-sum folding payment';
+
+        await addFoldingPayment({
+            LoomId: Number(loomId),
+            WeekStartDate: bill.WeekStartDate,
+            PaymentDate: paymentDate,
+            Amount: payAmountRounded,
+            PaymentType: paymentType || 'Cash',
+            Note: paymentNote
+        });
+
+        remainingAmount = Number((remainingAmount - payAmountRounded).toFixed(2));
+        totalAllocated = Number((totalAllocated + payAmountRounded).toFixed(2));
+
+        allocatedBills.push({
+            WeekStartDate: bill.WeekStartDate,
+            WeekEndDate: bill.WeekEndDate,
+            TotalCalculatedWages: bill.TotalCalculatedWages,
+            PreviousPaid: bill.TotalPaidAmount,
+            AllocatedAmount: payAmountRounded,
+            NewBalanceDue: Number(Math.max(0, balanceDue - payAmountRounded).toFixed(2))
+        });
+    }
+
+    return {
+        success: true,
+        totalAllocated,
+        excessRemaining: Number(Math.max(0, remainingAmount).toFixed(2)),
+        allocatedCount: allocatedBills.length,
+        allocatedBills
+    };
 };

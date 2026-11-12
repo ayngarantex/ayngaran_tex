@@ -2,6 +2,9 @@ import Search from '@/app/ui/search';
 import Table from '@/app/ui/payments/table';
 import Pagination from '@/app/lib/pagination';
 import { fetchPaymentCount } from '@/app/api/node/payment';
+import { fetchLooms } from '@/app/api/node/looms';
+import LoomLumpSumPaymentModal from '@/app/ui/loom-wages/loom-lump-sum-payment-modal';
+import FoldingLumpSumPaymentModal from '@/app/ui/folding/folding-lump-sum-payment-modal';
 import Financialyear from '@/app/lib/financialyear';
 import Link from 'next/link';
 
@@ -24,6 +27,8 @@ export default async function Page(props: {
   const type = searchParams?.type || 'invoice';
   const totalCount = await fetchPaymentCount(query, startDate, endDate, type);
   const totalPages = Math.ceil(Number(totalCount) / 50);
+
+  const looms = (type === 'loom' || type === 'folding') ? await fetchLooms('', 0) : [];
 
   return (
     <div className="w-full">
@@ -60,6 +65,24 @@ export default async function Page(props: {
         >
           Yarn Payments
         </Link>
+        <Link
+          href={`/admin/payments?type=loom&startDate=${startDate}&endDate=${endDate}`}
+          className={`mr-8 py-3 px-1 border-b-2 font-medium transition-all duration-150 ${type === 'loom'
+            ? 'border-blue-500 text-blue-600'
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+        >
+          Loom Payments
+        </Link>
+        <Link
+          href={`/admin/payments?type=folding&startDate=${startDate}&endDate=${endDate}`}
+          className={`mr-8 py-3 px-1 border-b-2 font-medium transition-all duration-150 ${type === 'folding'
+            ? 'border-blue-500 text-blue-600'
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+        >
+          Folding Payments
+        </Link>
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
@@ -72,6 +95,11 @@ export default async function Page(props: {
               hideBillType={true}
             />
           </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {type === 'loom' && <LoomLumpSumPaymentModal looms={looms || []} />}
+          {type === 'folding' && <FoldingLumpSumPaymentModal looms={looms || []} />}
         </div>
       </div>
       <Table query={query} currentPage={currentPage} pageLimit={pageLimit} startDate={startDate} endDate={endDate} type={type} />

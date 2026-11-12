@@ -325,7 +325,10 @@ export default function FoldingModal({
                                 {newType === 'Given' ?
                                     <option value="unfolded">Unfolded (Default)</option>
                                     :
-                                    <option value="damag">Damaged</option>
+                                    <>
+                                        <option value="damage">Damaged</option>
+                                        <option value="shortage">Shortage</option>
+                                    </>
                                 }
                             </select>
                         </div>

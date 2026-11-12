@@ -154,19 +154,21 @@ export default function Form({
   }, [taxPercentage, billType])
 
   useEffect(() => {
-    let taxAmount = 0;
     if (billType === 'gst') {
-      taxAmount = (beforeTax / 100) * taxPercentage
       let stateTax = taxPercentage / 2
       setCgstAmount(Number(((beforeTax / 100) * stateTax).toFixed(2)))
       setSgstAmount(Number(((beforeTax / 100) * stateTax).toFixed(2)))
-      setIgstAmount(Number(taxAmount.toFixed(2)))
+      setIgstAmount(Number(((beforeTax / 100) * taxPercentage).toFixed(2)))
+    }
+  }, [billType, taxPercentage, beforeTax])
 
+  useEffect(() => {
+    if (billType === 'gst') {
       setInvoiceNumber(String(Number(lastInvoiceGstNumber) + 1))
     } else {
       setInvoiceNumber(String(Number(lastInvoiceDcNumber) + 1))
     }
-  }, [billType, taxPercentage, beforeTax])
+  }, [billType])
 
   useEffect(() => {
     let taxAmount = 0;

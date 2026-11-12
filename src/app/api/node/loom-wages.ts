@@ -6,7 +6,9 @@ import {
     deleteLoomWagePayment,
     updateLoomDefaultWageRate,
     updateSizingWarpWageRate,
-    updateLoomOpeningBalance
+    updateLoomOpeningBalance,
+    getUnpaidLoomWageBills,
+    processLoomWageLumpSumPaymentRepo
 } from "@/server/repositories/loomWagesRepositories";
 
 export const fetchLoomWagesConsolidated = async (
@@ -24,6 +26,33 @@ export const fetchLoomWagesConsolidated = async (
     } catch (err) {
         console.error("fetchLoomWagesConsolidated Error:", err);
         return [];
+    }
+};
+
+export const fetchUnpaidLoomWageBills = async (loomId: number) => {
+    try {
+        const rows = await getUnpaidLoomWageBills(Number(loomId));
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchUnpaidLoomWageBills Error:", err);
+        return [];
+    }
+};
+
+export const processLoomWageLumpSumPayment = async (data: {
+    loomId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    note?: string;
+    selectedWeekStartDates?: string[];
+}) => {
+    try {
+        const res = await processLoomWageLumpSumPaymentRepo(data);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err: any) {
+        console.error("processLoomWageLumpSumPayment Error:", err);
+        return { success: false, message: err?.message || "Failed to process loom-wage lump-sum payment" };
     }
 };
 

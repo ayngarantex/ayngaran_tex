@@ -53,3 +53,23 @@ export const getYarnPaymentCount = async (
 ) => {
     return await repo.getYarnPaymentCount(search, startDate, endDate);
 };
+
+export const getLoomPayments = async (
+    search: string | null,
+    page: number | null,
+    limit: number | null,
+    startDate: string | null,
+    endDate: string | null,
+    categoryFilter?: string | null
+) => {
+    return await repo.getLoomPayments(search, page, limit, startDate, endDate, categoryFilter);
+};
+
+export const getLoomPaymentCount = async (
+    search: string | null,
+    startDate: string | null,
+    endDate: string | null,
+    categoryFilter?: string | null
+) => {
+    return await repo.getLoomPaymentCount(search, startDate, endDate, categoryFilter);
+};

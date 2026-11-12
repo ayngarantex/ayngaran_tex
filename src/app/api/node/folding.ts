@@ -11,7 +11,9 @@ import {
     addFoldingPayment,
     deleteFoldingPayment,
     updateFoldingLoomWageRate,
-    updateFoldingLoomOpeningBalance
+    updateFoldingLoomOpeningBalance,
+    getUnpaidFoldingBills,
+    processFoldingLumpSumPaymentRepo
 } from "@/server/repositories/foldingRepositories";
 import { pageLimit } from "@/app/lib/utils";
 
@@ -112,6 +114,33 @@ export const fetchFoldingWagesConsolidated = async (
     } catch (err) {
         console.error("fetchFoldingWagesConsolidated Error:", err);
         return [];
+    }
+};
+
+export const fetchUnpaidFoldingBills = async (loomId: number) => {
+    try {
+        const rows = await getUnpaidFoldingBills(Number(loomId));
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchUnpaidFoldingBills Error:", err);
+        return [];
+    }
+};
+
+export const processFoldingLumpSumPayment = async (data: {
+    loomId: number;
+    amount: number;
+    paymentDate: string;
+    paymentType: string;
+    note?: string;
+    selectedWeekStartDates?: string[];
+}) => {
+    try {
+        const res = await processFoldingLumpSumPaymentRepo(data);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err: any) {
+        console.error("processFoldingLumpSumPayment Error:", err);
+        return { success: false, message: err?.message || "Failed to process folding lump-sum payment" };
     }
 };
 

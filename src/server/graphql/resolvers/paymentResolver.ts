@@ -20,5 +20,11 @@ export const paymentResolver = {
         yarnPaymentCount: async (_: unknown, { search, startDate, endDate }: any) => {
             return await paymentService.getYarnPaymentCount(search, startDate, endDate);
         },
+        loomPayments: async (_: unknown, { search, page, limit, startDate, endDate, category }: any) => {
+            return await paymentService.getLoomPayments(search, page, limit, startDate, endDate, category);
+        },
+        loomPaymentCount: async (_: unknown, { search, startDate, endDate, category }: any) => {
+            return await paymentService.getLoomPaymentCount(search, startDate, endDate, category);
+        },
     },
 };

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { processUnifiedSupplierLumpSumPayment } from '@/app/api/node/supplier';
-import { BanknotesIcon, XMarkIcon, SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useMemo } from 'react';
+import { fetchUnpaidSupplierBills, processUnifiedSupplierLumpSumPayment } from '@/app/api/node/supplier';
+import { BanknotesIcon, XMarkIcon, SparklesIcon, CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { formatCurrency, formatDateNew, currentDate } from '@/app/lib/utils';
 
 const paymentTypes = ["Bank", "Gpay", "Cash", "PhonePay", "Check"];
@@ -38,6 +38,12 @@ export default function SupplierLumpSumPaymentModal({
   const [category, setCategory] = useState<"purchases" | "yarn" | "sizing">(
     getCategoryFromType(supplierType, initialCategory)
   );
+
+  // Unpaid bills state
+  const [unpaidBills, setUnpaidBills] = useState<any[]>([]);
+  const [loadingBills, setLoadingBills] = useState(false);
+  const [selectedBillIds, setSelectedBillIds] = useState<number[]>([]);
+
   const [amount, setAmount] = useState<string>('');
   const [paymentDate, setPaymentDate] = useState<string>(currentDate());
   const [paymentType, setPaymentType] = useState<string>('Bank');
@@ -58,6 +64,41 @@ export default function SupplierLumpSumPaymentModal({
     }
   }, [selectedSupplierId, suppliers, initialCategory]);
 
+  // Load unpaid bills whenever supplier, category, billType, or isOpen changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const supId = Number(selectedSupplierId || initialSupplierId);
+    if (supId > 0) {
+      setLoadingBills(true);
+      setErrorMsg('');
+      fetchUnpaidSupplierBills(supId, category, billType || null)
+        .then((bills) => {
+          setUnpaidBills(bills || []);
+          setSelectedBillIds([]);
+        })
+        .catch((err) => {
+          console.error("Failed to load unpaid supplier bills:", err);
+          setErrorMsg("Failed to load unpaid bills for this supplier.");
+        })
+        .finally(() => {
+          setLoadingBills(false);
+        });
+    } else {
+      setUnpaidBills([]);
+      setSelectedBillIds([]);
+    }
+  }, [selectedSupplierId, initialSupplierId, category, billType, isOpen]);
+
+  // Calculate selected bills total due
+  const selectedTotalDue = useMemo(() => {
+    if (selectedBillIds.length === 0) return 0;
+    const set = new Set(selectedBillIds);
+    return unpaidBills
+      .filter((b) => set.has(Number(b.BillId || b.PurchaseId || b.YarnId || b.SizingId)))
+      .reduce((sum, b) => sum + (Number(b.BalanceDue) || 0), 0);
+  }, [selectedBillIds, unpaidBills]);
+
   const handleOpen = () => {
     setIsOpen(true);
     setResultSummary(null);
@@ -73,6 +114,22 @@ export default function SupplierLumpSumPaymentModal({
     setIsOpen(false);
     if (resultSummary?.success) {
       window.location.reload();
+    }
+  };
+
+  const handleToggleBill = (billId: number) => {
+    setSelectedBillIds((prev) =>
+      prev.includes(billId)
+        ? prev.filter((id) => id !== billId)
+        : [...prev, billId]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selectedBillIds.length === unpaidBills.length) {
+      setSelectedBillIds([]);
+    } else {
+      setSelectedBillIds(unpaidBills.map((b) => Number(b.BillId || b.PurchaseId || b.YarnId || b.SizingId)));
     }
   };
 
@@ -102,7 +159,8 @@ export default function SupplierLumpSumPaymentModal({
         paymentType,
         paymentTo,
         billType: billType || null,
-        category
+        category,
+        selectedBillIds: selectedBillIds.length > 0 ? selectedBillIds : undefined
       });
 
       if (res && res.success) {
@@ -132,7 +190,7 @@ export default function SupplierLumpSumPaymentModal({
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
 
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-emerald-50/60 rounded-t-2xl">
@@ -142,7 +200,9 @@ export default function SupplierLumpSumPaymentModal({
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-800">Supplier Lump-Sum Payment</h2>
-                  <p className="text-xs text-slate-500">Auto-allocates payment bill-by-bill (Oldest First)</p>
+                  <p className="text-xs text-slate-500">
+                    Select bills to pay or auto-allocate payment across unpaid bills (Oldest First)
+                  </p>
                 </div>
               </div>
               <button
@@ -155,18 +215,20 @@ export default function SupplierLumpSumPaymentModal({
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto space-y-4">
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
 
               {resultSummary ? (
                 <div className="space-y-4 bg-emerald-50/50 p-4 rounded-xl border border-emerald-200">
                   <div className="flex items-center gap-2 text-emerald-800 font-bold text-base">
-                    <CheckCircleIcon className="w-6 h-6 text-emerald-600" />
-                    Successfully Allocated ₹{formatCurrency(resultSummary.totalAllocated)} across {resultSummary.allocatedCount} {category.toUpperCase()} Bill(s)!
+                    <CheckCircleIcon className="w-6 h-6 text-emerald-600 shrink-0" />
+                    <span>
+                      Successfully Allocated (FormatCurrency(resultSummary.totalAllocated)} across {resultSummary.allocatedCount} {category.toUpperCase()} Bill(s)!
+                    </span>
                   </div>
 
                   {resultSummary.excessRemaining > 0 && (
                     <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm font-semibold">
-                      Excess Remaining Unallocated: ₹{formatCurrency(resultSummary.excessRemaining)}
+                      Excess Remaining Unallocated: (FormatCurrency(resultSummary.excessRemaining)}
                     </div>
                   )}
 
@@ -197,7 +259,7 @@ export default function SupplierLumpSumPaymentModal({
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form id="supplierLumpSumForm" onSubmit={handleSubmit} className="space-y-4">
                   {errorMsg && (
                     <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
                       {errorMsg}
@@ -248,6 +310,135 @@ export default function SupplierLumpSumPaymentModal({
                     </div>
                   </div>
 
+                  {/* Outstanding Bills Table with Checkboxes */}
+                  {Number(selectedSupplierId || initialSupplierId) > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          Outstanding {category.toUpperCase()} Bills ({unpaidBills.length})
+                        </span>
+                        {unpaidBills.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleToggleSelectAll}
+                            className="text-xs text-emerald-600 hover:text-emerald-800 font-semibold cursor-pointer"
+                          >
+                            {selectedBillIds.length === unpaidBills.length
+                              ? 'Deselect All'
+                              : 'Select All'}
+                          </button>
+                        )}
+                      </div>
+
+                      {loadingBills ? (
+                        <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
+                          Loading pending bills...
+                        </div>
+                      ) : unpaidBills.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200 font-medium">
+                          ✓ All {category} bills for this supplier are fully paid!
+                        </div>
+                      ) : (
+                        <div className="border border-slate-200 rounded-xl overflow-hidden max-h-56 overflow-y-auto">
+                          <table className="min-w-full divide-y divide-slate-200 text-xs">
+                            <thead className="bg-slate-100 text-slate-600 font-semibold sticky top-0 z-10">
+                              <tr>
+                                <th className="w-10 px-3 py-2 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedBillIds.length === unpaidBills.length && unpaidBills.length > 0}
+                                    onChange={handleToggleSelectAll}
+                                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                  />
+                                </th>
+                                <th className="px-3 py-2 text-left">Bill #</th>
+                                <th className="px-3 py-2 text-left">Date</th>
+                                <th className="px-3 py-2 text-left">Type</th>
+                                <th className="px-3 py-2 text-right">Bill Amount</th>
+                                <th className="px-3 py-2 text-right text-emerald-700">Paid</th>
+                                <th className="px-3 py-2 text-right text-rose-700 font-black">Due (₹)</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 bg-white">
+                              {unpaidBills.map((b) => {
+                                const billId = Number(b.BillId || b.PurchaseId || b.YarnId || b.SizingId);
+                                const isChecked = selectedBillIds.includes(billId);
+                                return (
+                                  <tr
+                                    key={billId}
+                                    onClick={() => handleToggleBill(billId)}
+                                    className={`hover:bg-emerald-50/50 cursor-pointer transition-colors ${isChecked ? 'bg-emerald-50/80 font-semibold' : ''
+                                      }`}
+                                  >
+                                    <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => handleToggleBill(billId)}
+                                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                      />
+                                    </td>
+                                    <td className="px-3 py-2 font-medium text-slate-800 whitespace-nowrap">
+                                      #{b.InvoiceNumber || billId}
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-600 whitespace-nowrap">
+                                      {formatDateNew(b.InvoiceDate)}
+                                    </td>
+                                    <td className="px-3 py-2 whitespace-nowrap">
+                                      <span className={`px-2 py-0.5 text-[11px] font-bold rounded-full ${(b.BillType || '').toLowerCase() === 'gst'
+                                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                          : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                        }`}>
+                                        {(b.BillType || 'Standard').toUpperCase()}
+                                      </span>
+                                    </td>
+                                    <td className="px-3 py-2 text-right text-slate-600 whitespace-nowrap">
+                                      (FormatCurrency(b.InvoiceAmount)}
+                                    </td>
+                                    <td className="px-3 py-2 text-right text-emerald-700 whitespace-nowrap">
+                                      (FormatCurrency(b.PaidAmount)}
+                                    </td>
+                                    <td className="px-3 py-2 text-right font-black text-rose-700 whitespace-nowrap">
+                                      (FormatCurrency(b.BalanceDue)}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                      {/* Selected Bills Total Banner */}
+                      {selectedBillIds.length > 0 ? (
+                        <div className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900">
+                          <div>
+                            <div className="text-xs font-bold text-emerald-800">
+                              Selected {selectedBillIds.length} Bill(s) Total Due:
+                            </div>
+                            <div className="text-lg font-black text-emerald-700">
+                              ₹ {formatCurrency(selectedTotalDue)}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setAmount(String(selectedTotalDue.toFixed(2)))}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm cursor-pointer transition-colors"
+                          >
+                            Use Selected Total
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-center gap-2">
+                          <InformationCircleIcon className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>
+                            <strong>No bills selected:</strong> Lump-sum amount will automatically be allocated across unpaid bills (Oldest First).
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Amount */}
                     <div>
@@ -257,7 +448,7 @@ export default function SupplierLumpSumPaymentModal({
                       <input
                         type="number"
                         step="0.01"
-                        min="1"
+                        min="0.01"
                         placeholder="e.g. 230000"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
@@ -330,44 +521,31 @@ export default function SupplierLumpSumPaymentModal({
                       </select>
                     </div>
                   </div>
-
-                  {/* Info notice */}
-                  <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-800">
-                    💡 <span className="font-bold">Auto-Allocation logic:</span> The entered payment will be applied starting from the oldest unpaid {category} bill (`InvoiceDate ASC`). A separate entry will be created in <code className="font-semibold">{category === 'sizing' ? 'sizing_payment_details' : category === 'yarn' ? 'yarn_payment_details' : 'purchase_payment_details'}</code> for each bill automatically.
-                  </div>
-
-                  {/* Footer Action */}
-                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={handleClose}
-                      className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {loading ? 'Processing...' : 'Auto-Allocate & Save Payment'}
-                    </button>
-                  </div>
                 </form>
               )}
             </div>
 
-            {resultSummary && (
-              <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-2xl flex justify-end">
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/80 rounded-b-2xl">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                {resultSummary ? 'Close & Refresh' : 'Cancel'}
+              </button>
+
+              {!resultSummary && (
                 <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors"
+                  type="submit"
+                  form="supplierLumpSumForm"
+                  disabled={loading}
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center gap-2"
                 >
-                  Done & Refresh
+                  {loading ? 'Processing...' : '⚡ Auto-Allocate & Save Payment'}
                 </button>
-              </div>
-            )}
+              )}
+            </div>
 
           </div>
         </div>
