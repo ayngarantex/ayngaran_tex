@@ -1,7 +1,7 @@
 import db from '../config/db';
-import { processSupplierLumpSumPaymentRepo } from './purchaseRepositories';
-import { processYarnLumpSumPaymentRepo } from './yarnRepositories';
-import { processSizingLumpSumPaymentRepo } from './sizingRepositories';
+import { processSupplierLumpSumPaymentRepo, getUnpaidPurchases } from './purchaseRepositories';
+import { processYarnLumpSumPaymentRepo, getUnpaidYarns } from './yarnRepositories';
+import { processSizingLumpSumPaymentRepo, getUnpaidSizings } from './sizingRepositories';
 
 export const getSuppliers = async (
     search: string | null,
@@ -292,6 +292,29 @@ export const getPurchasePaymentsBySupplierId = async (
     return rows;
 };
 
+export const getUnpaidSupplierBills = async (
+    supplierId: number,
+    category?: 'purchases' | 'yarn' | 'sizing' | null,
+    billType?: string | null
+) => {
+    const supplier = await getSupplierById(Number(supplierId));
+    const supType = category || (supplier ? supplier.Type : null);
+
+    if (supType === 'Sizing' || supType === 'sizing') {
+        return getUnpaidSizings(Number(supplierId), billType);
+    } else if (supType === 'Purchase' || supType === 'purchases') {
+        return getUnpaidPurchases(Number(supplierId), billType);
+    } else if (supType === 'Yarn' || supType === 'yarn') {
+        return getUnpaidYarns(Number(supplierId), billType);
+    } else {
+        const pur = await getUnpaidPurchases(Number(supplierId), billType);
+        if (pur.length > 0) return pur;
+        const yrn = await getUnpaidYarns(Number(supplierId), billType);
+        if (yrn.length > 0) return yrn;
+        return getUnpaidSizings(Number(supplierId), billType);
+    }
+};
+
 export const processUnifiedSupplierLumpSumPaymentRepo = async (data: {
     supplierId: number;
     amount: number;
@@ -300,6 +323,7 @@ export const processUnifiedSupplierLumpSumPaymentRepo = async (data: {
     paymentTo: string;
     billType?: string | null;
     category?: 'purchases' | 'yarn' | 'sizing' | null;
+    selectedBillIds?: number[];
 }) => {
     const supplier = await getSupplierById(Number(data.supplierId));
     const supType = data.category || (supplier ? supplier.Type : null);

@@ -18,6 +18,8 @@ interface WeeklyProductSummaryProps {
     totalGivenCount: number;
     totalReturnCount: number;
     totalFoldedGivenCount: number;
+    totalShortageGivenCount: number;
+    totalExcessGivenCount: number;
     netPiecesRemaining: number;
 }
 
@@ -27,6 +29,8 @@ export default function WeeklyProductSummary({
     totalGivenCount,
     totalReturnCount,
     totalFoldedGivenCount,
+    totalShortageGivenCount,
+    totalExcessGivenCount,
     netPiecesRemaining
 }: WeeklyProductSummaryProps) {
     const [productViewMode, setProductViewMode] = useState<'table' | 'cards'>('table');

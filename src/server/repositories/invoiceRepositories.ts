@@ -706,6 +706,47 @@ export const getInvoiceDetailsForPeriod = async (startDate: string, endDate: str
     }
 };
 
+export const getUnpaidInvoices = async (customerId: number, billType?: string | null) => {
+    let query = `
+        SELECT I.InvoiceId, I.InvoiceNumber, I.InvoiceDate, I.InvoiceAmount, I.ReceivedAmount, I.BillType, I.InvoiceType, I.Tds
+        FROM invoice I
+        WHERE I.CustomerId = ?
+          AND (I.IsCancel IS NULL OR I.IsCancel = 0)
+          AND (I.InvoiceType IS NULL OR I.InvoiceType != 'Credit Note')
+          AND ((I.InvoiceAmount - COALESCE(I.Tds, 0)) - I.ReceivedAmount) > 0.01
+    `;
+    const params: any[] = [Number(customerId)];
+
+    if (billType) {
+        query += ` AND I.BillType = ?`;
+        params.push(billType);
+    }
+
+    query += ` ORDER BY I.InvoiceDate ASC, I.InvoiceId ASC`;
+
+    const [invoices]: any = await db.query(query, params);
+
+    return (invoices || []).map((inv: any) => {
+        const invAmount = Number(inv.InvoiceAmount || 0);
+        const tds = Number(inv.Tds || 0);
+        const netAmount = Number((invAmount - tds).toFixed(2));
+        const receivedAmount = Number(inv.ReceivedAmount || 0);
+        const balanceDue = Number(Math.max(0, netAmount - receivedAmount).toFixed(2));
+        return {
+            InvoiceId: inv.InvoiceId,
+            InvoiceNumber: inv.InvoiceNumber,
+            InvoiceDate: inv.InvoiceDate,
+            InvoiceAmount: invAmount,
+            Tds: tds,
+            NetAmount: netAmount,
+            ReceivedAmount: receivedAmount,
+            BalanceDue: balanceDue,
+            BillType: inv.BillType,
+            InvoiceType: inv.InvoiceType
+        };
+    });
+};
+
 export const processLumpSumPaymentRepo = async (data: {
     customerId: number;
     amount: number;
@@ -713,6 +754,7 @@ export const processLumpSumPaymentRepo = async (data: {
     paymentType: string;
     paymentTo: string;
     billType?: string | null;
+    selectedInvoiceIds?: number[];
 }) => {
     const conn = await db.getConnection();
     try {
@@ -755,10 +797,23 @@ export const processLumpSumPaymentRepo = async (data: {
             };
         }
 
+        let targetInvoices = invoices;
+        if (data.selectedInvoiceIds && data.selectedInvoiceIds.length > 0) {
+            const selectedSet = new Set(data.selectedInvoiceIds.map(Number));
+            targetInvoices = invoices.filter((inv: any) => selectedSet.has(Number(inv.InvoiceId)));
+            if (targetInvoices.length === 0) {
+                await conn.rollback();
+                return {
+                    success: false,
+                    message: "None of the selected invoices have an outstanding balance."
+                };
+            }
+        }
+
         const allocatedInvoices: any[] = [];
         let totalAllocated = 0;
 
-        for (const inv of invoices) {
+        for (const inv of targetInvoices) {
             if (lumpSumRemaining <= 0.001) break;
 
             const invAmount = Number(inv.InvoiceAmount || 0);

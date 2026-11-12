@@ -440,6 +440,42 @@ export const updateYarnPaymentsRepo = async (yarnId: any, payments: any[]) => {
     }
 };
 
+export const getUnpaidYarns = async (supplierId: number, billType?: string | null) => {
+    let query = `
+        SELECT Y.YarnId, Y.InvoiceNumber, Y.InvoiceDate, Y.InvoiceAmount, Y.PaidAmount, Y.BillType
+        FROM yarns Y
+        WHERE Y.SupplierId = ?
+          AND (Y.InvoiceAmount - Y.PaidAmount) > 0.01
+    `;
+    const params: any[] = [Number(supplierId)];
+
+    if (billType) {
+        query += ` AND Y.BillType = ?`;
+        params.push(billType);
+    }
+
+    query += ` ORDER BY Y.InvoiceDate ASC, Y.YarnId ASC`;
+
+    const [rows]: any = await db.query(query, params);
+
+    return (rows || []).map((yrn: any) => {
+        const invAmount = Number(yrn.InvoiceAmount || 0);
+        const paidAmount = Number(yrn.PaidAmount || 0);
+        const balanceDue = Number(Math.max(0, invAmount - paidAmount).toFixed(2));
+        return {
+            BillId: yrn.YarnId,
+            YarnId: yrn.YarnId,
+            InvoiceNumber: yrn.InvoiceNumber,
+            InvoiceDate: yrn.InvoiceDate,
+            InvoiceAmount: invAmount,
+            PaidAmount: paidAmount,
+            BalanceDue: balanceDue,
+            BillType: yrn.BillType,
+            Category: 'yarn'
+        };
+    });
+};
+
 export const processYarnLumpSumPaymentRepo = async (data: {
     supplierId: number;
     amount: number;
@@ -447,6 +483,8 @@ export const processYarnLumpSumPaymentRepo = async (data: {
     paymentType: string;
     paymentTo: string;
     billType?: string | null;
+    selectedYarnIds?: number[];
+    selectedBillIds?: number[];
 }) => {
     const conn = await db.getConnection();
     try {
@@ -487,10 +525,24 @@ export const processYarnLumpSumPaymentRepo = async (data: {
             };
         }
 
+        let targetYarns = yarns;
+        const selectedIds = data.selectedYarnIds || data.selectedBillIds;
+        if (selectedIds && selectedIds.length > 0) {
+            const selectedSet = new Set(selectedIds.map(Number));
+            targetYarns = yarns.filter((y: any) => selectedSet.has(Number(y.YarnId)));
+            if (targetYarns.length === 0) {
+                await conn.rollback();
+                return {
+                    success: false,
+                    message: "None of the selected yarn bills have an outstanding balance."
+                };
+            }
+        }
+
         const allocatedYarns: any[] = [];
         let totalAllocated = 0;
 
-        for (const yrn of yarns) {
+        for (const yrn of targetYarns) {
             if (lumpSumRemaining <= 0.001) break;
 
             const invAmount = Number(yrn.InvoiceAmount || 0);

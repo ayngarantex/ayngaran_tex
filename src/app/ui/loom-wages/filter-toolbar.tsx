@@ -12,6 +12,7 @@ import {
     saveLoomDefaultRate,
     saveLoomOpeningBalance
 } from '@/app/api/node/loom-wages';
+import LoomLumpSumPaymentModal from './loom-lump-sum-payment-modal';
 
 interface FilterToolbarProps {
     searchQuery: string;
@@ -134,6 +135,16 @@ export default function FilterToolbar({
                         />
                     </div>
                 </div>
+
+                {/* Lump-Sum Payment Trigger */}
+                <div className="flex items-center gap-2">
+                    <LoomLumpSumPaymentModal
+                        looms={looms}
+                        initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}
+                        initialLoomName={selectedLoom?.LoomName}
+                        onSuccess={onReload}
+                    />
+                </div>
             </div>
 
             {/* Loom Common Wage Rate & Opening Balance Quick Editor if Loom Selected */}
@@ -154,14 +165,14 @@ export default function FilterToolbar({
                                 />
                                 <button
                                     onClick={() => handleSaveLoomRate(selectedLoom.LoomId)}
-                                    className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
+                                    className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
                                     title="Save Rate"
                                 >
                                     <CheckIcon className="h-4 w-4" />
                                 </button>
                                 <button
                                     onClick={() => setEditingLoomId(null)}
-                                    className="p-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300"
+                                    className="p-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 cursor-pointer"
                                     title="Cancel"
                                 >
                                     <XMarkIcon className="h-4 w-4" />
@@ -177,7 +188,7 @@ export default function FilterToolbar({
                                         setEditingLoomId(selectedLoom.LoomId);
                                         setTempLoomRate(String(selectedLoom.WageRate || 0));
                                     }}
-                                    className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-bold text-xs"
+                                    className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-bold text-xs cursor-pointer"
                                 >
                                     <PencilSquareIcon className="h-3.5 w-3.5" />
                                     Edit Rate
@@ -201,14 +212,14 @@ export default function FilterToolbar({
                                 />
                                 <button
                                     onClick={() => handleSaveOpeningBalance(selectedLoom.LoomId)}
-                                    className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
+                                    className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
                                     title="Save Opening Balance"
                                 >
                                     <CheckIcon className="h-4 w-4" />
                                 </button>
                                 <button
                                     onClick={() => setEditingOpeningBalanceLoomId(null)}
-                                    className="p-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300"
+                                    className="p-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 cursor-pointer"
                                     title="Cancel"
                                 >
                                     <XMarkIcon className="h-4 w-4" />
@@ -224,7 +235,7 @@ export default function FilterToolbar({
                                         setEditingOpeningBalanceLoomId(selectedLoom.LoomId);
                                         setTempOpeningBalance(String(selectedLoom.OpeningBalance || 0));
                                     }}
-                                    className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-bold text-xs"
+                                    className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-bold text-xs cursor-pointer"
                                 >
                                     <PencilSquareIcon className="h-3.5 w-3.5" />
                                     Edit Balance
@@ -237,4 +248,3 @@ export default function FilterToolbar({
         </div>
     );
 }
-

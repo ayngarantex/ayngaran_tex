@@ -1,7 +1,7 @@
 "use server";
 
 import { pageLimit } from "@/app/lib/utils";
-import { getInvoices, getInvoicesCount, getInvoicesTotal, getInvoice, getLastInvoiceNumber, createInvoice as createInvoiceRepo, updateInvoice as updateInvoiceRepo, updateInvoicePaymentsRepo, processLumpSumPaymentRepo, deleteInvoice as deleteInvoiceRepo, getCustomerInvoices, getCustomerPayments, getInvoicesForPeriod, getInvoiceDetailsForPeriod } from "@/server/repositories/invoiceRepositories";
+import { getInvoices, getInvoicesCount, getInvoicesTotal, getInvoice, getLastInvoiceNumber, createInvoice as createInvoiceRepo, updateInvoice as updateInvoiceRepo, updateInvoicePaymentsRepo, getUnpaidInvoices, processLumpSumPaymentRepo, deleteInvoice as deleteInvoiceRepo, getCustomerInvoices, getCustomerPayments, getInvoicesForPeriod, getInvoiceDetailsForPeriod } from "@/server/repositories/invoiceRepositories";
 
 export const fetchInvoices = async (
     query: string,
@@ -120,6 +120,16 @@ export const updateInvoicePayments = async (invoiceId: number, payments: any[]) 
     return JSON.parse(JSON.stringify(res));
 };
 
+export const fetchUnpaidInvoices = async (customerId: number, billType?: string | null) => {
+    try {
+        const rows = await getUnpaidInvoices(Number(customerId), billType);
+        return JSON.parse(JSON.stringify(rows));
+    } catch (err) {
+        console.error("fetchUnpaidInvoices Error:", err);
+        return [];
+    }
+};
+
 export const processLumpSumPayment = async (data: {
     customerId: number;
     amount: number;
@@ -127,9 +137,15 @@ export const processLumpSumPayment = async (data: {
     paymentType: string;
     paymentTo: string;
     billType?: string | null;
+    selectedInvoiceIds?: number[];
 }) => {
-    const res = await processLumpSumPaymentRepo(data);
-    return JSON.parse(JSON.stringify(res));
+    try {
+        const res = await processLumpSumPaymentRepo(data);
+        return JSON.parse(JSON.stringify(res));
+    } catch (err: any) {
+        console.error("processLumpSumPayment Error:", err);
+        return { success: false, message: err?.message || "Failed to process customer lump-sum payment" };
+    }
 };
 
 export const deleteInvoice = async (id: number | string) => {

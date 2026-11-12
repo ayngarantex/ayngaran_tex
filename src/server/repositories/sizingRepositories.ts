@@ -557,6 +557,42 @@ export const updateSizingPaymentsRepo = async (sizingId: any, payments: any[]) =
     }
 };
 
+export const getUnpaidSizings = async (supplierId: number, billType?: string | null) => {
+    let query = `
+        SELECT S.SizingId, S.InvoiceNumber, S.InvoiceDate, S.InvoiceAmount, S.ReceivedAmount, S.BillType
+        FROM sizing S
+        WHERE S.SupplierId = ?
+          AND (S.InvoiceAmount - S.ReceivedAmount) > 0.01
+    `;
+    const params: any[] = [Number(supplierId)];
+
+    if (billType) {
+        query += ` AND S.BillType = ?`;
+        params.push(billType);
+    }
+
+    query += ` ORDER BY S.InvoiceDate ASC, S.SizingId ASC`;
+
+    const [rows]: any = await db.query(query, params);
+
+    return (rows || []).map((szg: any) => {
+        const invAmount = Number(szg.InvoiceAmount || 0);
+        const paidAmount = Number(szg.ReceivedAmount || 0);
+        const balanceDue = Number(Math.max(0, invAmount - paidAmount).toFixed(2));
+        return {
+            BillId: szg.SizingId,
+            SizingId: szg.SizingId,
+            InvoiceNumber: szg.InvoiceNumber,
+            InvoiceDate: szg.InvoiceDate,
+            InvoiceAmount: invAmount,
+            PaidAmount: paidAmount,
+            BalanceDue: balanceDue,
+            BillType: szg.BillType,
+            Category: 'sizing'
+        };
+    });
+};
+
 export const processSizingLumpSumPaymentRepo = async (data: {
     supplierId: number;
     amount: number;
@@ -564,6 +600,8 @@ export const processSizingLumpSumPaymentRepo = async (data: {
     paymentType: string;
     paymentTo: string;
     billType?: string | null;
+    selectedSizingIds?: number[];
+    selectedBillIds?: number[];
 }) => {
     const conn = await db.getConnection();
     try {
@@ -604,10 +642,24 @@ export const processSizingLumpSumPaymentRepo = async (data: {
             };
         }
 
+        let targetSizings = sizings;
+        const selectedIds = data.selectedSizingIds || data.selectedBillIds;
+        if (selectedIds && selectedIds.length > 0) {
+            const selectedSet = new Set(selectedIds.map(Number));
+            targetSizings = sizings.filter((s: any) => selectedSet.has(Number(s.SizingId)));
+            if (targetSizings.length === 0) {
+                await conn.rollback();
+                return {
+                    success: false,
+                    message: "None of the selected sizing bills have an outstanding balance."
+                };
+            }
+        }
+
         const allocatedSizings: any[] = [];
         let totalAllocated = 0;
 
-        for (const siz of sizings) {
+        for (const siz of targetSizings) {
             if (lumpSumRemaining <= 0.001) break;
 
             const invAmount = Number(siz.InvoiceAmount || 0);

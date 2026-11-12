@@ -436,6 +436,42 @@ export const updatePurchasePaymentsRepo = async (purchaseId: any, payments: any[
     }
 };
 
+export const getUnpaidPurchases = async (supplierId: number, billType?: string | null) => {
+    let query = `
+        SELECT P.PurchaseId, P.InvoiceNumber, P.InvoiceDate, P.InvoiceAmount, P.PaidAmount, P.BillType
+        FROM purchases P
+        WHERE P.SupplierId = ?
+          AND (P.InvoiceAmount - P.PaidAmount) > 0.01
+    `;
+    const params: any[] = [Number(supplierId)];
+
+    if (billType) {
+        query += ` AND P.BillType = ?`;
+        params.push(billType);
+    }
+
+    query += ` ORDER BY P.InvoiceDate ASC, P.PurchaseId ASC`;
+
+    const [rows]: any = await db.query(query, params);
+
+    return (rows || []).map((pur: any) => {
+        const invAmount = Number(pur.InvoiceAmount || 0);
+        const paidAmount = Number(pur.PaidAmount || 0);
+        const balanceDue = Number(Math.max(0, invAmount - paidAmount).toFixed(2));
+        return {
+            BillId: pur.PurchaseId,
+            PurchaseId: pur.PurchaseId,
+            InvoiceNumber: pur.InvoiceNumber,
+            InvoiceDate: pur.InvoiceDate,
+            InvoiceAmount: invAmount,
+            PaidAmount: paidAmount,
+            BalanceDue: balanceDue,
+            BillType: pur.BillType,
+            Category: 'purchases'
+        };
+    });
+};
+
 export const processSupplierLumpSumPaymentRepo = async (data: {
     supplierId: number;
     amount: number;
@@ -443,6 +479,8 @@ export const processSupplierLumpSumPaymentRepo = async (data: {
     paymentType: string;
     paymentTo: string;
     billType?: string | null;
+    selectedPurchaseIds?: number[];
+    selectedBillIds?: number[];
 }) => {
     const conn = await db.getConnection();
     try {
@@ -483,10 +521,24 @@ export const processSupplierLumpSumPaymentRepo = async (data: {
             };
         }
 
+        let targetPurchases = purchases;
+        const selectedIds = data.selectedPurchaseIds || data.selectedBillIds;
+        if (selectedIds && selectedIds.length > 0) {
+            const selectedSet = new Set(selectedIds.map(Number));
+            targetPurchases = purchases.filter((p: any) => selectedSet.has(Number(p.PurchaseId)));
+            if (targetPurchases.length === 0) {
+                await conn.rollback();
+                return {
+                    success: false,
+                    message: "None of the selected purchase bills have an outstanding balance."
+                };
+            }
+        }
+
         const allocatedPurchases: any[] = [];
         let totalAllocated = 0;
 
-        for (const pur of purchases) {
+        for (const pur of targetPurchases) {
             if (lumpSumRemaining <= 0.001) break;
 
             const invAmount = Number(pur.InvoiceAmount || 0);

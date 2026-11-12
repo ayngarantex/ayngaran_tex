@@ -17,5 +17,8 @@ type Query {
 
   yarnPayments(search: String, page: Int, limit: Int, startDate: String, endDate: String): [Payment]
   yarnPaymentCount(search: String, startDate: String, endDate: String): Int
+
+  loomPayments(search: String, page: Int, limit: Int, startDate: String, endDate: String, category: String): [Payment]
+  loomPaymentCount(search: String, startDate: String, endDate: String, category: String): Int
 }
 `;

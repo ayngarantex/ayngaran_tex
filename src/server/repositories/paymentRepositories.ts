@@ -271,3 +271,200 @@ export const getYarnPaymentCount = async (
     const [rows]: any = await db.query(sql, params);
     return rows[0]?.total || 0;
 };
+
+export const getLoomPayments = async (
+    search: string | null,
+    page: number | null,
+    limit: number | null,
+    startDate: string | null,
+    endDate: string | null,
+    categoryFilter?: string | null
+) => {
+    let sql = `
+        SELECT 
+            DATE_FORMAT(P.PaymentDate, '%Y-%m-%d') AS PaymentDate,
+            P.LoomId,
+            L.LoomName AS CustomerName,
+            P.Category AS BillType,
+            SUM(P.Amount) AS PaymentAmount,
+            COALESCE(
+                NULLIF(GROUP_CONCAT(DISTINCT NULLIF(P.RefInfo, '-') SEPARATOR ', '), ''),
+                '-'
+            ) AS InvoiceNumber,
+            GROUP_CONCAT(DISTINCT NULLIF(P.PaymentType, '') SEPARATOR ', ') AS PaymentModes,
+            GROUP_CONCAT(DISTINCT NULLIF(P.Note, '') SEPARATOR '; ') AS Note
+        FROM (
+            SELECT 
+                'Loom Wage' AS Category,
+                LWP.PaymentId,
+                LWP.LoomId,
+                LWP.PaymentDate,
+                LWP.Amount,
+                LWP.PaymentType,
+                LWP.Note,
+                COALESCE(
+                    NULLIF(LWP.Dc, ''),
+                    CASE 
+                        WHEN LWP.WeekStartDate IS NOT NULL 
+                        THEN CONCAT('Week: ', DATE_FORMAT(LWP.WeekStartDate, '%d-%m-%Y'))
+                        ELSE NULL 
+                    END,
+                    NULLIF(LWP.Note, ''),
+                    '-'
+                ) AS RefInfo
+            FROM loom_wages_payments LWP
+
+            UNION ALL
+
+            SELECT 
+                'Folding' AS Category,
+                FP.PaymentId,
+                FP.LoomId,
+                FP.PaymentDate,
+                FP.Amount,
+                FP.PaymentType,
+                FP.Note,
+                COALESCE(
+                    CASE 
+                        WHEN FP.WeekStartDate IS NOT NULL 
+                        THEN CONCAT('Week: ', DATE_FORMAT(FP.WeekStartDate, '%d-%m-%Y'))
+                        ELSE NULL 
+                    END,
+                    NULLIF(FP.Note, ''),
+                    '-'
+                ) AS RefInfo
+            FROM folding_payments FP
+        ) P
+        JOIN loom_details L ON P.LoomId = L.LoomId
+    `;
+
+    let params: any[] = [];
+    let conditions: string[] = [];
+
+    if (categoryFilter && categoryFilter !== '') {
+        conditions.push(`P.Category = ?`);
+        params.push(categoryFilter);
+    }
+
+    if (search != null && search != '') {
+        conditions.push(`(
+            LOWER(L.LoomName) LIKE ?
+            OR LOWER(P.RefInfo) LIKE ?
+            OR LOWER(P.Note) LIKE ?
+            OR LOWER(P.PaymentType) LIKE ?
+            OR LOWER(P.Category) LIKE ?
+        )`);
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (startDate && endDate) {
+        conditions.push(`P.PaymentDate >= ? AND P.PaymentDate <= ?`);
+        params.push(startDate, endDate);
+    }
+
+    if (conditions.length > 0) {
+        sql += ` WHERE ` + conditions.join(" AND ");
+    }
+
+    sql += ' GROUP BY P.PaymentDate, P.LoomId, P.Category ORDER BY P.PaymentDate DESC, L.LoomName ASC, P.Category ASC';
+
+    if (page && limit) {
+        sql += " LIMIT ? OFFSET ?";
+        params.push(Number(limit));
+        params.push((page - 1) * limit);
+    }
+
+    const [rows]: any = await db.query(sql, params);
+    return rows;
+};
+
+export const getLoomPaymentCount = async (
+    search: string | null,
+    startDate: string | null,
+    endDate: string | null,
+    categoryFilter?: string | null
+) => {
+    let sql = `
+        SELECT COUNT(*) AS total FROM (
+            SELECT 
+                P.PaymentDate,
+                P.LoomId,
+                P.Category
+            FROM (
+                SELECT 
+                    'Loom Wage' AS Category,
+                    LWP.PaymentId,
+                    LWP.LoomId,
+                    LWP.PaymentDate,
+                    LWP.Amount,
+                    LWP.PaymentType,
+                    LWP.Note,
+                    COALESCE(
+                        NULLIF(LWP.Dc, ''),
+                        CASE 
+                            WHEN LWP.WeekStartDate IS NOT NULL 
+                            THEN CONCAT('Week: ', DATE_FORMAT(LWP.WeekStartDate, '%d-%m-%Y'))
+                            ELSE NULL 
+                        END,
+                        NULLIF(LWP.Note, ''),
+                        '-'
+                    ) AS RefInfo
+                FROM loom_wages_payments LWP
+
+                UNION ALL
+
+                SELECT 
+                    'Folding' AS Category,
+                    FP.PaymentId,
+                    FP.LoomId,
+                    FP.PaymentDate,
+                    FP.Amount,
+                    FP.PaymentType,
+                    FP.Note,
+                    COALESCE(
+                        CASE 
+                            WHEN FP.WeekStartDate IS NOT NULL 
+                            THEN CONCAT('Week: ', DATE_FORMAT(FP.WeekStartDate, '%d-%m-%Y'))
+                            ELSE NULL 
+                        END,
+                        NULLIF(FP.Note, ''),
+                        '-'
+                    ) AS RefInfo
+                FROM folding_payments FP
+            ) P
+            JOIN loom_details L ON P.LoomId = L.LoomId
+    `;
+
+    let params: any[] = [];
+    let conditions: string[] = [];
+
+    if (categoryFilter && categoryFilter !== '') {
+        conditions.push(`P.Category = ?`);
+        params.push(categoryFilter);
+    }
+
+    if (search != null && search != '') {
+        conditions.push(`(
+            LOWER(L.LoomName) LIKE ?
+            OR LOWER(P.RefInfo) LIKE ?
+            OR LOWER(P.Note) LIKE ?
+            OR LOWER(P.PaymentType) LIKE ?
+            OR LOWER(P.Category) LIKE ?
+        )`);
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (startDate && endDate) {
+        conditions.push(`P.PaymentDate >= ? AND P.PaymentDate <= ?`);
+        params.push(startDate, endDate);
+    }
+
+    if (conditions.length > 0) {
+        sql += ` WHERE ` + conditions.join(" AND ");
+    }
+
+    sql += ' GROUP BY P.PaymentDate, P.LoomId, P.Category) AS Sub';
+
+    const [rows]: any = await db.query(sql, params);
+    return rows[0]?.total || 0;
+};

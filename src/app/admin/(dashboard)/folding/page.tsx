@@ -5,6 +5,7 @@ import Search from "@/app/ui/search";
 import Pagination from "@/app/lib/pagination";
 import { fetchFoldingCount, fetchFoldingWagesConsolidated } from "@/app/api/node/folding";
 import { fetchLooms } from "@/app/api/node/looms";
+import FoldingLumpSumPaymentModal from "@/app/ui/folding/folding-lump-sum-payment-modal";
 import { pageLimit } from "@/app/lib/utils";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -41,38 +42,44 @@ export default async function Page(props: {
             Weekly consolidation by folder/loom with piece tracking (Given/Return), folding wages &amp; payments
           </p>
         </div>
-        <div className="flex">
-          <div className="flex items-center gap-2.5 mr-2">
-            <CreateFolding type="Given" looms={looms || []} />
-          </div>
-          <div className="flex items-center gap-2.5">
-            <CreateFolding type="Return" looms={looms || []} />
-          </div>
+        <div className="flex items-center gap-2.5">
+          <FoldingLumpSumPaymentModal looms={looms || []} />
+          <CreateFolding type="Given" looms={looms || []} />
+          <CreateFolding type="Return" looms={looms || []} />
         </div>
       </div>
 
       {/* View Switcher Tabs */}
-      <div className="flex items-center gap-2 mt-4 border-b border-slate-200 pb-1">
-        <Link
-          href={`/admin/folding?view=weekly${query ? `&query=${query}` : ''}${loomId ? `&loomId=${loomId}` : ''}${startDate ? `&startDate=${startDate}` : ''}`}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${currentView !== 'entries'
-            ? 'bg-emerald-600 text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-        >
-          <CalendarDaysIcon className="h-4 w-4" />
-          Weekly Reconciliation ({weeklyRecords.length})
-        </Link>
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-4 border-b border-slate-200 pb-1">
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/folding?view=weekly${query ? `&query=${query}` : ''}${loomId ? `&loomId=${loomId}` : ''}${startDate ? `&startDate=${startDate}` : ''}`}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${currentView !== 'entries'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+          >
+            <CalendarDaysIcon className="h-4 w-4" />
+            Weekly Reconciliation ({weeklyRecords.length})
+          </Link>
+
+          <Link
+            href={`/admin/folding?view=entries${query ? `&query=${query}` : ''}`}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${currentView === 'entries'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+          >
+            <TableCellsIcon className="h-4 w-4" />
+            All DC Entries ({totalCount})
+          </Link>
+        </div>
 
         <Link
-          href={`/admin/folding?view=entries${query ? `&query=${query}` : ''}`}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${currentView === 'entries'
-            ? 'bg-emerald-600 text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+          href="/admin/payments?type=folding"
+          className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors"
         >
-          <TableCellsIcon className="h-4 w-4" />
-          All DC Entries ({totalCount})
+          View Folding Payments List →
         </Link>
       </div>
 
@@ -96,10 +103,7 @@ export default async function Page(props: {
           </div>
         </div>
       ) : (
-        <WeeklyFoldingTable
-          initialRecords={weeklyRecords || []}
-          looms={looms || []}
-        />
+        <WeeklyFoldingTable initialRecords={weeklyRecords} looms={looms} />
       )}
     </div>
   );

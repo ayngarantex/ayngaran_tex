@@ -45,6 +45,8 @@ export interface WeeklyFoldingRecord {
     TotalPayableReturnCount?: number;
     TotalFoldedReturnCount?: number;
     TotalFoldedGivenCount?: number;
+    TotalShortageGivenCount?: number,
+    TotalExcessGivenCount?: number,
     TotalFoldedCount?: number;
     NetPieces: number;
     TotalCalculatedWages: number;
@@ -212,10 +214,14 @@ export default function WeeklyFoldingTable({
         ).length;
     }, [overallProductSummary]);
 
+    console.log("records", records)
+
     // Calculate Summary Metrics
     const totalGivenCount = records.reduce((sum, r) => sum + r.TotalGivenCount, 0);
     const totalReturnCount = records.reduce((sum, r) => sum + r.TotalReturnCount, 0);
     const totalFoldedGivenCount = records.reduce((sum, r) => sum + (r.TotalFoldedGivenCount || 0), 0);
+    const totalShortageGivenCount = records.reduce((sum, r) => sum + (r.TotalShortageGivenCount || 0), 0);
+    const totalExcessGivenCount = records.reduce((sum, r) => sum + (r.TotalExcessGivenCount || 0), 0);
     const netPiecesRemaining = totalGivenCount - totalReturnCount;
     const totalCalculatedWagesSum = records.reduce((sum, r) => sum + r.TotalCalculatedWages, 0);
     const totalPaymentsSum = records.reduce((sum, r) => sum + r.TotalPaidAmount, 0);
@@ -287,6 +293,8 @@ export default function WeeklyFoldingTable({
                         totalGivenCount={totalGivenCount}
                         totalReturnCount={totalReturnCount}
                         totalFoldedGivenCount={totalFoldedGivenCount}
+                        totalShortageGivenCount={totalShortageGivenCount}
+                        totalExcessGivenCount={totalExcessGivenCount}
                         netPiecesRemaining={netPiecesRemaining}
                         totalCalculatedWagesSum={totalCalculatedWagesSum}
                         totalPaymentsSum={totalPaymentsSum}
@@ -302,6 +310,8 @@ export default function WeeklyFoldingTable({
                         totalGivenCount={totalGivenCount}
                         totalReturnCount={totalReturnCount}
                         totalFoldedGivenCount={totalFoldedGivenCount}
+                        totalShortageGivenCount={totalShortageGivenCount}
+                        totalExcessGivenCount={totalExcessGivenCount}
                         netPiecesRemaining={netPiecesRemaining}
                     />
                 )}
@@ -357,6 +367,7 @@ export default function WeeklyFoldingTable({
                             </tr>
                         ) : (
                             records.map((rec) => {
+                                { console.log("rec", rec) }
                                 const rowKey = `${rec.LoomId}_${rec.WeekStartDate}`;
                                 const isExpanded = expandedRowKey === rowKey;
                                 const currentTab = activeTab[rowKey] || 'dcs';
@@ -480,10 +491,20 @@ export default function WeeklyFoldingTable({
                                                                 ({rec.TotalFoldedGivenCount.toLocaleString()} Folded)
                                                             </span>
                                                         ) : null}
+                                                        {rec.TotalExcessGivenCount && rec.TotalExcessGivenCount > 0 ? (
+                                                            <span className="text-[9px] text-purple-700 font-bold mt-0.5">
+                                                                ({rec.TotalExcessGivenCount.toLocaleString()} Excess)
+                                                            </span>
+                                                        ) : null}
                                                     </div>
                                                 ) : (
                                                     <span className="text-slate-300">-</span>
                                                 )}
+                                                {rec.TotalShortageGivenCount && rec.TotalShortageGivenCount > 0 ? (
+                                                    <span className="text-[9px] text-purple-700 font-bold mt-0.5">
+                                                        ({rec.TotalShortageGivenCount.toLocaleString()} Short)
+                                                    </span>
+                                                ) : null}
                                             </td>
 
                                             {/* Return Count */}
