@@ -49,7 +49,7 @@ export default async function ProductTable({
                 <th scope="col" className="relative py-3.5 pl-6 pr-3 text-right font-bold">
                   Actions
                 </th>
-                </tr>
+              </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100 text-sm font-medium">
               {products?.map((prod: any) => (
@@ -63,7 +63,9 @@ export default async function ProductTable({
                       <div className="flex items-center gap-1.5 mt-1 md:hidden">
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200/70 rounded-md px-1.5 py-0.5">
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-500">Avail:</span>
-                          <span>{prod?.AvailableStock ? Number(prod.AvailableStock).toLocaleString() : 0}</span>
+                          <span>{prod?.AvailableStock ? Number(prod.AvailableStock).toLocaleString() : 0}
+                            <span className='text-slate-700 pl-2'>({prod?.AvailableStock ? (Number(prod.AvailableStock) / 50).toLocaleString() : 0})</span>
+                          </span>
                         </span>
                         {prod?.HSNCode && (
                           <span className="text-slate-400 font-mono text-[11px]">
