@@ -77,6 +77,7 @@ export default async function Page(props: {
           <div className='w-3/4 pl-2 no-print'>
             <Financialyear
               orderBy={true}
+              pendingDays={true}
             />
           </div>
         </div>

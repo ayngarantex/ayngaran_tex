@@ -5,8 +5,8 @@ import { getFinancialYears, getFinancialYear, loomsList, formatDateNew } from '.
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useLoading } from '../ui/loading-context';
 
-function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = false, LoomName = false, LoomsFetch = false, looms = [], hideBillType = false, LoomStatus = false, sizing = false, sizingList = [] }: {
-    hidePage?: boolean, hideYear?: boolean, orderBy?: boolean, LoomName?: boolean, LoomsFetch?: boolean, looms?: any[], hideBillType?: boolean, LoomStatus?: boolean, sizing?: boolean, sizingList?: any[]
+function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = false, pendingDays = false, LoomName = false, LoomsFetch = false, looms = [], hideBillType = false, LoomStatus = false, sizing = false, sizingList = [] }: {
+    hidePage?: boolean, hideYear?: boolean, orderBy?: boolean, pendingDays?: boolean, LoomName?: boolean, LoomsFetch?: boolean, looms?: any[], hideBillType?: boolean, LoomStatus?: boolean, sizing?: boolean, sizingList?: any[]
 }) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -175,6 +175,9 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                     >
                         <option key={'select'} value={''}>Date</option>
                         <option key='pending' value='pending'>Pending</option>
+                        {pendingDays && (
+                            <option key='pendingDays' value='pendingDays'>Pending Days</option>
+                        )}
                     </select>
                 </div>
                 : null}

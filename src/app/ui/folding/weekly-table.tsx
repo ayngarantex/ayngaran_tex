@@ -77,6 +77,8 @@ export default function WeeklyFoldingTable({
     const [selectedLoomId, setSelectedLoomId] = useState(searchParams.get('loomId') || '');
     const [startDateFilter, setStartDateFilter] = useState(searchParams.get('startDate') || '2026-09-27');
 
+    console.log("records", initialRecords)
+
     useEffect(() => {
         setRecords(initialRecords);
     }, [initialRecords]);
@@ -213,8 +215,6 @@ export default function WeeklyFoldingTable({
             stats => stats.given > 0 || stats.return > 0 || stats.net !== 0 || stats.folded > 0
         ).length;
     }, [overallProductSummary]);
-
-    console.log("records", records)
 
     // Calculate Summary Metrics
     const totalGivenCount = records.reduce((sum, r) => sum + r.TotalGivenCount, 0);
@@ -367,7 +367,6 @@ export default function WeeklyFoldingTable({
                             </tr>
                         ) : (
                             records.map((rec) => {
-                                { console.log("rec", rec) }
                                 const rowKey = `${rec.LoomId}_${rec.WeekStartDate}`;
                                 const isExpanded = expandedRowKey === rowKey;
                                 const currentTab = activeTab[rowKey] || 'dcs';

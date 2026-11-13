@@ -9,7 +9,8 @@ import {
   PrinterIcon,
   DocumentDuplicateIcon,
   XMarkIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -88,10 +89,76 @@ export function PrintButton() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer"
     >
       <PrinterIcon className="w-4 h-4 text-slate-500" />
-      <span>Print / PDF</span>
+      <span>Print</span>
+    </button>
+  );
+}
+
+export function DownloadDesignSheetPdfButton({
+  id,
+  designNumber,
+  designName,
+  includeWidth = true,
+  includeNotes = true,
+}: {
+  id: number | string;
+  designNumber?: string;
+  designName?: string;
+  includeWidth?: boolean;
+  includeNotes?: boolean;
+}) {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('includeWidth', String(includeWidth));
+      params.set('includeNotes', String(includeNotes));
+
+      const response = await fetch(`/api/design-sheets/${id}/pdf?${params.toString()}`);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.error('Design Sheet PDF generation error:', errData);
+        alert(`Server PDF generation issue (${errData.details || errData.error || 'Server error'}). Opening print dialog so you can save as PDF.`);
+        window.print();
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const safeName = (designNumber || designName || String(id)).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `design_sheet_${safeName}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Design Sheet PDF download error:', err);
+      alert('Unable to download PDF from server. Opening print dialog so you can save as PDF directly.');
+      window.print();
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={downloading}
+      className="flex items-center gap-2 rounded-lg border border-emerald-600 bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500 disabled:opacity-50 transition-colors cursor-pointer"
+      title="Download Design Sheet as PDF"
+    >
+      <ArrowDownTrayIcon className="w-4 h-4" />
+      <span>{downloading ? 'Downloading...' : 'Download PDF'}</span>
     </button>
   );
 }

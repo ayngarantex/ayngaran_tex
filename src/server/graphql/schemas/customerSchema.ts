@@ -19,6 +19,7 @@ type Customer {
   Agent: String
   customer_product_code: String
   pending: Float
+  pendingDays: Int
   invoices: [Invoice]
 }
 

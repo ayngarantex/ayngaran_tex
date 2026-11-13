@@ -64,7 +64,7 @@ export default async function Page(props: {
             <p className="text-3xl font-extrabold text-purple-900 mt-1">
               {totalAvailableSum.toLocaleString()}
               {totalAvailableSum && (
-                <span className='text-green-600 text-xl font-semibold ml-2'>({(totalAvailableSum / 50).toLocaleString()} Bales)</span>
+                <span className='text-green-600 text-xl font-semibold ml-2'>({(totalAvailableSum / 50).toLocaleString()} Bundles)</span>
               )}
             </p>
           </div>
