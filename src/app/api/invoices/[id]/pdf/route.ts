@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getInvoiceById } from '@/server/repositories/invoiceRepository';
+import { getInvoiceById } from '@/server/repositories/invoiceRepositories';
 import { launchBrowser, navigateToPrintUrl } from '@/app/lib/puppeteer-helper';
 
 export const runtime = 'nodejs'; // Ensure Node runtime for Buffer support
@@ -53,7 +53,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     });
   } catch (error: any) {
     if (browser) {
-      try { await browser.close(); } catch (e) {}
+      try { await browser.close(); } catch (e) { }
     }
     console.error('Failed to generate PDF with Puppeteer:', error);
     return NextResponse.json(

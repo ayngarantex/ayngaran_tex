@@ -124,7 +124,6 @@ export default function WeeklyProductSummary({
                                     : (stats.return > 0 ? 100 : 0);
                                 const isBalanced = stats.net === 0 && (stats.given > 0 || stats.return > 0);
                                 const hasPending = stats.net > 0;
-                                { console.log("stats", stats) }
 
                                 return (
                                     <tr key={product} className="hover:bg-slate-50/80 transition-colors">

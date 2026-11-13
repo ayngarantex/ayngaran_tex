@@ -79,6 +79,11 @@ export default async function CustomerTable({
                     <span className={cust?.pending > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
                       {formatCurrency(cust?.pending || 0)}
                     </span>
+                    {cust?.pendingDays > 0 && (
+                      <span className={`text-green-600 ml-2`}>
+                        ({cust?.pendingDays} Days)
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3.5 text-slate-700 max-w-xs truncate">
                     {cust?.Address || '-'}

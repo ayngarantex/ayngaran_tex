@@ -10,7 +10,20 @@ export const getCustomers = async (
 ) => {
     let sql = "";
     let params: any[] = [];
-    sql = `SELECT SUM(IF(I.IsCancel = 1, 0, (I.InvoiceAmount - COALESCE(I.Tds, 0))) - I.ReceivedAmount) as pending, C.* FROM customers C
+    sql = `SELECT SUM(IF(I.IsCancel = 1, 0, (I.InvoiceAmount - COALESCE(I.Tds, 0))) - I.ReceivedAmount) as pending,
+    DATEDIFF(
+        CURDATE(),
+        MIN(
+            CASE
+                WHEN (I.IsCancel IS NULL OR I.IsCancel = 0)
+                 AND (I.InvoiceType IS NULL OR I.InvoiceType != 'Credit Note')
+                 AND ((I.InvoiceAmount - COALESCE(I.Tds, 0)) - COALESCE(I.ReceivedAmount, 0)) > 0.01
+                THEN DATE(I.InvoiceDate)
+                ELSE NULL
+            END
+        )
+    ) AS pendingDays,
+    C.* FROM customers C
     LEFT JOIN invoice I ON I.CustomerId = C.CustomerId `;
 
     if (startDate && endDate) {
@@ -35,10 +48,12 @@ export const getCustomers = async (
     }
 
     sql += ' GROUP BY C.CustomerId';
-    if (orderBy !== "pending") {
-        sql += " ORDER BY CustomerName ASC";
-    } else {
+    if (orderBy === "pending") {
         sql += " ORDER BY pending DESC";
+    } else if (orderBy === "pendingDays") {
+        sql += " ORDER BY pendingDays DESC";
+    } else {
+        sql += " ORDER BY CustomerName ASC";
     }
 
     if (page && limit) {

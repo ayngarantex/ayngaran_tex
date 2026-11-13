@@ -351,8 +351,6 @@ export const getFoldingWagesConsolidated = async (
         const isShortage = (row.FoldedStatus || 'unfolded').toLowerCase() === 'shortage';
         const isExcess = (row.FoldedStatus || 'unfolded').toLowerCase() === 'excess';
 
-        console.log("row.FoldedStatus", row.FoldedStatus, count)
-
         if (isReturn) {
             // Only unfolded returns are payable for wages; folded returns are already folded and not paid            
             if (isShortage) {
@@ -362,17 +360,17 @@ export const getFoldingWagesConsolidated = async (
                 group.TotalReturnCount += count;
             }
         } else {
-            // group.TotalGivenCount += count;
-            if (isShortage) {
-                group.TotalGivenCount -= count;
-            }
+            group.TotalGivenCount += count;
+            // if (isShortage) {
+            //     group.TotalGivenCount -= count;
+            // }
             if (isFolded) {
                 group.TotalFoldedGivenCount += count;
             }
         }
 
 
-        if (isFolded || isExcess) {
+        if (isReturn && (isFolded || isExcess)) {
             group.TotalFoldedCount += count;
         }
         if (isShortage) {
@@ -406,8 +404,6 @@ export const getFoldingWagesConsolidated = async (
             Items: parsedItems
         });
     }
-
-    console.log("weeklyGroupMap", weeklyGroupMap)
 
     // Calculate wages and net pieces for each group
     for (const group of Object.values(weeklyGroupMap)) {

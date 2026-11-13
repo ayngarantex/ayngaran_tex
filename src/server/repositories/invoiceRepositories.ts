@@ -140,13 +140,16 @@ export const getInvoices = async (
     return invoices;
 };
 
-// OR I.InvoiceId IN (
-//           SELECT ID.InvoiceId 
-//           FROM invoice_details ID 
-//           LEFT JOIN products P ON ID.ItemId = P.Id 
-//           WHERE LOWER(P.Name) LIKE LOWER('%${search}%') 
-//              OR LOWER(ID.ProductName) LIKE LOWER('%${search}%')
-//         )
+export const getInvoiceById = async (id: number): Promise<any> => {
+    const sql = `
+    SELECT i.*, c.* FROM invoice i
+    LEFT JOIN customers c ON i.CustomerId = c.CustomerId
+    WHERE i.InvoiceId = ?
+  `;
+    // const [rows]: any = await db.query(query);
+    const [rows]: any = await db.query(sql, id);
+    return rows[0] || null;
+};
 
 export const getInvoicesCount = async (
     search: string | null,

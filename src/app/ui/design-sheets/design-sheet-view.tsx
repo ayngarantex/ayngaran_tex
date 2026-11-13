@@ -1,16 +1,22 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeftIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { PrintButton, WhatsAppShareButton, CopyDesignSheetTopButton } from './buttons';
+import { PrintButton, DownloadDesignSheetPdfButton, WhatsAppShareButton, CopyDesignSheetTopButton } from './buttons';
 import type { DesignSheet, DesignSheetItem } from '@/app/lib/types';
 
 export default function DesignSheetView({
-  sheet
+  sheet,
+  initialIncludeWidth = true,
+  initialIncludeNotes = true,
 }: {
   sheet: DesignSheet;
+  initialIncludeWidth?: boolean;
+  initialIncludeNotes?: boolean;
 }) {
+  const [includeWidthInPrint, setIncludeWidthInPrint] = useState(initialIncludeWidth);
+  const [includeNotesInPrint, setIncludeNotesInPrint] = useState(initialIncludeNotes);
   const items: DesignSheetItem[] = sheet.Items || [];
 
   // Pre-calculate groups so we can use rowSpan in table
@@ -105,12 +111,41 @@ export default function DesignSheetView({
           <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Design Sheets</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
+            <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={includeWidthInPrint}
+                onChange={(e) => setIncludeWidthInPrint(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <span>Item Width</span>
+            </label>
+            {sheet.Notes && (
+              <label className="inline-flex items-center gap-1.5 cursor-pointer select-none border-l border-slate-200 pl-3">
+                <input
+                  type="checkbox"
+                  checked={includeNotesInPrint}
+                  onChange={(e) => setIncludeNotesInPrint(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <span>Notes</span>
+              </label>
+            )}
+          </div>
           <WhatsAppShareButton
             title={`Design Sheet ${sheet.DesignNumber}`}
             text={generateWhatsAppText()}
           />
           <PrintButton />
+          <DownloadDesignSheetPdfButton
+            id={sheet.Id}
+            designNumber={sheet.DesignNumber}
+            designName={sheet.DesignName}
+            includeWidth={includeWidthInPrint}
+            includeNotes={includeNotesInPrint}
+          />
           <CopyDesignSheetTopButton
             id={sheet.Id}
             designNumber={sheet.DesignNumber}
@@ -129,21 +164,26 @@ export default function DesignSheetView({
       {/* Printable Design Sheet Card */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm print:border-none print:shadow-none print:p-0 overflow-hidden">
         {/* Header Banner */}
-        <div className="border-b border-slate-200 p-6 sm:p-8 bg-slate-50/50 print:bg-transparent print:border-b-2 print:border-slate-800">
+        <div className="border-b border-slate-200 p-3 sm:px-8 sm:py-4 bg-slate-50/50 print:bg-transparent print:border-b-2 print:border-slate-800">
+          <div className="flex text-xs font-bold uppercase tracking-wider text-blue-600 print:text-slate-600 justify-between">
+            <div>Ayngaran Tex • Sizing Specification</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Color Breakdown
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-blue-600 print:text-slate-600">
-                Ayngaran Tex • Sizing Specification
-              </div>
-              <h1 className={`text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1`}>
+              <h1 className={`text-2xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-1`}>
                 {sheet.DesignName}
               </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600 font-medium">
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600 font-medium">
                 <span className="inline-flex items-center font-bold text-slate-900">
                   Design No: <span className="ml-1.5 font-mono text-blue-700">{sheet.DesignNumber}</span>
                 </span>
-                <span>•</span>
-                <span>Width: <strong className="text-slate-900">{sheet.ItemWidth || '54"'}</strong></span>
+                <span className={includeWidthInPrint ? '' : 'print:hidden'}>•</span>
+                <span className={includeWidthInPrint ? '' : 'print:hidden opacity-60'}>
+                  Width: <strong className="text-slate-900">{sheet.ItemWidth || '54"'}</strong>
+                </span>
                 <span>•</span>
                 <span>Total Ends: <strong className="text-slate-900">{sheet.TotalEnds?.toLocaleString()}</strong></span>
               </div>
@@ -152,41 +192,36 @@ export default function DesignSheetView({
             {/* Quick summary badges */}
             {sheet.ColorSummary && (
               <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Color Breakdown
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {Object.entries(sheet.ColorSummary).map(([color, count]) => {
-                    const isWhite = color.toLowerCase().includes('white') || color.includes('சலவை');
-                    const isBlack = color.toLowerCase().includes('black') || color.includes('கருப்பு');
-                    return (
-                      <span
-                        key={color}
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold border ${isBlack
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : isWhite
-                            ? 'bg-white text-slate-900 border-slate-300'
-                            : 'bg-blue-100 text-blue-900 border-blue-300'
-                          }`}
-                      >
-                        <span>{color}:</span>
-                        <span className="font-mono">{count} ends</span>
-                      </span>
-                    );
-                  })}
-                </div>
+                {Object.entries(sheet.ColorSummary).map(([color, count]) => {
+                  const isWhite = color.toLowerCase().includes('white') || color.includes('சலவை');
+                  const isBlack = color.toLowerCase().includes('black') || color.includes('கருப்பு');
+                  return (
+                    <div
+                      key={color}
+                      className={`w-max inline-flex items-center whitespace-nowrap text-nowrap rounded-md px-2.5 py-1 text-xs font-bold border ${isBlack
+                        ? 'bg-slate-900 text-white border-slate-900'
+                        : isWhite
+                          ? 'bg-white text-slate-900 border-slate-300'
+                          : 'bg-blue-100 text-blue-900 border-blue-300'
+                        }`}
+                    >
+                      <span>{color}:</span>
+                      <span className="font-mono">{count} ends</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
         {/* Pattern Table Matching User's Photo */}
-        <div className="p-4 sm:p-8 overflow-x-auto">
+        <div className="p-4 sm:px-4 sm:py-4 overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b-2 border-slate-300 text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">
                 <th className="py-3 px-3 sm:px-4 w-5/12">
-                  Color / Pattern Description
+                  Color Description
                 </th>
                 <th className="py-3 px-3 sm:px-4 w-2/12 font-bold">
                   Value
@@ -289,16 +324,21 @@ export default function DesignSheetView({
           </div>
 
           {/* Dotted / Dashed Separator 2 */}
-          <div className="my-3 flex items-center justify-between text-xs font-mono text-slate-400 select-none">
+          <div className={`my-3 flex items-center justify-between text-xs font-mono text-slate-400 select-none ${includeWidthInPrint ? '' : 'print:hidden'}`}>
             <span className="flex-1 border-b-2 border-dashed border-slate-300"></span>
             <span className="px-4 font-bold text-slate-500">:-:</span>
             <span className="flex-1 border-b-2 border-dashed border-slate-300"></span>
           </div>
 
           {/* Item Width Row */}
-          <div className="py-3 px-3 sm:px-4 flex items-center justify-between text-base sm:text-lg font-bold text-slate-900 bg-white rounded-lg border border-slate-200">
-            <div>
+          <div className={`py-3 px-3 sm:px-4 flex items-center justify-between text-base sm:text-lg font-bold text-slate-900 bg-white rounded-lg border border-slate-200 ${includeWidthInPrint ? '' : 'print:hidden opacity-60'}`}>
+            <div className="flex items-center gap-2">
               <span>உருப்படி அகலம் (Item Width)</span>
+              {!includeWidthInPrint && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-500 print:hidden">
+                  Excluded from print
+                </span>
+              )}
             </div>
             <div className="font-mono text-lg sm:text-xl font-bold text-purple-700">
               {sheet.ItemWidth || '54"'}
@@ -307,19 +347,26 @@ export default function DesignSheetView({
 
           {/* Notes / Special Instructions for Sizing Master */}
           {sheet.Notes && (
-            <div className="mt-6 rounded-lg bg-amber-50/70 border border-amber-200 p-4 text-sm text-amber-900">
-              <strong className="block font-bold mb-1 text-amber-950">
-                📌 Sizing Master Notes / குறிப்புகள்:
-              </strong>
+            <div className={`mt-6 rounded-lg bg-amber-50/70 border border-amber-200 p-4 text-sm text-amber-900 ${includeNotesInPrint ? '' : 'print:hidden opacity-60'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <strong className="block font-bold text-amber-950">
+                  📌 Sizing Master Notes / குறிப்புகள்:
+                </strong>
+                {!includeNotesInPrint && (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700 print:hidden">
+                    Excluded from print
+                  </span>
+                )}
+              </div>
               <p className="whitespace-pre-line">{sheet.Notes}</p>
             </div>
           )}
 
           {/* Sizing Team Signoff Section (Great for physical printouts) */}
-          <div className="mt-10 pt-6 border-t border-slate-200 grid grid-cols-3 gap-4 text-center text-xs font-semibold text-slate-500">
+          {/* <div className="mt-10 pt-6 border-t border-slate-200 grid grid-cols-3 gap-4 text-center text-xs font-semibold text-slate-500">
             <div>
               <div className="h-10 border-b border-dashed border-slate-300 mb-2"></div>
-              <span>Prepared By (Office)</span>
+              <span>Prepared By (Ayngaran Tex)</span>
             </div>
             <div>
               <div className="h-10 border-b border-dashed border-slate-300 mb-2"></div>
@@ -329,7 +376,7 @@ export default function DesignSheetView({
               <div className="h-10 border-b border-dashed border-slate-300 mb-2"></div>
               <span>Creel Verified Date</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
