@@ -6,6 +6,7 @@ import { CreateExpenses } from '@/app/ui/expenses/buttons';
 import Table from '@/app/ui/expenses/table';
 import FinancialyearNew from '@/app/lib/financialyearNew';
 import SearchNew from '../search-new';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { formatCurrency } from '@/app/lib/utils';
 import PaginationNew from '@/app/lib/paginationNew';
 import { getCashInHand, saveCashInHand } from '@/app/api/node/dashboard';
@@ -252,26 +253,25 @@ export default function ExpensesContainer() {
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-2 no-print">
-        <div className="flex w-1/2">
-          <div className="w-full">
-            <SearchNew
-              placeholder="Search expenses..."
-              onSearch={(val) => setQuery(val)}
-            />
-          </div>
-          <div className="w-3/4 pl-2">
-            <FinancialyearNew
-              hideBillType={true}
-              setFilter={(startDate: string, endDate: string, billType: string, orderByColumn: string) => {
-                setStartDate(startDate)
-                setEndDate(endDate)
-              }}
-            />
-          </div>
-        </div>
-        <CreateExpenses />
-      </div>
+      <ListFilterBar
+        className="mt-6"
+        search={
+          <SearchNew
+            placeholder="Search expenses..."
+            onSearch={(val) => setQuery(val)}
+          />
+        }
+        filters={
+          <FinancialyearNew
+            hideBillType={true}
+            setFilter={(startDate: string, endDate: string, billType: string, orderByColumn: string) => {
+              setStartDate(startDate);
+              setEndDate(endDate);
+            }}
+          />
+        }
+        actions={<CreateExpenses />}
+      />
 
       {data.expenses?.length ?
         <Table expenses={data.expenses || []} />

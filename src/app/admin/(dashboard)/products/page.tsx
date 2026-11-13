@@ -1,5 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { CreateProduct } from '@/app/ui/products/buttons';
 import Table from '@/app/ui/products/table';
 import { fetchProductCount, fetchProductTotals } from '@/app/api/node/product'; //node query
@@ -75,20 +76,21 @@ export default async function Page(props: {
           </div>
         </div>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <div className='w-1/3'>
-          <Search placeholder="Search products..." />
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href="/admin/products/stocks"
-            className="flex h-10 items-center rounded-lg bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-          >
-            Stock Ledger
-          </Link>
-          <CreateProduct />
-        </div>
-      </div>
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search products..." />}
+        actions={
+          <>
+            <Link
+              href="/admin/products/stocks"
+              className="flex h-10 items-center rounded-lg bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
+              Stock Ledger
+            </Link>
+            <CreateProduct />
+          </>
+        }
+      />
       {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
       <Table query={query} currentPage={currentPage} />
       {/* </Suspense> */}

@@ -1,7 +1,9 @@
 import Pagination from '@/app/lib/pagination';
 import Table from '@/app/ui/warp/table';
 import WarpSummaryTable from '@/app/ui/warp/summary-table';
+import Search from '@/app/ui/search';
 import Financialyear from '@/app/lib/financialyear';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { pageLimit } from '@/app/lib/utils';
 import { fetchWarps, fetchWarpsCount, fetchWarpSummary, fetchWarpSummaryCount } from '@/app/api/node/warp';
 import { fetchLooms } from '@/app/api/node/looms';
@@ -79,8 +81,10 @@ export default async function Page(props: {
           </Link>
         </div>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <div className="w-3/4 pl-2">
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search warp..." />}
+        filters={
           <Financialyear
             hideYear={true}
             orderBy={false}
@@ -90,8 +94,8 @@ export default async function Page(props: {
             sizing={true}
             sizingList={sizingList}
           />
-        </div>
-      </div>
+        }
+      />
 
       {/* {view === 'summary' ? ( */}
       <WarpSummaryTable summary={summary} />

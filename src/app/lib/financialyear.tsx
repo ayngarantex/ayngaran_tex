@@ -121,9 +121,9 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
     }, [financialYear])
 
     return (
-        <div className="w-full flex">
+        <div className="w-full flex flex-wrap items-center gap-2">
             {!hideYear ?
-                <div className="relative w-1/2">
+                <div className="relative flex-1 min-w-[130px]">
                     <select
                         id="financialYear"
                         name="financialYear"
@@ -146,7 +146,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                 </div>
                 : null}
             {!hideBillType ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="billType"
                         name="billType"
@@ -163,7 +163,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                 </div>
                 : null}
             {orderBy ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="orderBy"
                         name="orderBy"
@@ -182,7 +182,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                 </div>
                 : null}
             {LoomsFetch ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="orderBy"
                         name="orderBy"
@@ -205,7 +205,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                 </div>
                 : null}
             {LoomName ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="orderBy"
                         name="orderBy"
@@ -229,7 +229,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                 : null}
 
             {LoomStatus ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="loomStatus"
                         name="loomStatus"
@@ -247,7 +247,7 @@ function FinancialyearInner({ hidePage = false, hideYear = false, orderBy = fals
                 : null}
 
             {sizing ?
-                <div className="relative pl-2 w-full">
+                <div className="relative flex-1 min-w-[160px]">
                     <select
                         className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-5 text-sm outline-2 placeholder:text-gray-500"
                         onChange={(e) => {

@@ -1,5 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { CreateCustomer, PrintCustomers, PrintSelector } from '@/app/ui/customers/buttons';
 import Table from '@/app/ui/customers/table';
 import Financialyear from '@/app/lib/financialyear';
@@ -69,26 +70,25 @@ export default async function Page(props: {
           <p className="text-gray-600 mt-2">Total Customers: {totalCustomers} | Overall Pending: {totalPending ? formatCurrency(totalPending) : '0.00'}</p>
         </div>
       )}
-      <div className={`mt-4 flex items-center justify-between gap-2 ${printMode ? 'mt-0' : 'md:mt-8'} no-print`}>
-        <div className='flex w-1/2'>
-          <div className='w-1/3 no-print'>
-            <Search placeholder="Search customers..." />
-          </div>
-          <div className='w-3/4 pl-2 no-print'>
-            <Financialyear
-              orderBy={true}
-              pendingDays={true}
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
-          <div className='no-print'>
-            <PrintCustomers query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
-          </div>
-          <CreateCustomer />
-        </div>
-      </div>
+      <ListFilterBar
+        className={printMode ? 'mt-0' : 'mt-4 md:mt-8'}
+        search={<Search placeholder="Search customers..." />}
+        filters={
+          <Financialyear
+            orderBy={true}
+            pendingDays={true}
+          />
+        }
+        actions={
+          <>
+            <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
+            <div className="no-print">
+              <PrintCustomers query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
+            </div>
+            <CreateCustomer />
+          </>
+        }
+      />
       {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
       <Table query={query} currentPage={currentPage} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} limit={printMode ? null : pageLimit} />
       {/* </Suspense> */}

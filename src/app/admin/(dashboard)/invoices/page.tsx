@@ -1,5 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { CreateInvoice, PrintInvoices, PrintInvoiceSelector, ExportInvoices, ExportGstr1, LumpSumPaymentModal } from '@/app/ui/invoices/buttons';
 import Table from '@/app/ui/invoices/table';
 import Financialyear from '@/app/lib/financialyear';
@@ -82,74 +83,73 @@ export default async function Page(props: {
           <p className="text-gray-600 mt-2">Total Invoices: {invoicesCount || 0}</p>
         </div>
       )}
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8 no-print">
-        <div className='flex w-1/2 items-center gap-2 no-print'>
-          <div className='w-1/4 no-print'>
-            <Search placeholder="Search invoices..." />
-          </div>
-          <div className='w-3/4 pl-2 no-print flex items-center gap-2'>
-            <Financialyear
-              orderBy={true}
-            />
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search invoices..." />}
+        filters={
+          <>
+            <Financialyear orderBy={true} />
             <InvoiceFilterModal products={products} customers={customers} />
-          </div>
-        </div>
-        {!printMode && (
-          <div className="flex gap-2 text-wrap flex-wrap">
-            <div className='no-print'>
-              <ExportGstr1 />
-            </div>
-            <div className='no-print'>
-              <ExportInvoices query={query} billType={billType} orderBy={orderBy} />
-            </div>
-            <div className='no-print'>
-              <PrintInvoices query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
-            </div>
-            <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
-            <CreateInvoice />
-          </div>
-        )}
-      </div>
+          </>
+        }
+        actions={
+          !printMode && (
+            <>
+              <div className="no-print">
+                <ExportGstr1 />
+              </div>
+              <div className="no-print">
+                <ExportInvoices query={query} billType={billType} orderBy={orderBy} />
+              </div>
+              <div className="no-print">
+                <PrintInvoices query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
+              </div>
+              <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
+              <CreateInvoice />
+            </>
+          )
+        }
+      />
       {!printMode && (
         <>
           <div className="flex justify-between px-4 py-5 mt-5 bg-blue-300 rounded-lg self-center no-print">
-            <div className="w-full flex no-print">
-              <label htmlFor="mobile" className="text-sm self-center font-bold">
+            <div className="w-full flex flex-wrap no-print">
+              <label htmlFor="mobile" className="text-sm self-center font-bold md:w-full">
                 Sold
               </label>
-              <div className="relative pl-4 tex-2xl w-40 text-right text-blue-600 text-lg text-center">
+              <div className="relative pr-2 md:pr-0 text-lg md:text-xl font-bold text-blue-600 w-auto md:w-40">
                 {formatCurrency(invoiceTotalDetatils?.TotalInvoiceAmount || 0)}
               </div>
             </div>
-            <div className="w-full flex justify-center">
-              <label htmlFor="mobile" className="text-sm self-center font-bold">
+            <div className="w-full flex flex-wrap">
+              <label htmlFor="mobile" className="text-sm self-center text-left font-bold md:w-full">
                 Received
               </label>
-              <div className="relative pl-4 tex-2xl w-40 text-right text-blue-600 text-lg text-center">
+              <div className="relative pr-2 md:pr-0 text-lg md:text-xl font-bold text-blue-600 w-auto md:w-40">
                 {formatCurrency(Number(parseFloat(invoiceTotalDetatils?.TotalReceivedAmount || 0).toFixed(2)))}
               </div>
             </div>
-            <div className="w-full flex justify-center">
-              <label htmlFor="mobile" className="text-sm self-center font-bold">
+            <div className="w-full flex flex-wrap">
+              <label htmlFor="mobile" className="text-sm self-center text-left font-bold md:w-full">
                 TDS
               </label>
-              <div className="relative pl-4 tex-2xl w-40 text-right text-indigo-700 text-lg text-center font-bold">
+              <div className="relative pr-2 md:pr-0 text-lg md:text-xl font-bold text-indigo-700 w-auto md:w-40">
                 {formatCurrency(Number(parseFloat(invoiceTotalDetatils?.TotalTdsAmount || 0).toFixed(2)))}
               </div>
             </div>
-            <div className="w-full flex justify-center">
-              <label htmlFor="mobile" className="text-sm self-center font-bold">
+            <div className="w-full flex flex-wrap">
+              <label htmlFor="mobile" className="text-sm self-center text-left font-bold md:w-full">
                 Cancelled
               </label>
-              <div className="relative pl-4 tex-2xl w-40 text-right text-red-600 text-lg text-center">
+              <div className="relative pr-2 md:pr-0 text-lg md:text-xl font-bold text-red-600 w-auto md:w-40">
                 {formatCurrency(invoiceTotalDetatils?.TotalCancelledAmount || 0)}
               </div>
             </div>
-            <div className="w-full flex justify-end">
-              <label htmlFor="mobile" className="text-sm self-center font-bold">
+            <div className="w-full flex flex-wrap">
+              <label htmlFor="mobile" className="text-sm self-center text-left font-bold md:w-full">
                 Pending
               </label>
-              <div className="relative pl-4 tex-2xl w-40 text-right text-red-600 text-lg text-center">
+              <div className="relative pr-2 md:pr-0 text-lg md:text-xl font-bold text-red-700 w-auto md:w-40">
                 {formatCurrency((invoiceTotalDetatils?.TotalBalanceAmount || 0) - (invoiceTotalDetatils?.TotalCancelledAmount || 0))}
               </div>
             </div>
