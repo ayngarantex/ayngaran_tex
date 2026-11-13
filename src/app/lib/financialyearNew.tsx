@@ -23,9 +23,9 @@ export default function FinancialyearNew({
     }, [startDate, endDate, billType, orderByColumn, loomName])
 
     return (
-        <div className="w-full flex">
+        <div className="w-full flex flex-wrap items-center gap-2">
             {!hideYear ?
-                <div className="relative w-1/2">
+                <div className="relative flex-1 min-w-[130px]">
                     <select
                         id="financialYear"
                         name="financialYear"
@@ -57,7 +57,7 @@ export default function FinancialyearNew({
                 </div>
             : null}
             {!hideBillType ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="billType"
                         name="billType"
@@ -74,7 +74,7 @@ export default function FinancialyearNew({
                 </div>
             : null}
             {orderBy ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="orderBy"
                         name="orderBy"
@@ -90,7 +90,7 @@ export default function FinancialyearNew({
                 </div>
             : null}
             {LoomName ?
-                <div className="relative pl-2 w-1/2">
+                <div className="relative flex-1 min-w-[120px]">
                     <select
                         id="orderBy"
                         name="orderBy"

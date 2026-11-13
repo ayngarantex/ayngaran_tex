@@ -62,6 +62,16 @@ export default async function CustomerTable({
                 >
                   <td className="whitespace-nowrap py-3.5 pl-6 pr-3 font-semibold text-slate-900">
                     {cust?.CustomerName}
+                    <div className="flex items-center gap-1.5 mt-1 md:hidden">
+                      <span className={cust?.pending > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
+                        {formatCurrency(cust?.pending || 0)}
+                      </span>
+                      {cust?.pendingDays > 0 && (
+                        <span className={`text-green-600 ml-2`}>
+                          ({cust?.pendingDays} Days)
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5 text-slate-800 font-mono text-xs font-semibold">
                     {cust?.GstNumber || '-'}

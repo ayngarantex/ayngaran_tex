@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import Pagination from '@/app/lib/pagination';
 import { CreateDesignSheet } from '@/app/ui/design-sheets/buttons';
 import DesignSheetsTable from '@/app/ui/design-sheets/table';
@@ -32,17 +33,19 @@ export default async function DesignSheetsPage(props: {
             Creel pattern setups, bracket repeats, and warp end specifications for sizing masters.
           </p>
         </div>
-        <CreateDesignSheet />
+        <div className="hidden md:block"><CreateDesignSheet /></div>
       </div>
 
       {/* Top Controls */}
-      <div className="mt-4 flex items-center justify-between gap-3 md:mt-6">
-        <div className="w-full md:w-80">
+      <ListFilterBar
+        className="mt-4 md:mt-6"
+        search={
           <Suspense fallback={<div className="h-10 bg-slate-100 rounded-lg animate-pulse" />}>
             <Search placeholder="Search by design #, name, or width..." />
           </Suspense>
-        </div>
-      </div>
+        }
+        actions={<CreateDesignSheet />}
+      />
 
       {/* Table */}
       <DesignSheetsTable designSheets={designSheets} />

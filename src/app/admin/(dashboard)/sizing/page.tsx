@@ -1,5 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { CreateSizing } from '@/app/ui/sizing/buttons';
 import Table from '@/app/ui/sizing/table';
 import { fetchSizingPages, fetchSizing, fetchSizingTotal } from '@/app/api/node/sizing';
@@ -36,27 +37,22 @@ export default async function Page(props: {
         {/* ${lusitana.className} */}
         <h1 className={`text-2xl`}>Sizing ({data?.count || 0})</h1>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <div className='flex w-1/2'>
-          <div className='w-1/4'>
-            <Search placeholder="Search sizing..." />
-          </div>
-          <div className='w-3/4 pl-2'>
-            <Financialyear
-              orderBy={true}
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/design-sheets"
-            className="flex h-10 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-          >
-            <span>Design Sheets</span>
-          </Link>
-          <CreateSizing />
-        </div>
-      </div>
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search sizing..." />}
+        filters={<Financialyear orderBy={true} />}
+        actions={
+          <>
+            <Link
+              href="/admin/design-sheets"
+              className="flex h-10 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+            >
+              <span>Design Sheets</span>
+            </Link>
+            <CreateSizing />
+          </>
+        }
+      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Purchased</span>

@@ -1,4 +1,5 @@
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import Table from '@/app/ui/payments/table';
 import Pagination from '@/app/lib/pagination';
 import { fetchPaymentCount } from '@/app/api/node/payment';
@@ -85,23 +86,19 @@ export default async function Page(props: {
         </Link>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <div className='flex w-1/2'>
-          <div className='w-1/4'>
-            <Search placeholder="Search payments..." />
-          </div>
-          <div className='w-1/2 pl-2'>
-            <Financialyear
-              hideBillType={true}
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {type === 'loom' && <LoomLumpSumPaymentModal looms={looms || []} />}
-          {type === 'folding' && <FoldingLumpSumPaymentModal looms={looms || []} />}
-        </div>
-      </div>
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search payments..." />}
+        filters={<Financialyear hideBillType={true} />}
+        actions={
+          (type === 'loom' || type === 'folding') ? (
+            <>
+              {type === 'loom' && <LoomLumpSumPaymentModal looms={looms || []} />}
+              {type === 'folding' && <FoldingLumpSumPaymentModal looms={looms || []} />}
+            </>
+          ) : undefined
+        }
+      />
       <Table query={query} currentPage={currentPage} pageLimit={pageLimit} startDate={startDate} endDate={endDate} type={type} />
 
       <div className="mt-5 flex w-full justify-center">

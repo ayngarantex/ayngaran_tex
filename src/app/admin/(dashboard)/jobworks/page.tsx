@@ -1,5 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { CreateLoom, CreateLoomEntry } from '@/app/ui/jobworks/buttons';
 import Table from '@/app/ui/jobworks/table';
 import { fetchLooms, fetchLoomsCount } from '@/app/api/node/looms';
@@ -24,15 +25,16 @@ export default async function Page(props: {
         {/* ${lusitana.className} */}
         <h1 className={`text-2xl`}>Job Work ({loomCount})</h1>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <div className='w-1/3'>
-          <Search placeholder="Search job works..." />
-        </div>
-        <span className='mx-3'>
-          <CreateLoomEntry loomId={"0"} />
-        </span>
-        <CreateLoom />
-      </div>
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search job works..." />}
+        actions={
+          <>
+            <CreateLoomEntry loomId={"0"} />
+            <CreateLoom />
+          </>
+        }
+      />
       {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
       <Table looms={looms} />
       {/* </Suspense> */}

@@ -1,5 +1,6 @@
 import Pagination from '@/app/lib/pagination';
 import Search from '@/app/ui/search';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { CreatePurchase, SupplierLumpSumPaymentModal } from '@/app/ui/purchases/buttons';
 import Table from '@/app/ui/purchases/table';
 import { fetchPurchasePages, fetchPurchases, fetchPurchasesDetails, fetchAllSuppliers } from '@/app/lib/data';
@@ -37,20 +38,17 @@ export default async function Page(props: {
       <div className="flex w-full items-center justify-between">
         <h1 className="text-2xl font-bold">Purchases ({data?.count || 0})</h1>
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 md:mt-8">
-        <div className="flex w-full md:w-1/2">
-          <div className="w-1/4">
-            <Search placeholder="Search purchases..." />
-          </div>
-          <div className="w-3/4 pl-2">
-            <Financialyear orderBy={true} />
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <SupplierLumpSumPaymentModal suppliers={suppliers} initialCategory="purchases" buttonLabel="Supplier Lump-Sum Pay" />
-          <CreatePurchase />
-        </div>
-      </div>
+      <ListFilterBar
+        className="mt-4 md:mt-8"
+        search={<Search placeholder="Search purchases..." />}
+        filters={<Financialyear orderBy={true} />}
+        actions={
+          <>
+            <SupplierLumpSumPaymentModal suppliers={suppliers} initialCategory="purchases" buttonLabel="Supplier Lump-Sum Pay" />
+            <CreatePurchase />
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">

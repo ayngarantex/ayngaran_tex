@@ -6,6 +6,7 @@ import { CreateInvestment } from '@/app/ui/investments/buttons';
 import Table from '@/app/ui/investments/table';
 import FinancialyearNew from '@/app/lib/financialyearNew';
 import SearchNew from '../search-new';
+import ListFilterBar from '@/app/ui/list-filter-bar';
 import { formatCurrency } from '@/app/lib/utils';
 import PaginationNew from '@/app/lib/paginationNew';
 
@@ -67,26 +68,25 @@ export default function InvestmentsContainer() {
       </div>
 
       {/* Controls: Search, Date Filter, and Add Button */}
-      <div className="mt-6 flex items-center justify-between gap-2 no-print">
-        <div className="flex w-1/2">
-          <div className="w-full">
-            <SearchNew
-              placeholder="Search investments..."
-              onSearch={(val) => setQuery(val)}
-            />
-          </div>
-          <div className="w-2/3 pl-2">
-            <FinancialyearNew
-              hideBillType={true}
-              setFilter={(start: string, end: string) => {
-                setStartDate(start);
-                setEndDate(end);
-              }}
-            />
-          </div>
-        </div>
-        <CreateInvestment />
-      </div>
+      <ListFilterBar
+        className="mt-6"
+        search={
+          <SearchNew
+            placeholder="Search investments..."
+            onSearch={(val) => setQuery(val)}
+          />
+        }
+        filters={
+          <FinancialyearNew
+            hideBillType={true}
+            setFilter={(start: string, end: string) => {
+              setStartDate(start);
+              setEndDate(end);
+            }}
+          />
+        }
+        actions={<CreateInvestment />}
+      />
 
       {/* List Table */}
       {loading ? (
