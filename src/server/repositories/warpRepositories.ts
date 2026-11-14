@@ -187,6 +187,7 @@ export const getWarpSummary = async (
         ROUND(COALESCE(SUM(SWD.Meters), 0), 2) AS TotalMeters,        
         L.LoomName,
         L.LoomId,
+        COALESCE(NULLIF(MAX(SWD.DhotiMeter), 0), MAX(L.DhotiMeter), 0) AS DhotiMeter,
         MAX(T.ReceivedWeight) AS ReceivedWeight,
         MAX(T.ReceivedDhoties) AS ReceivedDhoties,
         MAX(T.IsCompleted) AS IsCompleted,
@@ -288,6 +289,7 @@ export const getWarpSummary = async (
         Count: row.Count || 0,
         Weight: row.Weight || 0,
         Piece: row.Piece || 0,
+        DhotiMeter: Number(row.DhotiMeter) || 0,
     }));
 };
 
@@ -351,7 +353,8 @@ export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
             ROUND(COALESCE(SUM(SWD.Weight), 0), 2) AS TotalWeight,
             ROUND(COALESCE(SUM(SWD.Meters), 0), 2) AS TotalMeters,
             L.LoomId,
-            L.LoomName
+            L.LoomName,
+            COALESCE(NULLIF(MAX(SWD.DhotiMeter), 0), MAX(L.DhotiMeter), 0) AS DhotiMeter
         FROM sizing S 
         LEFT JOIN sizing_warp_details SWD ON S.SizingId = SWD.SizingId ${lId > 0 ? `AND SWD.LoomId = ${lId}` : ''}
         LEFT JOIN loom_details L ON SWD.LoomId = L.LoomId
@@ -396,6 +399,7 @@ export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
         PendingWarps: Number(firstRow.PendingWarps) || 0,
         TotalWeight: firstRow.TotalWeight || 0,
         TotalMeters: firstRow.TotalMeters || 0,
+        DhotiMeter: Number(firstRow.DhotiMeter) || 0,
         IsCompleted: sizingSummaryResult.length > 0 ? (sizingSummaryResult[0].IsCompleted ? 1 : 0) : 0,
         warp_detail: warpDhotieDetailsResult || [],
         warp_summary_details: sizingSummaryResult || []

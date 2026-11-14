@@ -282,16 +282,27 @@ export const createSizing = async (
         const sizingId = sizingRes.insertId;
 
 
+        // Auto-migrate sizing_warp_details to have DhotiMeter column if not exists
+        try {
+            const [cols]: any = await conn.query(`SHOW COLUMNS FROM sizing_warp_details LIKE 'DhotiMeter'`);
+            if (cols.length === 0) {
+                await conn.query(`ALTER TABLE sizing_warp_details ADD COLUMN DhotiMeter DECIMAL(10,2) NOT NULL DEFAULT 0.00`);
+            }
+        } catch (e) { }
+
         // 2. Insert products (warp details)
         for (const p of products) {
             const wageVal = (p.wageRate !== undefined && p.wageRate !== null && p.wageRate !== '')
                 ? parseFloat(String(p.wageRate))
                 : null;
+            const dhotiMeterVal = (p.dhotiMeter !== undefined && p.dhotiMeter !== null && p.dhotiMeter !== '')
+                ? parseFloat(String(p.dhotiMeter))
+                : 0.00;
 
             await conn.query(
                 `INSERT INTO sizing_warp_details (
-                    SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId, WageRate
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                    SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId, WageRate, DhotiMeter
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     sizingId,
                     p.meters || 0,
@@ -300,7 +311,8 @@ export const createSizing = async (
                     p.price ? parseFloat(String(p.price)) : null,
                     p.weight ? parseFloat(String(p.weight)) : null,
                     p.loomId ? parseInt(p.loomId) : null,
-                    wageVal
+                    wageVal,
+                    dhotiMeterVal
                 ]
             );
 
@@ -392,16 +404,27 @@ export const updateSizing = async (
             }
         }
 
+        // Auto-migrate sizing_warp_details to have DhotiMeter column if not exists
+        try {
+            const [cols]: any = await conn.query(`SHOW COLUMNS FROM sizing_warp_details LIKE 'DhotiMeter'`);
+            if (cols.length === 0) {
+                await conn.query(`ALTER TABLE sizing_warp_details ADD COLUMN DhotiMeter DECIMAL(10,2) NOT NULL DEFAULT 0.00`);
+            }
+        } catch (e) { }
+
         // 3. Update or Insert products (warp details)
         for (const p of products) {
             const wageVal = (p.wageRate !== undefined && p.wageRate !== null && p.wageRate !== '')
                 ? parseFloat(String(p.wageRate))
                 : null;
+            const dhotiMeterVal = (p.dhotiMeter !== undefined && p.dhotiMeter !== null && p.dhotiMeter !== '')
+                ? parseFloat(String(p.dhotiMeter))
+                : 0.00;
 
             if (p.warpId) {
                 await conn.query(
                     `UPDATE sizing_warp_details SET
-                        Meters = ?, Color = ?, DeliveredDate = ?, Price = ?, Weight = ?, LoomId = ?, WageRate = ?
+                        Meters = ?, Color = ?, DeliveredDate = ?, Price = ?, Weight = ?, LoomId = ?, WageRate = ?, DhotiMeter = ?
                      WHERE WarpId = ?`,
                     [
                         p.meters || 0,
@@ -411,14 +434,15 @@ export const updateSizing = async (
                         p.weight ? parseFloat(String(p.weight)) : null,
                         p.loomId ? parseInt(p.loomId) : null,
                         wageVal,
+                        dhotiMeterVal,
                         Number(p.warpId)
                     ]
                 );
             } else {
                 await conn.query(
                     `INSERT INTO sizing_warp_details (
-                        SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId, WageRate
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        SizingId, Meters, Color, DeliveredDate, Price, Weight, LoomId, WageRate, DhotiMeter
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         sizingId,
                         p.meters || 0,
@@ -427,7 +451,8 @@ export const updateSizing = async (
                         p.price ? parseFloat(String(p.price)) : null,
                         p.weight ? parseFloat(String(p.weight)) : null,
                         p.loomId ? parseInt(p.loomId) : null,
-                        wageVal
+                        wageVal,
+                        dhotiMeterVal
                     ]
                 );
             }

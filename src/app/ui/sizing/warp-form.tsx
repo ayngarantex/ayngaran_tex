@@ -12,7 +12,7 @@ interface ProductsProps {
 
 export default function WarpForm({ warpDetails, setWarpDetails, looms }: ProductsProps) {
   const [selectedProducts, setSelectedProducts] = useState<SizingRow[]>(
-    [{ pId: 0, warpId: 0, meters: 0, color: "", date: "", weight: 0, loomId: 0, wageRate: 0 }]
+    [{ pId: 0, warpId: 0, meters: 0, color: "", date: "", weight: 0, loomId: 0, wageRate: 0, dhotiMeter: 0 }]
   );
 
   useEffect(() => {
@@ -21,6 +21,19 @@ export default function WarpForm({ warpDetails, setWarpDetails, looms }: Product
 
     if (warpDetails && warpDetails.length > 0) {
       warpDetails.forEach((row: any, rowIndex: number) => {
+        const rowLoomId = row.LoomId || row.loomId || 0;
+        const matchingLoom = looms?.find((l: any) => Number(l.LoomId) === Number(rowLoomId));
+
+        let dm = row.DhotiMeter !== undefined && row.DhotiMeter !== null ? Number(row.DhotiMeter) : (row.dhotiMeter ? Number(row.dhotiMeter) : 0);
+        if (!dm && matchingLoom && matchingLoom.DhotiMeter) {
+          dm = Number(matchingLoom.DhotiMeter);
+        }
+
+        let wr = row.WageRate !== undefined ? Number(row.WageRate) : (row.wageRate ? Number(row.wageRate) : 0);
+        if (!wr && matchingLoom && matchingLoom.WageRate) {
+          wr = Number(matchingLoom.WageRate);
+        }
+
         formProducts.push({
           pId: rowIndex,
           warpId: row.WarpId || row.warpId || 0,
@@ -28,15 +41,16 @@ export default function WarpForm({ warpDetails, setWarpDetails, looms }: Product
           color: row.Color || row.color || "",
           date: row.DeliveredDate ? formatDateToLocalNew(row.DeliveredDate) : (row.date || ""),
           weight: row.Weight || row.weight || 0,
-          loomId: row.LoomId || row.loomId || 0,
-          wageRate: row.WageRate !== undefined ? Number(row.WageRate) : (row.wageRate ? Number(row.wageRate) : 0)
+          loomId: rowLoomId,
+          wageRate: wr,
+          dhotiMeter: dm
         });
         pId = rowIndex + 1;
       });
-      formProducts.push({ pId: pId, warpId: 0, meters: 0, color: "", date: "", weight: 0, loomId: 0, wageRate: 0 });
+      formProducts.push({ pId: pId, warpId: 0, meters: 0, color: "", date: "", weight: 0, loomId: 0, wageRate: 0, dhotiMeter: 0 });
       setSelectedProducts(formProducts);
     }
-  }, [warpDetails?.length]);
+  }, [warpDetails?.length, looms]);
 
   const handleChange = (
     pId: number,
@@ -50,8 +64,13 @@ export default function WarpForm({ warpDetails, setWarpDetails, looms }: Product
           // Auto fill default loom wage rate if loomId changes and wageRate is 0 or empty
           if (field === 'loomId' && Number(value) > 0) {
             const selectedLoom = looms?.find((l: any) => Number(l.LoomId) === Number(value));
-            if (selectedLoom && selectedLoom.WageRate && (!row.wageRate || row.wageRate === 0)) {
-              updated.wageRate = Number(selectedLoom.WageRate);
+            if (selectedLoom) {
+              if (selectedLoom.WageRate && (!row.wageRate || row.wageRate === 0)) {
+                updated.wageRate = Number(selectedLoom.WageRate);
+              }
+              if (selectedLoom.DhotiMeter && (!row.dhotiMeter || row.dhotiMeter === 0)) {
+                updated.dhotiMeter = Number(selectedLoom.DhotiMeter);
+              }
             }
           }
           return updated;
@@ -65,7 +84,7 @@ export default function WarpForm({ warpDetails, setWarpDetails, looms }: Product
     e.preventDefault();
     setSelectedProducts((prev) => [
       ...prev,
-      { pId: rowIndex, warpId: 0, meters: 0, color: "", date: "", weight: 0, loomId: 0, wageRate: 0 },
+      { pId: rowIndex, warpId: 0, meters: 0, color: "", date: "", weight: 0, loomId: 0, wageRate: 0, dhotiMeter: 0 },
     ]);
   };
 
@@ -190,6 +209,23 @@ export default function WarpForm({ warpDetails, setWarpDetails, looms }: Product
                 placeholder="Wages/Dhoti"
               />
               <CurrencyRupeeIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-indigo-500" />
+            </div>
+
+            {/* Meter Per Dhoti Field */}
+            <div className="relative w-36" title="Meter per Dhoti for this Warp (default from Job Work)">
+              <input
+                type="number"
+                step="0.01"
+                value={row.dhotiMeter !== undefined && row.dhotiMeter !== 0 ? row.dhotiMeter : ''}
+                onChange={(e) =>
+                  handleChange(rowIndex, "dhotiMeter", Number(e.target.value))
+                }
+                className="border border-emerald-200 p-2 pl-3 pr-10 rounded text-sm font-semibold text-emerald-900 w-full focus:border-emerald-500 outline-none"
+                placeholder="Meter/Dhoti"
+              />
+              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-emerald-700">
+                {row.dhotiMeter && Number(row.dhotiMeter) > 0 ? `${(Number(row.dhotiMeter) * 39.37).toFixed(1)}″` : 'm'}
+              </div>
             </div>
 
             {/* Remove Button */}

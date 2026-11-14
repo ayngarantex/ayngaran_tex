@@ -83,6 +83,10 @@ export default function EditForm({
     }
   };
 
+  const meterPerDhoti = (summaryDetails?.DhotiMeter && Number(summaryDetails.DhotiMeter) > 0)
+    ? Number(summaryDetails.DhotiMeter)
+    : ((summaryDetails?.LoomId === 11 || summaryDetails?.LoomId === 33) ? 1.89 : 1.93);
+
   const totalWarps = summaryDetails?.warp_detail?.length;
 
   const totalMeters = summaryDetails?.warp_detail?.length && summaryDetails?.warp_detail.reduce(
@@ -152,7 +156,11 @@ export default function EditForm({
                 </p>
                 <p className='font-semibold text-lg w-full my-2'>
                   Dhoties
-                  <span className='ml-2 text-blue-600 font-medium'>({(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((totalMeters || 0) / 1.89) : Math.floor((totalMeters || 0) / 1.93)})</span>
+                  <span className='ml-2 text-blue-600 font-medium'>
+                    ({warpDetails?.length
+                      ? warpDetails.reduce((sum: number, w: any) => sum + Math.floor((Number(w.Meters) || 0) / ((w.DhotiMeter && Number(w.DhotiMeter) > 0) ? Number(w.DhotiMeter) : meterPerDhoti)), 0)
+                      : Math.floor((totalMeters || 0) / meterPerDhoti)})
+                  </span>
                 </p>
               </div>
               <p className='font-semibold text-lg w-1/2'>Weight <span className='ml-2 text-blue-600 font-medium'>({(totalWeight || 0).toFixed(2)})</span></p>
@@ -168,6 +176,7 @@ export default function EditForm({
                   .filter((p: any) => String(p.WarpId) === String(row.WarpId))
                   .reduce((sum: number, p: any) => sum + Number(p.Count || 0), 0);
 
+                const rowMeterPerDhoti = (row.DhotiMeter && Number(row.DhotiMeter) > 0) ? Number(row.DhotiMeter) : meterPerDhoti;
                 const isWarpCompleted = !!row.CompletedDate;
                 const startDateToDisplay = warpEntries.length > 0 ? warpEntries[0] : (row.StartDate || null);
                 const endDateToDisplay = warpEntries.length > 0 ? warpEntries[warpEntries.length - 1] : (row.CompletedDate || null);
@@ -226,20 +235,21 @@ export default function EditForm({
 
                     <div className="flex font-medium text-gray-800 mb-1">
                       {warpReceivedDhoties > 0 && (
-                        <span className="text-blue-600 font-bold">Tot: ({(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) : Math.floor((row.Meters || 0) / 1.93)}) dhoties</span>
+                        <span className="text-blue-600 font-bold">Tot: ({Math.floor((row.Meters || 0) / rowMeterPerDhoti)}) dhoties</span>
                       )}
                     </div>
                     <div className="flex justify-between font-medium text-gray-800 mb-1">
                       {warpReceivedDhoties > 0 && (
                         <>
-                          <span className="text-red-600 font-bold">Diff: {(summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? Math.floor((row.Meters || 0) / 1.89) - warpReceivedDhoties : Math.floor((row.Meters || 0) / 1.93) - warpReceivedDhoties} dhoties</span>
+                          <span className="text-red-600 font-bold">Diff: {Math.floor((row.Meters || 0) / rowMeterPerDhoti) - warpReceivedDhoties} dhoties</span>
                           <span className="text-blue-600 font-bold">Rcvd: {warpReceivedDhoties} dhoties</span>
                         </>
                       )}
                     </div>
                     <div className="flex gap-2 mb-1">
-                      <div className="w-1/2 text-gray-600 text-xs">Meter: <span className="font-semibold text-gray-900">{row.Meters || 0}</span></div>
-                      <div className="w-1/2 text-gray-600 text-xs">Weight: <span className="font-semibold text-gray-900">{row.Weight || 0}</span></div>
+                      <div className="w-1/3 text-gray-600 text-xs">Meter: <span className="font-semibold text-gray-900">{row.Meters || 0}</span></div>
+                      <div className="w-1/3 text-gray-600 text-xs">Weight: <span className="font-semibold text-gray-900">{row.Weight || 0}</span></div>
+                      <div className="w-1/3 text-gray-600 text-xs">M/Dhoti: <span className="font-semibold text-emerald-800">{rowMeterPerDhoti} m ({ (rowMeterPerDhoti * 39.37).toFixed(1) }″)</span></div>
                     </div>
 
                     {/* Dates (Start & End) */}
@@ -294,6 +304,9 @@ interface PieceReceivedProps {
 }
 
 function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProducts, warpDetails }: PieceReceivedProps) {
+  const meterPerDhoti = (summaryDetails?.DhotiMeter && Number(summaryDetails.DhotiMeter) > 0)
+    ? Number(summaryDetails.DhotiMeter)
+    : ((summaryDetails?.LoomId === 11 || summaryDetails?.LoomId === 33) ? 1.89 : 1.93);
   const handleChange = (
     index: number,
     field: string,
@@ -492,7 +505,7 @@ function PieceReceivedDetails({ summaryDetails, summaryProducts, setSummaryProdu
           Dhoties: {totalDhoties || 0}
         </div>
         <div className="mt-2 font-bold text-sm pr-8">
-          Meter {totalDhoties ? ((summaryDetails.LoomId === 11 || summaryDetails.LoomId === 33) ? ((totalDhoties || 0) * 1.89) : ((totalDhoties || 0) * 1.93)) : 0}
+          Meter {totalDhoties ? ((totalDhoties || 0) * meterPerDhoti) : 0}
         </div>
         <div className="mt-2 font-bold text-sm">
           Weight: {(totalWeight || 0).toFixed(2)}

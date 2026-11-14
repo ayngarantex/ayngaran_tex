@@ -539,7 +539,7 @@ export default function WeeklyFoldingTable({
                                             </td>
 
                                             {/* Balance Due */}
-                                            <td className="px-3 py-3 text-right whitespace-nowrap font-black text-rose-700 bg-rose-50/30">
+                                            <td className={`px-3 py-3 text-right whitespace-nowrap font-black ${rec.BalanceDue > 0 ? 'text-rose-700' : 'text-green-700'}`}>
                                                 ₹ {rec.BalanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                 {rec.TotalFoldedGivenCount && rec.TotalFoldedGivenCount > 0 ? (
                                                     <span className="flex text-[9px] text-purple-700 font-bold mt-0.5 justify-end">

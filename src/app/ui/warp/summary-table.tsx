@@ -2,6 +2,12 @@ import { formatDate, formatDateNew } from "@/app/lib/utils";
 import { EditSUmmary } from "./buttons";
 import Link from "next/link";
 
+
+function getLoomDhotiMeter(row: any): number {
+  if (row.DhotiMeter && Number(row.DhotiMeter) > 0) return Number(row.DhotiMeter);
+  return (row.LoomId === 11 || row.LoomId === 33) ? 1.89 : 1.93;
+}
+
 export default function WarpSummaryTable({
   summary,
 }: {
@@ -114,10 +120,7 @@ export default function WarpSummaryTable({
                       <p className="text-blue-600 w-24">
                         <span className="w-12 pr-4 inline-block text-right">Rec</span>:
                         <span className="w-12 pl-1 inline-block text-right">
-                          {(row.LoomId === 11 || row.LoomId === 33) ?
-                            Math.floor(row.ReceivedDhoties * 1.89) :
-                            Math.floor(row.ReceivedDhoties * 1.93)
-                          }
+                          {Math.floor(row.ReceivedDhoties * getLoomDhotiMeter(row))}
                         </span>
                       </p>
                     </td>
@@ -125,10 +128,7 @@ export default function WarpSummaryTable({
                       <p className="text-red-600 w-24 mb-1">
                         <span className="w-12 pr-4 inline-block text-right">Total</span>:
                         <span className="w-12 pl-1 inline-block text-right">
-                          {(row.LoomId === 11 || row.LoomId === 33) ?
-                            Math.floor(row.TotalMeters / 1.89) :
-                            Math.floor(row.TotalMeters / 1.93)
-                          }
+                          {Math.floor(row.TotalMeters / getLoomDhotiMeter(row))}
                         </span>
                       </p>
                       <p className="text-blue-600 w-24 mb-1">
@@ -138,10 +138,7 @@ export default function WarpSummaryTable({
                       <p className="text-gray-600 w-24">
                         <span className="w-12 pr-3 inline-block text-right">Diff</span>:
                         <span className="w-12 pl-1 inline-block text-right">
-                          {(row.LoomId === 11 || row.LoomId === 33) ?
-                            Math.floor(row.TotalMeters / 1.89) - row.ReceivedDhoties :
-                            Math.floor(row.TotalMeters / 1.93) - row.ReceivedDhoties
-                          }
+                          {Math.floor(row.TotalMeters / getLoomDhotiMeter(row)) - row.ReceivedDhoties}
                         </span>
                       </p>
                     </td>

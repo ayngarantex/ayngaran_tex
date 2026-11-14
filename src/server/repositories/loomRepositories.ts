@@ -37,7 +37,7 @@ export const getLoomById = async (Id: any) => {
 };
 
 export const createLoom = async (loomData: any) => {
-    const { LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance } = loomData;
+    const { LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter } = loomData;
     try {
         const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
         if (cols.length === 0) {
@@ -53,17 +53,17 @@ export const createLoom = async (loomData: any) => {
 };
 
 export const updateLoom = async (loomData: any) => {
-    const { LoomId, LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance } = loomData;
+    const { LoomId, LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter } = loomData;
     try {
-        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
+        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'DhotiMeter'`);
         if (cols.length === 0) {
-            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
+            await db.query(`ALTER TABLE loom_details ADD COLUMN DhotiMeter DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
         }
     } catch (e) { }
 
     const [result]: any = await db.query(
-        "UPDATE loom_details SET LoomName = ?, Address = ?, ContactNumber = ?, Count = ?, WageRate = ?, OpeningBalance = ? WHERE LoomId = ?",
-        [LoomName, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0, LoomId]
+        "UPDATE loom_details SET LoomName = ?, Address = ?, ContactNumber = ?, Count = ?, WageRate = ?, OpeningBalance = ?, DhotiMeter = ? WHERE LoomId = ?",
+        [LoomName, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0, Number(DhotiMeter), LoomId]
     );
     return result.affectedRows;
 };
