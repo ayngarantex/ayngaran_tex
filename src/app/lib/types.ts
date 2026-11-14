@@ -18,6 +18,7 @@ export interface SizingRow {
   weight: any;
   loomId: any;
   wageRate?: number;
+  dhotiMeter?: number;
 }
 
 export interface PaymentRow {

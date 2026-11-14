@@ -16,6 +16,7 @@ export default function EditForm({
   const [count, setCount] = useState("");
   const [wageRate, setWageRate] = useState("");
   const [openingBalance, setOpeningBalance] = useState("");
+  const [dhotiMeter, setDhotiMeter] = useState("");
 
   // Pre-fill state from loom data
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function EditForm({
     setCount(loom?.Count || "");
     setWageRate(loom?.WageRate !== undefined ? String(loom.WageRate) : "");
     setOpeningBalance(loom?.OpeningBalance !== undefined ? String(loom.OpeningBalance) : "");
+    setDhotiMeter(loom?.DhotiMeter !== undefined && loom?.DhotiMeter !== null ? String(loom.DhotiMeter) : "");
   }, [loom]);
 
   const handleSubmit = async () => {
@@ -35,7 +37,8 @@ export default function EditForm({
       Address: address,
       Count: count,
       WageRate: wageRate,
-      OpeningBalance: openingBalance
+      OpeningBalance: openingBalance,
+      DhotiMeter: dhotiMeter
     };
 
     const res = await updateLoom(loomData);
@@ -140,6 +143,42 @@ export default function EditForm({
                 className="peer block w-full rounded-md border border-amber-200 py-2 pl-4 text-sm font-bold text-amber-900 outline-2 placeholder:text-gray-400 bg-blue-100 focus:bg-white"
               />
             </div>
+          </div>
+
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="dhotiMeter" className="block text-sm font-medium text-emerald-800 font-bold">
+                Meter of Dhoti (m)
+              </label>
+              {dhotiMeter && Number(dhotiMeter) > 0 ? (
+                <span className="text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
+                  ≈ {(Number(dhotiMeter) * 39.37).toFixed(1)}″ ({(Number(dhotiMeter) * 39.37).toFixed(2)} inch)
+                </span>
+              ) : null}
+            </div>
+            <div className="relative mt-2 rounded-md">
+              <input
+                id="dhotiMeter"
+                name="dhotiMeter"
+                type="number"
+                step="0.01"
+                value={dhotiMeter}
+                onChange={(e) => setDhotiMeter(e.target.value)}
+                placeholder="e.g. 1.89"
+                className="peer block w-full rounded-md border border-emerald-200 py-2 pl-4 pr-16 text-sm font-bold text-emerald-900 outline-2 placeholder:text-gray-400 bg-blue-100 focus:bg-white"
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <span className="text-xs font-semibold text-emerald-700">
+                  {dhotiMeter && Number(dhotiMeter) > 0 ? `${(Number(dhotiMeter) * 39.37).toFixed(1)}″` : 'm'}
+                </span>
+              </div>
+            </div>
+            {dhotiMeter && Number(dhotiMeter) > 0 && (
+              <p className="mt-1 text-xs text-emerald-700 font-medium">
+                ≈ {(Number(dhotiMeter) * 39.37).toFixed(2)} inches
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-2 lg:col-span-4">

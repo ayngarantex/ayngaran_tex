@@ -28,6 +28,9 @@ export default async function Table({
                   Wage Rate (₹/Dhoti)
                 </th>
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
+                  Meter / Dhoti (Inch)
+                </th>
+                <th scope="col" className="px-4 py-5 font-bold sm:pl-6">
                   Opening Balance (₹)
                 </th>
                 <th scope="col" className="px-4 py-5 font-bold sm:pl-6 flex justify-end">
@@ -64,6 +67,20 @@ export default async function Table({
                   <td className="whitespace-nowrap py-3 pl-6 pr-3 font-bold text-indigo-700">
                     <div className="flex items-center gap-1">
                       ₹ {parseFloat(loom?.WageRate || 0).toFixed(2)}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3 font-semibold text-emerald-800">
+                    <div className="flex items-center gap-1.5">
+                      {loom?.DhotiMeter && Number(loom.DhotiMeter) > 0 ? (
+                        <>
+                          <span>{parseFloat(loom.DhotiMeter).toFixed(2)} m</span>
+                          <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                            {(Number(loom.DhotiMeter) * 39.37).toFixed(1)}″
+                          </span>
+                        </>
+                      ) : (
+                        '-'
+                      )}
                     </div>
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3 font-bold text-amber-800">
