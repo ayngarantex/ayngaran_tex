@@ -39,7 +39,13 @@ export default function PaymentsTab({ record, onReload }: PaymentsTabProps) {
                         >
                             <div className="flex items-center gap-3">
                                 <span className="font-semibold text-slate-800">{formatDateNew(p.PaymentDate)}</span>
-                                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">
+                                <span className={`px-2 py-0.5 rounded-md font-medium ${
+                                    p.PaymentType === 'Advance Deduction' || (p.PaymentType || '').toLowerCase().includes('deduct')
+                                        ? 'bg-purple-100 text-purple-800 border border-purple-200 font-bold'
+                                        : p.PaymentType === 'Advance Payment' || (p.PaymentType || '').toLowerCase().includes('advance')
+                                        ? 'bg-amber-100 text-amber-800 border border-amber-200 font-bold'
+                                        : 'bg-slate-100 text-slate-700'
+                                }`}>
                                     {p.PaymentType}
                                 </span>
                                 {p.Note && (

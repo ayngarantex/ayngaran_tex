@@ -62,12 +62,11 @@ export const fetchInvoiceTotal = async (
     startDate: string,
     endDate: string,
     billType: string,
-    orderBy: string = '',
     productId?: string | null,
     customerId?: string | null
 ) => {
     try {
-        const totals = await getInvoicesTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null, productId ? Number(productId) : null, customerId ? Number(customerId) : null);
+        const totals = await getInvoicesTotal(query || null, startDate || null, endDate || null, billType || null, productId ? Number(productId) : null, customerId ? Number(customerId) : null);
         return JSON.parse(JSON.stringify(totals));
     } catch (err) {
         console.error("fetchInvoiceTotal Error:", err);

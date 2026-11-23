@@ -7,10 +7,11 @@ export const getSizings = async (
     startDate: string | null,
     endDate: string | null,
     billType: string | null,
-    orderBy: string | null
+    sortBy: string | null,
+    sortOrder: string | null,
 ) => {
     let sql = `
-    SELECT S.*, Sup.Name AS SupplierName, Sup.Name AS SizingName, Sup.GstNumber AS SupplierGstNumber,
+    SELECT S.*, COALESCE(S.InvoiceAmount, 0) - COALESCE(S.ReceivedAmount, 0) AS BalanceAmount, Sup.Name AS SupplierName, Sup.Name AS SizingName, Sup.GstNumber AS SupplierGstNumber,
            Sup.Agent AS SupplierAgent, Sup.AccountNumber AS SupplierAccountNumber, Sup.Bank AS SupplierBank,
            (SELECT COUNT(*) FROM sizing_warp_details SWD WHERE SWD.SizingId = S.SizingId) AS TotalWarp
     FROM sizing S
@@ -38,13 +39,24 @@ export const getSizings = async (
         params.push(billType);
     }
 
-    if (orderBy === 'pending') {
-        sql += ` ORDER BY 
-            CASE WHEN (COALESCE(S.InvoiceAmount, 0) - COALESCE(S.ReceivedAmount, 0)) > 0 THEN 0 ELSE 1 END,
-            S.InvoiceDate ASC`;
-    } else {
-        sql += " ORDER BY S.InvoiceDate DESC, S.SizingId DESC";
+    const direction = (sortOrder && sortOrder.toLowerCase() === 'asc') ? 'ASC' : 'DESC';
+    let orderClause = ``;
+    if (sortBy) {
+        switch (sortBy.toLowerCase()) {
+            case 'date':
+                orderClause = `ORDER BY S.InvoiceDate ${direction}, S.SizingId DESC`;
+                break;
+            case 'supplier':
+                orderClause = `ORDER BY Sup.Name ${direction}, S.SizingId DESC`;
+                break;
+            case 'balance':
+            case 'status':
+                orderClause = `ORDER BY BalanceAmount ${direction}, S.SizingId DESC`;
+                break;
+        }
     }
+
+    sql += " " + orderClause;
 
     if (page && limit) {
         sql += " LIMIT ? OFFSET ?";
@@ -115,8 +127,7 @@ export const getSizingTotal = async (
     search: string | null,
     startDate: string | null,
     endDate: string | null,
-    billType: string | null,
-    orderBy: string | null
+    billType: string | null
 ) => {
     let sql = `
     SELECT SUM(S.InvoiceAmount) AS totalInvoiceAmount, SUM(S.ReceivedAmount) AS totalReceived
@@ -281,15 +292,6 @@ export const createSizing = async (
 
         const sizingId = sizingRes.insertId;
 
-
-        // Auto-migrate sizing_warp_details to have DhotiMeter column if not exists
-        try {
-            const [cols]: any = await conn.query(`SHOW COLUMNS FROM sizing_warp_details LIKE 'DhotiMeter'`);
-            if (cols.length === 0) {
-                await conn.query(`ALTER TABLE sizing_warp_details ADD COLUMN DhotiMeter DECIMAL(10,2) NOT NULL DEFAULT 0.00`);
-            }
-        } catch (e) { }
-
         // 2. Insert products (warp details)
         for (const p of products) {
             const wageVal = (p.wageRate !== undefined && p.wageRate !== null && p.wageRate !== '')
@@ -403,14 +405,6 @@ export const updateSizing = async (
                 console.log(`Warp ${warpId} is used in warp_dc_details, skipping delete`);
             }
         }
-
-        // Auto-migrate sizing_warp_details to have DhotiMeter column if not exists
-        try {
-            const [cols]: any = await conn.query(`SHOW COLUMNS FROM sizing_warp_details LIKE 'DhotiMeter'`);
-            if (cols.length === 0) {
-                await conn.query(`ALTER TABLE sizing_warp_details ADD COLUMN DhotiMeter DECIMAL(10,2) NOT NULL DEFAULT 0.00`);
-            }
-        } catch (e) { }
 
         // 3. Update or Insert products (warp details)
         for (const p of products) {

@@ -2,16 +2,21 @@ import { UpdateProduct, DeleteProduct } from '@/app/ui/products/buttons';
 import { fetchProducts } from '@/app/api/node/product';
 import { formatDateNew } from '@/app/lib/utils';
 import Link from 'next/link';
+import SortableHeader from '@/app/ui/products/sortable-header';
 import StockCreateModal from '@/app/ui/products/StockCreateModal';
 
 export default async function ProductTable({
   query,
   currentPage,
+  sortBy,
+  sortOrder,
 }: {
   query: string;
   currentPage: number;
+  sortBy?: string;
+  sortOrder?: string;
 }) {
-  const products = await fetchProducts(query, currentPage);
+  const products = await fetchProducts(query, currentPage, sortBy, sortOrder);
 
   if (!products || products.length === 0) {
     return (
@@ -29,22 +34,22 @@ export default async function ProductTable({
             <thead className="rounded-lg text-left text-xs sm:text-sm font-bold bg-slate-100 text-slate-900 uppercase tracking-wider">
               <tr>
                 <th scope="col" className="px-4 py-3.5 font-bold sm:pl-6">
-                  Product Name
+                  <SortableHeader field="name" label="Product Name" />
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
                   Code
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
-                  Total
+                  <SortableHeader field="total" label="Total" />
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
-                  Sold
+                  <SortableHeader field="sold" label="Sold" />
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
-                  Last Entry
+                  <SortableHeader field="lastEntry" label="Last Entry" />
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
-                  Available
+                  <SortableHeader field="available" label="Available" />
                 </th>
                 <th scope="col" className="relative py-3.5 pl-6 pr-3 text-right font-bold">
                   Actions
@@ -101,7 +106,12 @@ export default async function ProductTable({
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5 font-bold text-purple-700">
-                    {prod?.AvailableStock ? Number(prod.AvailableStock).toLocaleString() : 0}
+                    <span>
+                      {prod?.AvailableStock ? Number(prod.AvailableStock).toLocaleString() : 0}
+                      {prod?.AvailableStock ? (
+                        <span className='text-slate-700 pl-2'>({(Number(prod.AvailableStock) / 50).toLocaleString()})</span>
+                      ) : null}
+                    </span>
                   </td>
                   <td className="whitespace-nowrap py-3.5 pl-6 pr-3 text-right">
                     <div className="flex justify-end gap-2 items-center">

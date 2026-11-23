@@ -41,7 +41,6 @@ export default function FoldingModal({
     looms,
     newType
 }: FoldingModalProps) {
-    console.log("initialData?.FoldedStatus", initialData?.FoldedStatus)
     const todayStr = new Date().toISOString().split('T')[0];
     const foldingItemList = FoldingItems();
 
@@ -282,8 +281,6 @@ export default function FoldingModal({
                                             setLoomId(found.LoomId);
                                             setFolder(found.LoomName);
                                         }
-                                    } else if (selectedVal === 'R Tex' || selectedVal === 'R Tex Folding') {
-                                        setLoomId(30036);
                                     }
                                 }}
                                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"

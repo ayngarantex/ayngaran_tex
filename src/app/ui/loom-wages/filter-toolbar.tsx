@@ -300,7 +300,7 @@ export default function FilterToolbar({
 
                     {/* Opening Balance (Before 2026-09-27) Editor */}
                     <div className="flex items-center gap-2 border-l border-indigo-200 pl-3">
-                        <span className="font-bold">Opening Balance (Before 2026-09-27):</span>
+                        <span className="font-bold">Loom Advance / Opening Balance:</span>
                         {isEditingOpeningBal ? (
                             <div className="flex items-center gap-1.5">
                                 <span className="font-bold">₹</span>
@@ -339,7 +339,7 @@ export default function FilterToolbar({
                                     className="inline-flex items-center gap-1 text-indigo-600 hover:underline font-bold text-xs cursor-pointer"
                                 >
                                     <PencilSquareIcon className="h-3.5 w-3.5" />
-                                    Edit Balance
+                                    Edit Advance
                                 </button>
                             </div>
                         )}

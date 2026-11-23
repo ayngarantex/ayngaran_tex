@@ -87,19 +87,6 @@ export default function WarpMultiForm({ looms = [], loomId = 0 }: { looms?: any[
           <h3 className="text-lg font-semibold">entries</h3>
           <p className="text-sm text-slate-600">Add multiple rows and save them all together.</p>
         </div>
-
-        <div className="flex flex-col gap-2 md:flex-row md:items-center">
-          <div className="text-sm text-slate-600">
-            Total weight: <span className="font-semibold">{totalWeight}</span>
-          </div>
-          <button
-            type="button"
-            onClick={addRow}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            + Add row
-          </button>
-        </div>
         <Link
           href={
             loomId ? `/admin/jobworks/${loomId}/view` : `/admin/jobworks`
@@ -210,6 +197,18 @@ export default function WarpMultiForm({ looms = [], loomId = 0 }: { looms?: any[
             </div>
           </div>
         ))}
+      </div>
+      <div className="flex flex-col gap-2 md:flex-row justify-end md:items-center mt-4">
+        <div className="text-sm text-slate-600">
+          Total weight: <span className="font-semibold">{totalWeight}</span>
+        </div>
+        <button
+          type="button"
+          onClick={addRow}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+        >
+          + Add row
+        </button>
       </div>
 
       {status ? (

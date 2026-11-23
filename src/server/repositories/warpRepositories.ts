@@ -340,6 +340,7 @@ export const getWarpSummaryCount = async (
 export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
     const sId = Number(sizingId);
     const lId = Number(loomId);
+    const escapedSizingStr = String(sizingId || '').replace(/'/g, "''");
 
     let sizingDetailsQuery = `
         SELECT 
@@ -358,11 +359,13 @@ export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
         FROM sizing S 
         LEFT JOIN sizing_warp_details SWD ON S.SizingId = SWD.SizingId ${lId > 0 ? `AND SWD.LoomId = ${lId}` : ''}
         LEFT JOIN loom_details L ON SWD.LoomId = L.LoomId
-        WHERE S.SizingId = ${sId}
+        WHERE (S.SizingId = ${sId || 0} OR S.InvoiceNumber = '${escapedSizingStr}')
         GROUP BY S.SizingId, L.LoomId, S.InvoiceDate, S.Color, L.LoomName
     `;
 
     const [sizingDetailsResult]: any = await db.query(sizingDetailsQuery);
+    const firstRow = sizingDetailsResult && sizingDetailsResult.length > 0 ? sizingDetailsResult[0] : {};
+    const actualSizingId = firstRow.SizingId ? Number(firstRow.SizingId) : sId;
 
     let sizingSummaryQuery = `
         SELECT SSD.Date,
@@ -374,18 +377,16 @@ export const getWarpSummaryById = async (sizingId: any, loomId: any) => {
         SSD.WarpId,
         SSD.IsCompleted
         FROM sizing_summary_details SSD
-        WHERE SSD.SizingId = ${sId} ${lId > 0 ? `AND SSD.LoomId = ${lId}` : ''}
+        WHERE SSD.SizingId = ${actualSizingId} ${lId > 0 ? `AND SSD.LoomId = ${lId}` : ''}
     `;
     const [sizingSummaryResult]: any = await db.query(sizingSummaryQuery);
 
     let warpDhotieDetailsQuery = `
         SELECT SWD.*
         FROM sizing_warp_details SWD 
-        WHERE SWD.SizingId = ${sId} ${lId > 0 ? `AND SWD.LoomId = ${lId}` : ''}
+        WHERE SWD.SizingId = ${actualSizingId} ${lId > 0 ? `AND SWD.LoomId = ${lId}` : ''}
     `;
     const [warpDhotieDetailsResult]: any = await db.query(warpDhotieDetailsQuery);
-
-    const firstRow = sizingDetailsResult && sizingDetailsResult.length > 0 ? sizingDetailsResult[0] : {};
 
     let data = {
         InvoiceDate: firstRow.InvoiceDate || null,

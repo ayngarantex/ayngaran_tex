@@ -165,16 +165,35 @@ export default function PaymentModal({ isOpen, onClose, record, onSuccess }: Pay
                         </label>
                         <select
                             value={paymentType}
-                            onChange={(e) => setPaymentType(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setPaymentType(val);
+                                if (val === 'Advance Deduction' && !note) {
+                                    setNote('Adjusted from Advance balance');
+                                } else if (val === 'Advance Payment' && !note) {
+                                    setNote('Advance given to weaver');
+                                }
+                            }}
                             className="w-full rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white"
                         >
                             <option value="Cash">Cash</option>
                             <option value="GPay / PhonePe / UPI">GPay / PhonePe / UPI</option>
                             <option value="Bank Transfer">Bank Transfer (NEFT/RTGS)</option>
-                            <option value="Advance Payment">Advance Payment</option>
+                            <option value="Advance Deduction">Advance Deduction (Adjust from Advance)</option>
+                            <option value="Advance Payment">Advance Payment (New Advance Given)</option>
                             <option value="Cheque">Cheque</option>
                             <option value="Other">Other</option>
                         </select>
+                        {paymentType === 'Advance Deduction' && (
+                            <p className="mt-1.5 text-[11px] font-medium text-purple-700 bg-purple-50 p-2 rounded-lg border border-purple-200">
+                                ℹ️ This amount will be adjusted against the weaver&apos;s advance, settling this week&apos;s wages without paying new cash.
+                            </p>
+                        )}
+                        {paymentType === 'Advance Payment' && (
+                            <p className="mt-1.5 text-[11px] font-medium text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                                ℹ️ This is a new advance given to the weaver, which will increase their outstanding advance.
+                            </p>
+                        )}
                     </div>
 
                     {/* Text Box / Notes */}

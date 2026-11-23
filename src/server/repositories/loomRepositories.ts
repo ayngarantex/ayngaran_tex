@@ -5,8 +5,8 @@ export const getLooms = async (search: string | null, page: number | null, limit
     let params: any[] = [];
 
     if (search != null && search != "") {
-        sql += " WHERE LOWER(LoomName) LIKE ?";
-        params.push(`%${search}%`);
+        sql += " WHERE LOWER(LoomName) LIKE ? OR LOWER(LoomType) LiKE ?";
+        params.push(`%${search}%`, `%${search}%`);
     }
 
     if (page != null && limit != null) {
@@ -37,33 +37,21 @@ export const getLoomById = async (Id: any) => {
 };
 
 export const createLoom = async (loomData: any) => {
-    const { LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter } = loomData;
-    try {
-        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
-        if (cols.length === 0) {
-            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
-        }
-    } catch (e) { }
+    const { LoomName, LoomType, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter } = loomData;
 
     const [result]: any = await db.query(
-        "INSERT INTO loom_details (LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance) VALUES (?, ?, ?, ?, ?, ?)",
-        [LoomName, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0]
+        "INSERT INTO loom_details (LoomName, LoomType, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter) VALUES (?, ?, ?, ? ?, ?,, ?, ?)",
+        [LoomName, LoomType, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance), Number(DhotiMeter) || 0]
     );
     return result;
 };
 
 export const updateLoom = async (loomData: any) => {
-    const { LoomId, LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter } = loomData;
-    try {
-        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'DhotiMeter'`);
-        if (cols.length === 0) {
-            await db.query(`ALTER TABLE loom_details ADD COLUMN DhotiMeter DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
-        }
-    } catch (e) { }
+    const { LoomId, LoomType, LoomName, Address, ContactNumber, Count, WageRate, OpeningBalance, DhotiMeter } = loomData;
 
     const [result]: any = await db.query(
-        "UPDATE loom_details SET LoomName = ?, Address = ?, ContactNumber = ?, Count = ?, WageRate = ?, OpeningBalance = ?, DhotiMeter = ? WHERE LoomId = ?",
-        [LoomName, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0, Number(DhotiMeter), LoomId]
+        "UPDATE loom_details SET LoomName = ?, LoomType = ? , Address = ?, ContactNumber = ?, Count = ?, WageRate = ?, OpeningBalance = ?, DhotiMeter = ? WHERE LoomId = ?",
+        [LoomName, LoomType, Address, ContactNumber, Count, Number(WageRate) || 0, Number(OpeningBalance) || 0, Number(DhotiMeter), LoomId]
     );
     return result.affectedRows;
 };

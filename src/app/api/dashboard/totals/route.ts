@@ -9,7 +9,7 @@ export async function GET() {
     const [invoiceTotals, yarnTotals, sizingTotals, purchaseTotals] = await Promise.all([
       fetchInvoiceTotal("", "", "", ""),
       fetchYarnsDetails("", "", "", "", ""),
-      fetchSizingTotal("", "", "", "", ""),
+      fetchSizingTotal("", "", "", ""),
       fetchPurchasesDetails("", "", "", "", "")
     ]);
 

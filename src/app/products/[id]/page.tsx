@@ -34,6 +34,7 @@ export default async function Page(props: {
                 width={140}
                 height={70}
                 className="object-contain"
+                loading="eager"
                 priority
                 unoptimized
               />
@@ -81,6 +82,7 @@ export default async function Page(props: {
               width={140}
               height={70}
               className="object-contain"
+              loading="eager"
               priority
               unoptimized
             />

@@ -4,9 +4,10 @@ export const getCustomers = async (
     search: string,
     page: number | null,
     limit: number | null,
-    orderBy: string | null,
     startDate: string | null,
-    endDate: string | null
+    endDate: string | null,
+    sortBy: string | null,
+    sortOrder: string | null
 ) => {
     let sql = "";
     let params: any[] = [];
@@ -47,14 +48,43 @@ export const getCustomers = async (
         params.push(`%${search}%`);
     }
 
+
     sql += ' GROUP BY C.CustomerId';
-    if (orderBy === "pending") {
-        sql += " ORDER BY pending DESC";
-    } else if (orderBy === "pendingDays") {
-        sql += " ORDER BY pendingDays DESC";
-    } else {
-        sql += " ORDER BY CustomerName ASC";
+
+    const direction = (sortOrder && sortOrder.toLowerCase() === 'asc') ? 'ASC' : 'DESC';
+
+    let orderClause = "ORDER BY CustomerName asc";
+
+    const zeroLast = direction.toLowerCase() === 'asc' ? 'CASE WHEN pendingDays = 0 THEN 1 ELSE 0 END ASC,' : '';
+    if (sortBy) {
+        switch (sortBy.toLowerCase()) {
+            case 'name':
+                orderClause = `ORDER BY CustomerName ${direction}`;
+                break;
+            case 'state':
+                orderClause = `ORDER BY State ${direction}`;
+                break;
+            case 'agent':
+                orderClause = `ORDER BY Agent ${direction}`;
+                break;
+            case 'pending':
+                orderClause = `ORDER BY pending ${direction}`;
+                break;
+            case 'days':
+                orderClause = `ORDER BY ${zeroLast} pendingDays ${direction}`;
+                break;
+        }
     }
+
+    sql += " " + orderClause;
+
+    // if (sortBy === "pending") {
+    //     sql += " ORDER BY pending DESC";
+    // } else if (sortBy === "pendingDays") {
+    //     sql += " ORDER BY pendingDays DESC";
+    // } else {
+    //     sql += " ORDER BY CustomerName ASC";
+    // }
 
     if (page && limit) {
         sql += " LIMIT ? OFFSET ?";

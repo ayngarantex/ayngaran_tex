@@ -15,10 +15,12 @@ export function UpdateWarp({ id }: { id: string }) {
   );
 }
 
-export function EditSUmmary({ Id, LoomId }: { Id: string, LoomId: number }) {
+export function EditSUmmary({ Id, LoomId }: { Id: string, LoomId: number | string }) {
+  const safeId = Id || '0';
+  const safeLoomId = LoomId !== undefined && LoomId !== null && LoomId !== '' ? LoomId : '0';
   return (
     <ActionLink
-      href={`/admin/warp/${Id}/${LoomId}/summary`}
+      href={`/admin/warp/${safeId}/${safeLoomId}/summary`}
       className="rounded-md border p-2 hover:bg-blue-100 flex items-center justify-center"
       title="Summary"
     >

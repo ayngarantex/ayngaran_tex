@@ -82,14 +82,15 @@ export function UpdateCustomerProduct({ id }: { id: string }) {
   );
 }
 
-export function PrintCustomers({ query, startDate, endDate, billType, orderBy }: { query: string, startDate: string, endDate: string, billType: string, orderBy: string }) {
+export function PrintCustomers({ query, startDate, endDate, billType, sortBy, sortOrder }: { query: string, startDate: string, endDate: string, billType: string, sortBy: string, sortOrder: string }) {
   const handlePrint = () => {
     const params = new URLSearchParams();
     if (query) params.set('query', query);
     if (startDate) params.set('startDate', startDate);
     if (endDate) params.set('endDate', endDate);
     if (billType) params.set('billType', billType);
-    if (orderBy) params.set('orderBy', orderBy);
+    if (sortBy) params.set('sortBy', sortBy);
+    if (sortOrder) params.set('sortOrder', sortOrder);
     params.set('print', 'true');
     window.open(`/admin/customers?${params.toString()}`, '_blank');
   };

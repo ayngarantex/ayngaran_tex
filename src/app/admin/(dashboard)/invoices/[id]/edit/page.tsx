@@ -6,7 +6,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const InvoiceId = parseInt(params.id);
     const invoice = await fetchInvoiceById(InvoiceId);
-    const customers = await fetchCustomers('', 0, "", "", "");
+    const customers = await fetchCustomers('', 0, "", "", null);
 
     return (
         <main>

@@ -27,7 +27,7 @@ export default async function Page(props: {
   const startDate = searchParams?.startDate || '2026-09-27';
   const currentView = searchParams?.view || 'weekly';
 
-  const looms = await fetchLooms('', 0);
+  const looms = await fetchLooms('folding', 0);
   const weeklyRecords = await fetchFoldingWagesConsolidated(query, loomId, startDate);
   const totalCount = await fetchFoldingCount(query);
   const totalPages = Math.ceil(Number(totalCount) / pageLimit) || 1;

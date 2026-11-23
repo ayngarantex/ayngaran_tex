@@ -1,6 +1,12 @@
 import db from '../config/db';
 
-export const getProducts = async (search: string | null, page: number | null, limit: number | null) => {
+export const getProducts = async (
+    search: string | null,
+    page: number | null,
+    limit: number | null,
+    sortBy?: string | null,
+    sortOrder?: string | null
+) => {
     let sql = `
         SELECT P.*, 
                CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) AS TotalStock,
@@ -31,7 +37,38 @@ export const getProducts = async (search: string | null, page: number | null, li
         }
     }
 
-    sql += " GROUP BY P.Id ORDER BY AvailableStock DESC, SoldCount DESC";
+    sql += " GROUP BY P.Id";
+
+    const direction = (sortOrder && sortOrder.toLowerCase() === 'asc') ? 'ASC' : 'DESC';
+
+    let orderClause = "ORDER BY AvailableStock DESC, SoldCount DESC";
+    if (sortBy) {
+        switch (sortBy.toLowerCase()) {
+            case 'name':
+                orderClause = `ORDER BY P.Name ${direction}, P.Id ASC`;
+                break;
+            case 'total':
+            case 'totalstock':
+                orderClause = `ORDER BY TotalStock ${direction}, AvailableStock DESC, P.Id DESC`;
+                break;
+            case 'sold':
+            case 'soldcount':
+                orderClause = `ORDER BY SoldCount ${direction}, AvailableStock DESC, P.Id DESC`;
+                break;
+            case 'available':
+            case 'availablestock':
+                orderClause = `ORDER BY AvailableStock ${direction}, SoldCount DESC, P.Id DESC`;
+                break;
+            case 'lastentry':
+            case 'lastentrydate':
+                orderClause = direction === 'DESC'
+                    ? `ORDER BY (LastEntryDate IS NULL) ASC, LastEntryDate DESC, P.Id DESC`
+                    : `ORDER BY (LastEntryDate IS NULL) ASC, LastEntryDate ASC, P.Id ASC`;
+                break;
+        }
+    }
+
+    sql += " " + orderClause;
 
     if (page && limit) {
         sql += " LIMIT ? OFFSET ?";

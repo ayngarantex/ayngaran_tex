@@ -42,6 +42,11 @@ export interface WeeklyConsolidatedRecord {
     TotalWeight: number;
     TotalCalculatedWages: number;
     TotalPaidAmount: number;
+    paidInAmount: number;
+    CashPaidAmount: number;
+    AdvancePaidAmount: number;
+    AdvanceDeductedAmount: number;
+    LoomAdvancePending: number;
     BalanceDue: number;
     Dcs: DcSummaryItem[];
     TotalDcsCount: number;

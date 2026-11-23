@@ -8,8 +8,8 @@ export const sizingResolver = {
         sizingCount: async (_: unknown, { search, startDate, endDate, billType }: any) => {
             return await sizingService.getSizingCount(search, startDate, endDate, billType);
         },
-        sizingTotal: async (_: unknown, { search, startDate, endDate, billType, orderBy }: any) => {
-            return await sizingService.getSizingTotal(search, startDate, endDate, billType, orderBy);
+        sizingTotal: async (_: unknown, { search, startDate, endDate, billType }: any) => {
+            return await sizingService.getSizingTotal(search, startDate, endDate, billType);
         },
         sizing: async (_: unknown, { Id }: any) => {
             return await sizingService.getSizingById(Number(Id));

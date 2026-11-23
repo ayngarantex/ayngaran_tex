@@ -36,9 +36,9 @@ export default async function Page(props: {
   const printMode = searchParams?.print === 'true';
 
   const products = await fetchAllProducts();
-  const customers = await fetchCustomers("", 1, "", "", "", null);
+  const customers = await fetchCustomers("", 1, "", "", null, "", "");
 
-  const invoiceTotalDetatils: any = await fetchInvoiceTotal(query, startDate, endDate, billType, orderBy, productId, customerId);
+  const invoiceTotalDetatils: any = await fetchInvoiceTotal(query, startDate, endDate, billType, productId, customerId);
 
   const invoices = await fetchInvoices(query, currentPage, startDate, endDate, billType, orderBy, printMode ? null : undefined, productId, customerId);
   const invoicesCount = await fetchInvoicesCount(query, startDate, endDate, billType, orderBy, productId, customerId);

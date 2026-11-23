@@ -4,7 +4,7 @@ import { fetchCustomers } from '@/app/api/node/customers';
 import { fetchLastInvoiceNumber } from '@/app/api/node/invoice';
 
 export default async function Page() {
-  const customers = await fetchCustomers('', 0, "", "", "");
+  const customers = await fetchCustomers('', 0, "", "", null);
   const lastInvoiceGstNumber = await fetchLastInvoiceNumber("gst");
   const lastInvoiceDcNumber = await fetchLastInvoiceNumber("dc");
 

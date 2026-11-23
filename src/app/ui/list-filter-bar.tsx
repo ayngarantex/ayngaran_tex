@@ -31,17 +31,17 @@ function ListFilterBarInner({
   // Determine whether any non-default filters are active
   const hasActiveParam = searchParams
     ? Boolean(
-        searchParams.get('startDate') ||
-        searchParams.get('endDate') ||
-        searchParams.get('billType') ||
-        searchParams.get('orderBy') ||
-        searchParams.get('productId') ||
-        searchParams.get('customerId') ||
-        searchParams.get('loomId') ||
-        searchParams.get('sizingId') ||
-        searchParams.get('loomStatus') ||
-        searchParams.get('pendingDays')
-      )
+      searchParams.get('startDate') ||
+      searchParams.get('endDate') ||
+      searchParams.get('billType') ||
+      searchParams.get('orderBy') ||
+      searchParams.get('productId') ||
+      searchParams.get('customerId') ||
+      searchParams.get('loomId') ||
+      searchParams.get('sizingId') ||
+      searchParams.get('loomStatus') ||
+      searchParams.get('pendingDays')
+    )
     : false;
 
   const isActive = hasActiveFilters !== undefined ? hasActiveFilters : hasActiveParam;
@@ -60,13 +60,12 @@ function ListFilterBarInner({
               onClick={() => setIsOpen((prev) => !prev)}
               aria-expanded={isOpen}
               aria-label="Toggle filters and actions"
-              className={`relative flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 cursor-pointer h-10 w-10 ${
-                isOpen
+              className={`relative flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 cursor-pointer h-10 w-10 ${isOpen
                   ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                   : isActive
-                  ? 'bg-blue-50 text-blue-600 border-blue-300 ring-2 ring-blue-100'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-              }`}
+                    ? 'bg-blue-50 text-blue-600 border-blue-300 ring-2 ring-blue-100'
+                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                }`}
             >
               {isOpen ? (
                 <XMarkIcon className="w-5 h-5" />
@@ -141,4 +140,3 @@ export default function ListFilterBar(props: ListFilterBarProps) {
     </Suspense>
   );
 }
-

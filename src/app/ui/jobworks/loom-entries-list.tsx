@@ -200,7 +200,7 @@ export default function LoomEntriesList({ entries, loom }: { entries: any[], loo
 
                                     <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-indigo-600 text-base">
                                         {entry.isWarpSummary ? (
-                                            <Link className="cursor-pointer text-indigo-600 font-bold hover:underline" href={`/admin/warp/${entry.sizingId}/${entry.LoomId}/summary`}>
+                                            <Link className="cursor-pointer text-indigo-600 font-bold hover:underline" href={`/admin/warp/${entry.sizingId || 0}/${entry.LoomId || 0}/summary`}>
                                                 Edit (Warp Summary)
                                             </Link>
                                         ) : (

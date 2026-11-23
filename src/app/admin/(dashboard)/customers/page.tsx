@@ -16,8 +16,9 @@ export default async function Page(props: {
     startDate?: string;
     endDate?: string;
     billType?: string;
-    orderBy?: string;
     print?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
@@ -25,14 +26,15 @@ export default async function Page(props: {
   const startDate = searchParams?.startDate || '';
   const endDate = searchParams?.endDate || '';
   const billType = searchParams?.billType || '';
-  const orderBy = searchParams?.orderBy || '';
+  const sortBy = searchParams?.sortBy || 'name';
+  const sortOrder = searchParams?.sortOrder || 'asc';
   const currentPage = Number(searchParams?.page) || 1;
   const printMode = searchParams?.print === 'true';
 
   const totalCustomers = await fetchCustomerCount(query);
   const totalPages = Math.ceil(Number(totalCustomers) / pageLimit); //node query
   const totalPending = await fetchTotalPending(query, startDate, endDate);
-  const customers = await fetchCustomers("", 1, "", "", "", null);
+  const customers = await fetchCustomers("", 1, "", "", null, "", "");
 
   return (
     <div className="w-full">
@@ -83,14 +85,14 @@ export default async function Page(props: {
           <>
             <LumpSumPaymentModal customers={customers} buttonLabel="Lump-Sum Pay" />
             <div className="no-print">
-              <PrintCustomers query={query} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} />
+              <PrintCustomers query={query} startDate={startDate} endDate={endDate} billType={billType} sortBy={sortBy} sortOrder={sortOrder} />
             </div>
             <CreateCustomer />
           </>
         }
       />
       {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
-      <Table query={query} currentPage={currentPage} startDate={startDate} endDate={endDate} billType={billType} orderBy={orderBy} limit={printMode ? null : pageLimit} />
+      <Table query={query} currentPage={currentPage} startDate={startDate} endDate={endDate} billType={billType} limit={printMode ? null : pageLimit} sortBy={sortBy} sortOrder={sortOrder} />
       {/* </Suspense> */}
       {!printMode && (
         <div className="mt-5 flex w-full justify-center no-print">

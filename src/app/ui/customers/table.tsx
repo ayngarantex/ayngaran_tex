@@ -1,6 +1,7 @@
 import { UpdateCustomer, DeleteCustomer, CustomerLeader, UpdateCustomerProduct } from '@/app/ui/customers/buttons';
 import { formatCurrency } from '@/app/lib/utils';
 import { fetchCustomers } from '@/app/api/node/customers';
+import SortableHeader from '@/app/ui/products/sortable-header';
 
 export default async function CustomerTable({
   query,
@@ -8,18 +9,20 @@ export default async function CustomerTable({
   startDate,
   endDate,
   billType,
-  orderBy,
-  limit
+  limit,
+  sortBy,
+  sortOrder,
 }: {
   query: string;
   currentPage: number;
   startDate: string;
   endDate: string;
   billType: string;
-  orderBy: string;
   limit?: number | null;
+  sortBy?: string;
+  sortOrder?: string;
 }) {
-  const customers = await fetchCustomers(query, currentPage, orderBy, startDate, endDate, limit);
+  const customers = await fetchCustomers(query, currentPage, startDate, endDate, limit, sortBy, sortOrder);
 
   return (
     <div className="mt-6 flow-root">
@@ -29,22 +32,25 @@ export default async function CustomerTable({
             <thead className="rounded-lg text-left text-xs sm:text-sm font-bold bg-slate-100 text-slate-900 uppercase tracking-wider">
               <tr>
                 <th scope="col" className="px-4 py-3.5 font-bold sm:pl-6">
-                  Customer Name
+                  <SortableHeader field="name" label="Customer Name" />
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
                   GST Number
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
-                  State
+                  <SortableHeader field="state" label="State" />
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
                   Mobile
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
-                  Agent
+                  <SortableHeader field="agent" label="Agent" />
                 </th>
-                <th scope="col" className="px-4 py-3.5 font-bold">
-                  Pending
+                <th scope="col" className="px-4 py-3.5 font-bo flex items-center gap-1ld">
+                  <SortableHeader field="pending" label="Pending" />
+                  <span className='pl-2'>
+                    <SortableHeader field="days" label="Days" />
+                  </span>
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
                   Address

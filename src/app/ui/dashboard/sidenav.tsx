@@ -33,6 +33,8 @@ export default function SideNav() {
             width={40}
             height={40}
             className="w-10 h-10 object-contain rounded-md"
+            loading="eager"
+            priority
             unoptimized
           />
           <span className="text-lg font-bold tracking-wide text-white">Ayngaran Tex</span>
@@ -61,6 +63,7 @@ export default function SideNav() {
                   width={36}
                   height={36}
                   className="w-9 h-9 object-contain"
+                  loading="eager"
                   unoptimized
                 />
                 <span className="text-base font-bold text-white">Ayngaran Tex</span>
@@ -102,6 +105,8 @@ export default function SideNav() {
             width={96}
             height={56}
             className="w-24 h-14 object-contain mb-1"
+            loading="eager"
+            priority
             unoptimized
           />
           <span className="text-xl font-extrabold text-white tracking-wide">Ayngaran Tex</span>

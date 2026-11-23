@@ -209,7 +209,6 @@ export const getInvoicesTotal = async (
     startDate: string | null,
     endDate: string | null,
     billType: string | null,
-    orderBy: string | null,
     productId: number | null = null,
     customerId: number | null = null
 ) => {
