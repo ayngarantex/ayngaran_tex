@@ -16,7 +16,7 @@ export default async function Page(props: {
     const loomId = searchParams?.loomId || '';
     const startDate = searchParams?.startDate || '2026-09-27';
 
-    const looms = await fetchLooms('', 0);
+    const looms = await fetchLooms('loom', 0);
     const records = await fetchLoomWagesConsolidated(query, loomId, startDate);
 
     return (

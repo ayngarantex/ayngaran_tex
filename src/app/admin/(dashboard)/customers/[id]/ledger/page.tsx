@@ -25,7 +25,7 @@ export default async function Page(props:
     // const cusNew = await fetchCustomerById(CustomerId);
     const invoices = await fetchCustomerInvoices(CustomerId, startDate, endDate, billType);
     const paymentDetails = await fetchCustomerPayments(CustomerId, startDate, endDate, billType);
-    const customers = await fetchCustomers('', 0, "", "", "");
+    const customers = await fetchCustomers('', 0, "", "", null);
 
     const grouped: Record<string, { newDate: string; Date: string; BillType: string; InvoiceNumber: (string | number)[]; Type: string, TotalPaid: number }> = {};
 

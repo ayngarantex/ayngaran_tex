@@ -82,8 +82,20 @@ export default function LoomWagesTable({
 
     const totalDhotiesCount = filteredRecords.reduce((sum, r) => sum + r.TotalCount, 0);
     const totalCalculatedWagesSum = filteredRecords.reduce((sum, r) => sum + r.TotalCalculatedWages, 0);
-    const totalPaymentsSum = filteredRecords.reduce((sum, r) => sum + r.TotalPaidAmount, 0);
-    const totalBalanceDue = filteredRecords.reduce((sum, r) => sum + r.BalanceDue, 0);
+    const totalOpeningBalanceSum = filteredRecords.reduce((sum, r) => sum + (r.OpeningBalance || 0), 0);
+
+    console.log("filteredRecords", filteredRecords)
+
+    // Total cash actually disbursed: Cash wage payments + Advance given (excluding internal Advance deductions)
+    const totalPaymentsSum = filteredRecords.reduce((sum, r) => sum + r.CashPaidAmount + (r.AdvancePaidAmount || 0), 0);
+
+    // Total Net Balance Due = (Total Wages + Opening Balance) - Total Cash Disbursed
+    // Takes all rows into account (including rows where amount paid > wages)
+    const onlyBalanceDue = Number((filteredRecords.reduce((sum, r) => sum + r.BalanceDue, 0)).toFixed(2));
+
+    const totalPaidAdvance = filteredRecords.reduce((sum, r) => sum + (r.AdvancePaidAmount || 0), 0);
+    const totalReturnAdvance = filteredRecords.reduce((sum, r) => sum + (r.AdvanceDeductedAmount || 0), 0);
+    const totalAdvancePendingSum = Number((totalPaidAdvance - totalReturnAdvance).toFixed(2));
 
     const toggleRowExpand = (rowKey: string, defaultTab: 'dcs' | 'payments' = 'dcs') => {
         if (expandedRowKey === rowKey && activeTab[rowKey] === defaultTab) {
@@ -101,7 +113,8 @@ export default function LoomWagesTable({
                 totalDhotiesCount={totalDhotiesCount}
                 totalCalculatedWagesSum={totalCalculatedWagesSum}
                 totalPaymentsSum={totalPaymentsSum}
-                totalBalanceDue={totalBalanceDue}
+                totalBalanceDue={onlyBalanceDue}
+                totalAdvancePendingSum={totalAdvancePendingSum}
             />
 
             {/* Filter Toolbar & Loom Default Wage Config */}

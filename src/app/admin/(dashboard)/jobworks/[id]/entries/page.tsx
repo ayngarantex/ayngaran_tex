@@ -9,7 +9,7 @@ export default async function Page(props: {
     const params = await props.params;
     const Id = parseInt(params.id);
     const entry = await fetchEntryById(Id);
-    const looms = await fetchLooms("", 0);
+    const looms = await fetchLooms("loom", 0);
 
     return (
         <main className="w-full">

@@ -7,6 +7,7 @@ import { createLoom } from '@/app/api/node/looms';
 
 export default function Form() {
   const [loomName, setLoomName] = useState("");
+  const [loomType, setLoomType] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
   const [count, setCount] = useState("");
@@ -17,6 +18,7 @@ export default function Form() {
   const handleSubmit = async () => {
     const loomData = {
       LoomName: loomName,
+      LoomType: loomType,
       ContactNumber: contactNumber,
       Address: address,
       Count: count,
@@ -37,7 +39,7 @@ export default function Form() {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
           <div>
             <label htmlFor="name" className="mb-2 block text-sm font-medium">
-              Loom Name
+              Name
             </label>
             <div className="relative mt-2 rounded-md">
               <input
@@ -51,6 +53,28 @@ export default function Form() {
                 placeholder="Loom name"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
               />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="name" className="mb-2 block text-sm font-medium">
+              Type
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <select
+                id="customer"
+                name="customerId"
+                onChange={(e) => {
+                  setLoomType(e.target.value)
+                }}
+                className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500 bg-blue-100"
+                value={loomType}
+              >
+                <option value="" disabled>Select Type</option>
+                <option key='Loom' value='Loom'>Loom</option>
+                <option key="Folding" value="Folding">Folding</option>
+                <option key="Babbin" value="Babbin">Babbin</option>
+              </select>
             </div>
           </div>
 
@@ -93,24 +117,6 @@ export default function Form() {
           </div>
 
           <div>
-            <label htmlFor="wageRate" className="mb-2 block text-sm font-medium text-slate-800 font-bold">
-              Wage Rate per Dhoti (₹)
-            </label>
-            <div className="relative mt-2 rounded-md">
-              <input
-                id="wageRate"
-                name="wageRate"
-                type="number"
-                step="0.01"
-                value={wageRate}
-                onChange={(e) => setWageRate(e.target.value)}
-                placeholder="e.g. 25.00"
-                className="peer block w-full rounded-md border border-indigo-200 py-2 pl-4 text-sm font-bold text-indigo-900 outline-2 placeholder:text-gray-400 bg-blue-100 focus:bg-white"
-              />
-            </div>
-          </div>
-
-          <div>
             <label htmlFor="openingBalance" className="mb-2 block text-sm font-medium text-amber-800 font-bold">
               Opening Balance before 2026-09-27 (₹)
             </label>
@@ -128,7 +134,24 @@ export default function Form() {
             </div>
           </div>
 
-          
+          <div>
+            <label htmlFor="wageRate" className="mb-2 block text-sm font-medium text-slate-800 font-bold">
+              Wage Rate per Dhoti (₹)
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <input
+                id="wageRate"
+                name="wageRate"
+                type="number"
+                step="0.01"
+                value={wageRate}
+                onChange={(e) => setWageRate(e.target.value)}
+                placeholder="e.g. 25.00"
+                className="peer block w-full rounded-md border border-indigo-200 py-2 pl-4 text-sm font-bold text-indigo-900 outline-2 placeholder:text-gray-400 bg-blue-100 focus:bg-white"
+              />
+            </div>
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <label htmlFor="dhotiMeter" className="block text-sm font-medium text-emerald-800 font-bold">

@@ -9,10 +9,11 @@ export const fetchSizing = async (
     startDate: string = '',
     endDate: string = '',
     billType: string = '',
-    orderBy: string = ''
+    sortBy: string = '',
+    sortOrder: string = ''
 ) => {
     try {
-        const rows = await getSizings(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, orderBy || null);
+        const rows = await getSizings(query || null, currentPage || 1, pageLimit, startDate || null, endDate || null, billType || null, sortBy || null, sortOrder || null);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchSizing Error:", err);
@@ -41,10 +42,9 @@ export const fetchSizingTotal = async (
     startDate: string,
     endDate: string,
     billType: string,
-    orderBy: string
 ) => {
     try {
-        const totals = await getSizingTotal(query || null, startDate || null, endDate || null, billType || null, orderBy || null);
+        const totals = await getSizingTotal(query || null, startDate || null, endDate || null, billType || null);
         return JSON.parse(JSON.stringify(totals));
     } catch (err) {
         console.error("fetchSizingTotal Error:", err);

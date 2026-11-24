@@ -1,7 +1,7 @@
 import * as repo from '../repositories/customerRepositories';
 
-export const getCustomers = async (search: any, page: any, limit: any, orderBy: any, startDate: any, endDate: any) => {
-    return await repo.getCustomers(search, page, limit, orderBy, startDate, endDate);
+export const getCustomers = async (search: any, page: any, limit: any, orderBy: any, startDate: any, endDate: any, sortOrder?: any) => {
+    return await repo.getCustomers(search, page, limit, startDate, endDate, orderBy, sortOrder ?? null);
 };
 export const customerPendingPayment = async (search: any, startDate: any, endDate: any) => {
     return await repo.customerPendingPayment(search, startDate, endDate);

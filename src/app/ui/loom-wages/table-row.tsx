@@ -80,20 +80,47 @@ export default function TableRow({
 
                 {/* Total Paid Amount */}
                 <td className="px-3 py-4 text-right font-extrabold text-emerald-700 whitespace-nowrap">
-                    ₹ {record.TotalPaidAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <div>₹ {record.TotalPaidAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                    {(record.AdvancePaidAmount > 0 || record.AdvanceDeductedAmount > 0) && (
+                        <div className="text-[11px] font-semibold mt-0.5 space-x-1">
+                            {record.paidInAmount > 0 && (
+                                <span className="text-slate-600">Cash: ₹{record.paidInAmount.toFixed(2)}</span>
+                            )}
+                            {record.AdvanceDeductedAmount > 0 && (
+                                <span className="text-purple-700 font-bold">
+                                    {`+ Adv Cut: ₹${record.AdvanceDeductedAmount.toFixed(2)}`}
+                                </span>
+                            )}
+                            {record.AdvancePaidAmount > 0 && (
+                                <span className="text-amber-700 font-bold">
+                                    {`(Adv Paid: ₹${record.AdvancePaidAmount.toFixed(2)})`}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </td>
 
                 {/* Balance Due */}
                 <td className="px-3 py-4 text-right font-extrabold whitespace-nowrap">
-                    {record.BalanceDue > 0 ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-xs">
-                            ₹ {record.BalanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </span>
-                    ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
-                            Paid in Full
-                        </span>
-                    )}
+                    <div className="inline-flex flex-col items-end gap-1">
+                        {record.BalanceDue > 0.01 ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-xs">
+                                ₹ {record.BalanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                                Paid In Full
+                            </span>
+                        )}
+
+                        {/* Only show advance/excess in this row if amount paid in THIS row was greater than wages */}
+                        {record.BalanceDue < -0.01 && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-red-700 border border-red-200 text-[11px] font-bold">
+                                <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                                Adv: - ₹ {Math.abs(record.BalanceDue).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </span>
+                        )}
+                    </div>
                 </td>
 
                 {/* Details & History Toggles */}
@@ -101,11 +128,10 @@ export default function TableRow({
                     <div className="inline-flex items-center gap-1.5">
                         <button
                             onClick={() => onToggleExpand('dcs')}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1 cursor-pointer ${
-                                isExpanded && currentTab === 'dcs'
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
-                            }`}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1 cursor-pointer ${isExpanded && currentTab === 'dcs'
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                                }`}
                         >
                             <DocumentDuplicateIcon className="h-3.5 w-3.5" />
                             DCs ({record.TotalDcsCount})
@@ -113,11 +139,10 @@ export default function TableRow({
 
                         <button
                             onClick={() => onToggleExpand('payments')}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1 cursor-pointer ${
-                                isExpanded && currentTab === 'payments'
-                                    ? 'bg-emerald-600 text-white border-emerald-600'
-                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                            }`}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1 cursor-pointer ${isExpanded && currentTab === 'payments'
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                }`}
                         >
                             <CurrencyRupeeIcon className="h-3.5 w-3.5" />
                             {record.Payments.length} Pay

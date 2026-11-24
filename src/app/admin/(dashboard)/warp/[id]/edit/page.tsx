@@ -5,7 +5,7 @@ import { fetchLooms } from '@/app/api/node/looms';
 export default async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const Id = params.id
-    const looms = await fetchLooms("", 0);
+    const looms = await fetchLooms("loom", 0);
     const warpDetails = await fetchWarpById(Id);
 
     return (

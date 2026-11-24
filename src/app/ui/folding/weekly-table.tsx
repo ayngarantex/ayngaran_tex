@@ -77,8 +77,6 @@ export default function WeeklyFoldingTable({
     const [selectedLoomId, setSelectedLoomId] = useState(searchParams.get('loomId') || '');
     const [startDateFilter, setStartDateFilter] = useState(searchParams.get('startDate') || '2026-09-27');
 
-    console.log("records", initialRecords)
-
     useEffect(() => {
         setRecords(initialRecords);
     }, [initialRecords]);

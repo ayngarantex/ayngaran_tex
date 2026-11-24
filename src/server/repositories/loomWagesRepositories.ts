@@ -304,6 +304,47 @@ export const getLoomWagesConsolidated = async (
         }
     }
 
+    // Calculate total advance given and total advance deducted per LoomId
+    const loomAdvanceGivenMap: Record<number, number> = {};
+    const loomAdvanceDeductedMap: Record<number, number> = {};
+
+    for (const p of payments) {
+        const lid = p.LoomId;
+        const pt = (p.PaymentType || '').toLowerCase();
+        const note = (p.Note || '').toLowerCase();
+        const amt = parseFloat(p.Amount) || 0;
+
+        const isDeduction = pt.includes('deduction') ||
+            pt.includes('adjustment') ||
+            note.includes('advance deduct') ||
+            note.includes('adjusted from advance') ||
+            note.includes('advance adjustment');
+
+        const isGiven = !isDeduction && (
+            pt === 'advance payment' ||
+            pt === 'advance given' ||
+            (pt.includes('advance') && (pt.includes('payment') || pt.includes('given'))) ||
+            note.includes('advance given') ||
+            note.includes('advance payment') ||
+            note.includes('as advance')
+        );
+
+        if (isDeduction) {
+            loomAdvanceDeductedMap[lid] = (loomAdvanceDeductedMap[lid] || 0) + amt;
+        } else if (isGiven) {
+            loomAdvanceGivenMap[lid] = (loomAdvanceGivenMap[lid] || 0) + amt;
+        }
+    }
+
+    const loomPendingAdvanceMap: Record<number, number> = {};
+    for (const lidStr of Object.keys(loomOpeningBalanceMap)) {
+        const lid = Number(lidStr);
+        const openingAdv = loomOpeningBalanceMap[lid] || 0;
+        const advGiven = loomAdvanceGivenMap[lid] || 0;
+        const advCut = loomAdvanceDeductedMap[lid] || 0;
+        loomPendingAdvanceMap[lid] = Number(Math.max(0, openingAdv + advGiven - advCut).toFixed(2));
+    }
+
     // Format consolidated list
     // Find earliest week for each LoomId in weeklyGroupMap to add OpeningBalance only once
     const loomEarliestWeekMap: Record<number, string> = {};
@@ -316,15 +357,61 @@ export const getLoomWagesConsolidated = async (
     const consolidatedList = Object.values(weeklyGroupMap).map(group => {
         const weekKey = `${group.LoomId}_${group.WeekStartDate}`;
         const itemPayments = weeklyPaymentsMap[weekKey] || [];
-        const totalPaidAmount = itemPayments.reduce((sum, p) => sum + p.Amount, 0);
         const totalCalculatedWages = Number(group.TotalCalculatedWages.toFixed(2));
+
+        const advanceDeductedAmount = itemPayments
+            .filter(p => {
+                const pt = (p.PaymentType || '').toLowerCase();
+                const note = (p.Note || '').toLowerCase();
+                return pt.includes('deduction') ||
+                    pt.includes('adjustment') ||
+                    note.includes('advance deduct') ||
+                    note.includes('adjusted from advance') ||
+                    note.includes('advance adjustment');
+            })
+            .reduce((sum, p) => sum + p.Amount, 0);
+
+        const advancePaidAmount = itemPayments
+            .filter(p => {
+                const pt = (p.PaymentType || '').toLowerCase();
+                const note = (p.Note || '').toLowerCase();
+                if (pt.includes('deduction') || pt.includes('adjustment') || note.includes('deduct') || note.includes('adjust')) return false;
+                return pt === 'advance payment' ||
+                    pt === 'advance given' ||
+                    (pt.includes('advance') && (pt.includes('payment') || pt.includes('given'))) ||
+                    note.includes('advance given') ||
+                    note.includes('advance payment') ||
+                    note.includes('as advance');
+            })
+            .reduce((sum, p) => sum + p.Amount, 0);
+
+        const rawTotalPaid = itemPayments.reduce((sum, p) => sum + ((p.PaymentType != 'Advance Payment') ? p.Amount : 0), 0);
+        const cashPaidAmount = Number(Math.max(0, rawTotalPaid - advancePaidAmount).toFixed(2));
+
+        // Effective Paid Amount:
+        // When Advance Payment is given (e.g. ₹12,000) and in the same week wages are deducted from that advance (e.g. ₹10,355),
+        // the deduction is NOT new cash; it is recovered from the advance given.
+        // Effective Paid Amount for the week = Cash Paid + max(Advance Paid, Advance Deducted)
+        const effectivePaidAmount = Number((cashPaidAmount + Math.max(advancePaidAmount)).toFixed(2));
 
         // Add opening balance ONLY ONCE per loom (applied to its earliest week row)
         const isEarliestWeekForLoom = loomEarliestWeekMap[group.LoomId] === group.WeekStartDate;
         const loomOpeningBalance = Number((loomOpeningBalanceMap[group.LoomId] || 0).toFixed(2));
         const openingBalanceToAdd = isEarliestWeekForLoom ? loomOpeningBalance : 0;
 
-        const balanceDue = Number((openingBalanceToAdd + totalCalculatedWages - totalPaidAmount).toFixed(2));
+        // Balance Due:
+        // If advance was given in this week (advancePaidAmount > 0):
+        // Balance is calculated against actual cash paid (Wages - (cashPaid + advancePaid)).
+        // E.g. Wages 10,355 - Paid 12,000 = -1,645 (Adv pending).
+        // If no advance was given in this week (advancePaidAmount == 0):
+        // Balance is calculated against wages settled (Wages - (cashPaid + advanceDeducted)).
+        const actualCashDisbursed = cashPaidAmount + advancePaidAmount;
+        const wageSettledAmount = cashPaidAmount + advanceDeductedAmount;
+
+
+        const paidInAmount = Number(Math.max(0, itemPayments.reduce((sum, p) => sum + ((p.PaymentType != 'Advance Payment' && p.PaymentType != 'Advance Deduction') ? p.Amount : 0), 0)).toFixed(2));
+
+        const balanceDue = Number((openingBalanceToAdd + totalCalculatedWages - paidInAmount - advanceDeductedAmount).toFixed(2));
 
         const dcsList = Object.values(group.DcMap).map(dc => ({
             ...dc,
@@ -342,7 +429,12 @@ export const getLoomWagesConsolidated = async (
             TotalCount: group.TotalCount,
             TotalWeight: Number(group.TotalWeight.toFixed(2)),
             TotalCalculatedWages: totalCalculatedWages,
-            TotalPaidAmount: Number(totalPaidAmount.toFixed(2)),
+            paidInAmount: paidInAmount,
+            TotalPaidAmount: effectivePaidAmount,
+            CashPaidAmount: cashPaidAmount,
+            AdvancePaidAmount: Number(advancePaidAmount.toFixed(2)),
+            AdvanceDeductedAmount: Number(advanceDeductedAmount.toFixed(2)),
+            LoomAdvancePending: loomPendingAdvanceMap[group.LoomId] || 0,
             BalanceDue: balanceDue,
             Dcs: dcsList,
             TotalDcsCount: dcsList.length,

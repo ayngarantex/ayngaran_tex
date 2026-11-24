@@ -7,9 +7,10 @@ export const getSizings = async (
     startDate: string | null,
     endDate: string | null,
     billType: string | null,
-    orderBy: string | null
+    orderBy: string | null = null,
+    sortOrder: string | null = null
 ) => {
-    return await repo.getSizings(search, page, limit, startDate, endDate, billType, orderBy);
+    return await repo.getSizings(search, page, limit, startDate, endDate, billType, orderBy, sortOrder);
 };
 
 export const getSizingCount = async (
@@ -25,10 +26,9 @@ export const getSizingTotal = async (
     search: string | null,
     startDate: string | null,
     endDate: string | null,
-    billType: string | null,
-    orderBy: string | null
+    billType: string | null
 ) => {
-    return await repo.getSizingTotal(search, startDate, endDate, billType, orderBy);
+    return await repo.getSizingTotal(search, startDate, endDate, billType);
 };
 
 export const getSizingById = async (id: number) => {

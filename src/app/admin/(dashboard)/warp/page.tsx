@@ -34,7 +34,7 @@ export default async function Page(props: {
   const view = searchParams?.view || 'summary';
 
   const sizingList = await fetchSizing("", 0, "", "", "", "");
-  const looms = await fetchLooms("", 0);
+  const looms = await fetchLooms("loom", 0);
 
   let warps: any[] = [];
   let summary: any[] = [];

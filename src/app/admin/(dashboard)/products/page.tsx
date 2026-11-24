@@ -12,11 +12,15 @@ export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
     page?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
+  const sortBy = searchParams?.sortBy || '';
+  const sortOrder = searchParams?.sortOrder || '';
 
   const totalProducts = await fetchProductCount(query); //node query
   const totalPages = Math.ceil(Number(totalProducts) / pageLimit); //node query
@@ -92,7 +96,7 @@ export default async function Page(props: {
         }
       />
       {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}> */}
-      <Table query={query} currentPage={currentPage} />
+      <Table query={query} currentPage={currentPage} sortBy={sortBy} sortOrder={sortOrder} />
       {/* </Suspense> */}
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />

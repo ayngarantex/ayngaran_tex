@@ -13,10 +13,11 @@ export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
     page?: string;
-    startDate: string,
-    endDate: string,
-    billType: string,
-    orderBy: string
+    startDate?: string,
+    endDate?: string,
+    billType?: string,
+    sortBy?: string,
+    sortOrder?: string
   }>;
 }) {
   const searchParams = await props.searchParams;
@@ -24,12 +25,13 @@ export default async function Page(props: {
   const startDate = searchParams?.startDate || '';
   const endDate = searchParams?.endDate || '';
   const billType = searchParams?.billType || '';
-  const orderBy = searchParams?.orderBy || '';
   const currentPage = Number(searchParams?.page) || 1;
+  const sortBy = searchParams?.sortBy || 'date';
+  const sortOrder = searchParams?.sortOrder || 'desc';
   const data = await fetchSizingPages(query, startDate, endDate, billType);
   const totalPages = data.totalPages || 0
-  const sizing = await fetchSizing(query, currentPage, startDate, endDate, billType, orderBy);
-  const sizngTotal: any = await fetchSizingTotal(query, startDate, endDate, billType, orderBy);
+  const sizing = await fetchSizing(query, currentPage, startDate, endDate, billType, sortBy, sortOrder);
+  const sizngTotal: any = await fetchSizingTotal(query, startDate, endDate, billType);
 
   return (
     <div className="w-full">
@@ -40,7 +42,7 @@ export default async function Page(props: {
       <ListFilterBar
         className="mt-4 md:mt-8"
         search={<Search placeholder="Search sizing..." />}
-        filters={<Financialyear orderBy={true} />}
+        filters={<Financialyear />}
         actions={
           <>
             <Link

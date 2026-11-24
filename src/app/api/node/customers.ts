@@ -5,13 +5,14 @@ import { getCustomers, customerPendingPayment, getCustomerCount, getCustomerById
 export const fetchCustomers = async (
     query: string,
     currentPage: number,
-    orderBy: string,
     startDate: string,
     endDate: string,
-    limit?: number | null
+    limit?: number | null,
+    sortBy?: string,
+    sortOrder?: string,
 ) => {
     try {
-        const rows = await getCustomers(query || "", currentPage || 1, limit === undefined ? null : limit, orderBy || null, startDate || null, endDate || null);
+        const rows = await getCustomers(query || "", currentPage || 1, limit === undefined ? null : limit, startDate || null, endDate || null, sortBy || null, sortOrder || null);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchCustomers Error:", err);

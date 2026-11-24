@@ -142,13 +142,6 @@ export const createFoldingEntry = async (data: {
     Items: Record<string, number>;
     Notes?: string;
 }) => {
-    try {
-        const [cols]: any = await db.query("SHOW COLUMNS FROM folding_entries LIKE 'FoldedStatus'");
-        if (cols.length === 0) {
-            await db.query("ALTER TABLE folding_entries ADD COLUMN FoldedStatus VARCHAR(20) NOT NULL DEFAULT 'unfolded' AFTER Type");
-        }
-    } catch (e) { }
-
     const { Date, DcNumber, LoomId, Type, Folder, FoldedStatus, Items, Notes } = data;
     const itemsJson = typeof Items === 'string' ? Items : JSON.stringify(Items || {});
 
@@ -184,12 +177,6 @@ export const updateFoldingEntry = async (
         Notes?: string;
     }
 ) => {
-    try {
-        const [cols]: any = await db.query("SHOW COLUMNS FROM folding_entries LIKE 'FoldedStatus'");
-        if (cols.length === 0) {
-            await db.query("ALTER TABLE folding_entries ADD COLUMN FoldedStatus VARCHAR(20) NOT NULL DEFAULT 'unfolded' AFTER Type");
-        }
-    } catch (e) { }
 
     const { Date, DcNumber, LoomId, Type, Folder, FoldedStatus, Items, Notes } = data;
     const itemsJson = typeof Items === 'string' ? Items : JSON.stringify(Items || {});
@@ -539,13 +526,6 @@ export const updateFoldingLoomWageRate = async (loomId: number, rate: number) =>
 };
 
 export const updateFoldingLoomOpeningBalance = async (loomId: number, balance: number) => {
-    try {
-        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
-        if (cols.length === 0) {
-            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
-        }
-    } catch (e) { }
-
     await db.query(
         `UPDATE loom_details SET OpeningBalance = ? WHERE LoomId = ?`,
         [Number(balance) || 0, Number(loomId)]

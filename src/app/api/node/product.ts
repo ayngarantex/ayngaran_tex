@@ -5,10 +5,12 @@ import { getProducts, getProductCount, getProductById, getProductTotals, createP
 
 export const fetchProducts = async (
     query: string,
-    currentPage: number
+    currentPage: number,
+    sortBy?: string,
+    sortOrder?: string
 ) => {
     try {
-        const rows = await getProducts(query || null, currentPage || 1, pageLimit);
+        const rows = await getProducts(query || null, currentPage || 1, pageLimit, sortBy || null, sortOrder || null);
         return JSON.parse(JSON.stringify(rows));
     } catch (err) {
         console.error("fetchProducts Error:", err);

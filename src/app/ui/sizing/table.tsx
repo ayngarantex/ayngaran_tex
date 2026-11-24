@@ -1,9 +1,10 @@
 import { UpdateSizing, DeleteSizing } from '@/app/ui/sizing/buttons';
 import { formatCurrency, formatDateNew } from '@/app/lib/utils';
 import InvoiceStatus from './status';
+import SortableHeader from '@/app/ui/products/sortable-header';
 
 export default async function InvoicesTable({
-  sizing
+  sizing,
 }: {
   sizing: any;
 }) {
@@ -18,10 +19,10 @@ export default async function InvoicesTable({
                   Bill Number
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
-                  Date
+                  <SortableHeader field="date" label="Date" />
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
-                  Supplier
+                  <SortableHeader field="supplier" label="Supplier" />
                 </th>
                 <th scope="col" className="px-4 py-3.5 font-bold">
                   Warp Design
@@ -33,10 +34,10 @@ export default async function InvoicesTable({
                   Paid
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
-                  Balance
+                  <SortableHeader field="balance" label="Balance" />
                 </th>
                 <th scope="col" className="px-3 py-3.5 font-bold">
-                  Status
+                  <SortableHeader field="status" label="Status" />
                 </th>
                 <th scope="col" className="relative py-3.5 pl-6 pr-3 text-right font-bold">
                   Actions
@@ -68,8 +69,8 @@ export default async function InvoicesTable({
                     {formatCurrency(siz.ReceivedAmount || 0)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5 font-bold">
-                    <span className={(siz.InvoiceAmount - siz.ReceivedAmount) > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
-                      {formatCurrency((siz.InvoiceAmount || 0) - (siz.ReceivedAmount || 0))}
+                    <span className={(siz.BalanceAmount) > 0 ? 'text-red-600 font-extrabold text-base' : 'text-slate-900'}>
+                      {formatCurrency(siz.BalanceAmount || 0)}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5">
