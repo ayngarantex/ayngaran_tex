@@ -349,7 +349,8 @@ export default function ExpensesContainer() {
                   <div className="flex justify-between items-center gap-4">
                     <label className="text-sm font-semibold text-gray-600 w-full">Prakash hand (Cash)</label>
                     <div className="w-2/3 bg-slate-100 text-slate-800 font-bold border border-slate-200 rounded-lg p-2 text-sm">
-                      {formatCurrency(cashDenomTotal)}
+                      {/* {formatCurrency(cashDenomTotal)} */}
+                      &nbsp;
                     </div>
                   </div>
 

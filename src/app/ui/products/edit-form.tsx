@@ -12,6 +12,7 @@ export default function EditForm({
   product: any;
 }) {
   const [productName, setProductName] = useState("");
+  const [productPrice, setProductPrice] = useState("");
   const [productType, setProductType] = useState("");
   const [hsnCode, setHsnCode] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -26,6 +27,7 @@ export default function EditForm({
   // Pre-fill state from product data
   useEffect(() => {
     setProductName(product?.Name || "");
+    setProductPrice(product?.Price || "");
     setProductType(product?.Type || "");
     setHsnCode(product?.HSNCode || "");
     setImages(product?.Image ? product.Image.split(',').map((img: string) => img.trim()).filter(Boolean) : []);
@@ -73,6 +75,7 @@ export default function EditForm({
     const productData = {
       Id: product.Id,
       Name: productName,
+      Price: productPrice,
       Type: productType,
       HSNCode: hsnCode,
       Image: images.join(','),
@@ -95,7 +98,7 @@ export default function EditForm({
     <form className="max-w-4xl">
       <div className="rounded-lg bg-blue-50 p-6 md:p-8 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
+
           {/* Left Column - Product Specifications */}
           <div className="flex flex-col gap-5">
             <div>
@@ -108,6 +111,21 @@ export default function EditForm({
                 type="text"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
+                placeholder="Enter product name"
+                className="mt-2 block w-full rounded-md border border-gray-300 py-2.5 px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="price" className="block text-sm font-semibold text-gray-700">
+                Product Price <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="price"
+                name="price"
+                type="number"
+                value={productPrice}
+                onChange={(e) => setProductPrice(e.target.value)}
                 placeholder="Enter product name"
                 className="mt-2 block w-full rounded-md border border-gray-300 py-2.5 px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
               />

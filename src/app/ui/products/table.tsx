@@ -106,12 +106,15 @@ export default async function ProductTable({
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3.5 font-bold text-purple-700">
-                    <span>
+                    <div className='flex'>
                       {prod?.AvailableStock ? Number(prod.AvailableStock).toLocaleString() : 0}
                       {prod?.AvailableStock ? (
                         <span className='text-slate-700 pl-2'>({(Number(prod.AvailableStock) / 50).toLocaleString()})</span>
                       ) : null}
-                    </span>
+                      {prod?.AvailableStock > 0 ?
+                        <span className='text-blue-700 pl-2 text-right w-full'>₹ {Number(prod?.AvailableStock * (prod?.Price > 0 ? prod.Price : 76)).toLocaleString()}</span>
+                        : null}
+                    </div>
                   </td>
                   <td className="whitespace-nowrap py-3.5 pl-6 pr-3 text-right">
                     <div className="flex justify-end gap-2 items-center">

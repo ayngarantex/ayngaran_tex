@@ -10,6 +10,7 @@ export default function CreateProductModal() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [productName, setProductName] = useState('');
+  const [productPrice, setProductPrice] = useState('');
   const [productType, setProductType] = useState('');
   const [hsnCode, setHsnCode] = useState('');
   const [tags, setTags] = useState('');
@@ -24,6 +25,7 @@ export default function CreateProductModal() {
   const handleOpen = () => {
     setIsOpen(true);
     setProductName('');
+    setProductPrice('');
     setProductType('');
     setHsnCode('');
     setTags('');
@@ -53,6 +55,7 @@ export default function CreateProductModal() {
     try {
       const productData = {
         Name: productName.trim(),
+        Price: productPrice ? parseFloat(productPrice) : null,
         Type: productType.trim(),
         HSNCode: hsnCode.trim(),
         Image: '',
@@ -94,7 +97,7 @@ export default function CreateProductModal() {
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            
+
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-blue-50/70 rounded-t-2xl">
               <div className="flex items-center gap-3">
@@ -140,6 +143,22 @@ export default function CreateProductModal() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Product Price <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={productPrice}
+                    onChange={(e) => setProductPrice(e.target.value)}
+                    required
+                    placeholder="Enter product price"
+                    className="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Product Type / Material
                   </label>
                   <input
@@ -150,9 +169,6 @@ export default function CreateProductModal() {
                     className="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     HSN Code
@@ -165,7 +181,9 @@ export default function CreateProductModal() {
                     className="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Size / Width Specification
@@ -178,9 +196,6 @@ export default function CreateProductModal() {
                     className="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Composition
@@ -193,7 +208,9 @@ export default function CreateProductModal() {
                     className="w-full border border-slate-300 rounded-xl p-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Tags (Comma separated)
