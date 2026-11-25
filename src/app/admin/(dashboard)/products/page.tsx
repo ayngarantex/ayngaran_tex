@@ -30,6 +30,7 @@ export default async function Page(props: {
   const totalStockSum = totals?.TotalStock || 0;
   const totalSoldSum = totals?.SoldCount || 0;
   const totalAvailableSum = totals?.AvailableStock || 0;
+  const AvailableStockPrice = totals?.AvailableStockPrice || 0;
 
   return (
     <div className="w-full">
@@ -72,6 +73,7 @@ export default async function Page(props: {
                 <span className='text-green-600 text-xl font-semibold ml-2'>({(totalAvailableSum / 50).toLocaleString()} Bundles)</span>
               )}
             </p>
+            <p className='w-full text-sm font-medium text-purple-700 uppercase tracking-wider'>₹{AvailableStockPrice.toLocaleString()}</p>
           </div>
           <div className="p-3 bg-white/85 rounded-lg text-purple-600 shadow-sm flex items-center justify-center">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

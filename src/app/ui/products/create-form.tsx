@@ -8,6 +8,7 @@ import { createProduct } from '@/app/api/node/product';
 
 export default function Form() {
   const [productName, setProductName] = useState("");
+  const [productPrice, setProductPrice] = useState("");
   const [productType, setProductType] = useState("");
   const [hsnCode, setHsnCode] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -54,6 +55,7 @@ export default function Form() {
 
     const productData = {
       Name: productName,
+      Price: productPrice,
       Type: productType,
       HSNCode: hsnCode,
       Image: images.join(','),

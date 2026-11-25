@@ -55,13 +55,6 @@ export const updateSizingWarpWageRate = async (
 
 // Save or Update opening balance before 2026-09-27 for a Loom
 export const updateLoomOpeningBalance = async (loomId: number, balance: number) => {
-    try {
-        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
-        if (cols.length === 0) {
-            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
-        }
-    } catch (e) { }
-
     await db.query(
         `UPDATE loom_details SET OpeningBalance = ? WHERE LoomId = ?`,
         [Number(balance) || 0, Number(loomId)]
@@ -74,19 +67,13 @@ export const getLoomWagesConsolidated = async (
     loomId: any = null,
     startDate: string = '2026-09-27'
 ) => {
-    // Safely check if OpeningBalance column exists in loom_details
-    try {
-        const [cols]: any = await db.query(`SHOW COLUMNS FROM loom_details LIKE 'OpeningBalance'`);
-        if (cols.length === 0) {
-            await db.query(`ALTER TABLE loom_details ADD COLUMN OpeningBalance DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
-        }
-    } catch (e) { }
-
     // Fetch loom default wage rates & opening balances
     const [loomsList]: any = await db.query(`SELECT LoomId, LoomName, COALESCE(WageRate, 0) AS DefaultWageRate, COALESCE(OpeningBalance, 0) AS OpeningBalance FROM loom_details`);
+    const loomNameMap: Record<number, string> = {};
     const loomDefaultWageMap: Record<number, number> = {};
     const loomOpeningBalanceMap: Record<number, number> = {};
     for (const l of loomsList) {
+        loomNameMap[l.LoomId] = l.LoomName;
         loomDefaultWageMap[l.LoomId] = parseFloat(l.DefaultWageRate) || 0;
         loomOpeningBalanceMap[l.LoomId] = parseFloat(l.OpeningBalance) || 0;
     }
@@ -285,13 +272,23 @@ export const getLoomWagesConsolidated = async (
 
     const weeklyPaymentsMap: Record<string, any[]> = {};
     for (const p of payments) {
-        let key = '';
-        if (p.WeekStartDate) {
-            key = `${p.LoomId}_${p.WeekStartDate}`;
+        let pWeekStart = p.WeekStartDate;
+        let pWeekEnd = '';
+        if (pWeekStart) {
+            const range = getWeekRange(pWeekStart);
+            pWeekStart = range.weekStart;
+            pWeekEnd = range.weekEnd;
         } else if (p.DcDate) {
-            const { weekStart } = getWeekRange(p.DcDate);
-            key = `${p.LoomId}_${weekStart}`;
+            const range = getWeekRange(p.DcDate);
+            pWeekStart = range.weekStart;
+            pWeekEnd = range.weekEnd;
+        } else if (p.PaymentDate) {
+            const range = getWeekRange(p.PaymentDate);
+            pWeekStart = range.weekStart;
+            pWeekEnd = range.weekEnd;
         }
+
+        const key = pWeekStart ? `${p.LoomId}_${pWeekStart}` : '';
 
         if (key) {
             if (!weeklyPaymentsMap[key]) {
@@ -301,6 +298,26 @@ export const getLoomWagesConsolidated = async (
                 ...p,
                 Amount: parseFloat(p.Amount) || 0
             });
+
+            // Ensure weeks that have payments/advances (e.g. standalone advance) still appear even if there are 0 DCs
+            const matchesLoomFilter = !loomId || Number(p.LoomId) === Number(loomId);
+            const matchesDateFilter = !startDate || pWeekStart >= startDate || (p.PaymentDate && p.PaymentDate >= startDate);
+            const loomName = loomNameMap[p.LoomId] || `Loom #${p.LoomId}`;
+            const matchesSearch = !search || search.trim() === '' || loomName.toLowerCase().includes(search.trim().toLowerCase());
+
+            if (!weeklyGroupMap[key] && matchesLoomFilter && matchesDateFilter && matchesSearch) {
+                weeklyGroupMap[key] = {
+                    LoomId: p.LoomId,
+                    LoomName: loomName,
+                    DefaultWageRate: loomDefaultWageMap[p.LoomId] || 0,
+                    WeekStartDate: pWeekStart,
+                    WeekEndDate: pWeekEnd,
+                    TotalCount: 0,
+                    TotalWeight: 0,
+                    TotalCalculatedWages: 0,
+                    DcMap: {}
+                };
+            }
         }
     }
 
@@ -465,13 +482,14 @@ export const addLoomWagePayment = async (data: {
 }) => {
 
     const { LoomId, WeekStartDate, Dc, DcDate, SizingId, PaymentDate, Amount, PaymentType, Note } = data;
+    const effectiveWeekStart = WeekStartDate || (PaymentDate ? getWeekRange(PaymentDate).weekStart : null);
     const [result]: any = await db.query(
         `INSERT INTO loom_wages_payments 
          (LoomId, WeekStartDate, Dc, DcDate, SizingId, PaymentDate, Amount, PaymentType, Note)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             Number(LoomId),
-            WeekStartDate || null,
+            effectiveWeekStart,
             Dc || '',
             DcDate || null,
             SizingId ? Number(SizingId) : null,

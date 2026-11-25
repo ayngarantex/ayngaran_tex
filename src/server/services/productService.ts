@@ -12,11 +12,11 @@ export const getProductTotals = async (search: any, productId: any) => {
 export const productById = async (id: any) => {
     return await repo.getProductById(id);
 };
-export const createProduct = async (name: any, type: any, hsncode: any, image: any, tags: any, description: any, details: any, size: any, composition: any, washcare: any) => {
-    return await repo.createProduct(name, type, hsncode, image, tags, description, details, size, composition, washcare);
+export const createProduct = async (name: any, type: any, hsncode: any, image: any, tags: any, description: any, details: any, size: any, composition: any, washcare: any, price: any = 0) => {
+    return await repo.createProduct(name, price, type, hsncode, image, tags, description, details, size, composition, washcare);
 };
-export const updateProduct = async (id: any, name: any, type: any, hsncode: any, image: any, tags: any, description: any, details: any, size: any, composition: any, washcare: any) => {
-    return await repo.updateProduct(id, name, type, hsncode, image, tags, description, details, size, composition, washcare);
+export const updateProduct = async (id: any, name: any, type: any, hsncode: any, image: any, tags: any, description: any, details: any, size: any, composition: any, washcare: any, price: any = 0) => {
+    return await repo.updateProduct(id, name, price, type, hsncode, image, tags, description, details, size, composition, washcare);
 };
 export const deleteProduct = async (id: any) => {
     return await repo.deleteProduct(id);

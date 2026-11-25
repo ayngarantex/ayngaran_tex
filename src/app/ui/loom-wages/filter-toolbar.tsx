@@ -14,6 +14,7 @@ import {
     saveLoomOpeningBalance
 } from '@/app/api/node/loom-wages';
 import LoomLumpSumPaymentModal from './loom-lump-sum-payment-modal';
+import LoomAdvanceModal from './loom-advance-modal';
 
 interface FilterToolbarProps {
     searchQuery: string;
@@ -172,12 +173,19 @@ export default function FilterToolbar({
 
                         <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-2.5">
                             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Actions</span>
-                            <LoomLumpSumPaymentModal
-                                looms={looms}
-                                initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}
-                                initialLoomName={selectedLoom?.LoomName}
-                                onSuccess={onReload}
-                            />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <LoomAdvanceModal
+                                    looms={looms}
+                                    initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}
+                                    onSuccess={onReload}
+                                />
+                                <LoomLumpSumPaymentModal
+                                    looms={looms}
+                                    initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}
+                                    initialLoomName={selectedLoom?.LoomName}
+                                    onSuccess={onReload}
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -237,8 +245,13 @@ export default function FilterToolbar({
                     </div>
                 </div>
 
-                {/* Lump-Sum Payment Trigger */}
+                {/* Lump-Sum Payment & Advance Triggers */}
                 <div className="flex items-center gap-2">
+                    <LoomAdvanceModal
+                        looms={looms}
+                        initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}
+                        onSuccess={onReload}
+                    />
                     <LoomLumpSumPaymentModal
                         looms={looms}
                         initialLoomId={selectedLoom ? selectedLoom.LoomId : undefined}

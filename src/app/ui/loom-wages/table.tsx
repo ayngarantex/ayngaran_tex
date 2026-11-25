@@ -84,8 +84,6 @@ export default function LoomWagesTable({
     const totalCalculatedWagesSum = filteredRecords.reduce((sum, r) => sum + r.TotalCalculatedWages, 0);
     const totalOpeningBalanceSum = filteredRecords.reduce((sum, r) => sum + (r.OpeningBalance || 0), 0);
 
-    console.log("filteredRecords", filteredRecords)
-
     // Total cash actually disbursed: Cash wage payments + Advance given (excluding internal Advance deductions)
     const totalPaymentsSum = filteredRecords.reduce((sum, r) => sum + r.CashPaidAmount + (r.AdvancePaidAmount || 0), 0);
 

@@ -121,19 +121,20 @@ export const getProductById = async (id: any) => {
 
 export const createProduct = async (
     name: string,
-    type: string | null,
-    hsncode: string | null,
-    image: string | null,
-    tags: string | null,
-    description: string | null,
-    details: string | null,
-    size: string | null,
-    composition: string | null,
-    washcare: string | null
+    price: number = 0,
+    type: string | null = null,
+    hsncode: string | null = null,
+    image: string | null = null,
+    tags: string | null = null,
+    description: string | null = null,
+    details: string | null = null,
+    size: string | null = null,
+    composition: string | null = null,
+    washcare: string | null = null
 ) => {
     const [result]: any = await db.query(
-        "INSERT INTO products (Name, Type, HSNCode, Image, Tags, Description, Details, Size, Composition, WashCare) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [name, type, hsncode, image, tags, description, details, size, composition, washcare]
+        "INSERT INTO products (Name, Price, Type, HSNCode, Image, Tags, Description, Details, Size, Composition, WashCare) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [name, price, type, hsncode, image, tags, description, details, size, composition, washcare]
     );
 
     return result;
@@ -142,19 +143,27 @@ export const createProduct = async (
 export const updateProduct = async (
     id: any,
     name: string,
-    type: string | null,
-    hsncode: string | null,
-    image: string | null,
-    tags: string | null,
-    description: string | null,
-    details: string | null,
-    size: string | null,
-    composition: string | null,
-    washcare: string | null
+    price: number = 0,
+    type: string | null = null,
+    hsncode: string | null = null,
+    image: string | null = null,
+    tags: string | null = null,
+    description: string | null = null,
+    details: string | null = null,
+    size: string | null = null,
+    composition: string | null = null,
+    washcare: string | null = null
 ) => {
+    // Safely check if OpeningBalance column exists in loom_details
+    try {
+        const [cols]: any = await db.query(`SHOW COLUMNS FROM products LIKE 'Price'`);
+        if (cols.length === 0) {
+            await db.query(`ALTER TABLE products ADD COLUMN Price DECIMAL(12,2) NOT NULL DEFAULT 0.00`);
+        }
+    } catch (e) { }
     const [result]: any = await db.query(
-        "UPDATE products SET Name=?, Type=?, HSNCode=?, Image=?, Tags=?, Description=?, Details=?, Size=?, Composition=?, WashCare=? WHERE Id=?",
-        [name, type, hsncode, image, tags, description, details, size, composition, washcare, id]
+        "UPDATE products SET Name=?, Price=?, Type=?, HSNCode=?, Image=?, Tags=?, Description=?, Details=?, Size=?, Composition=?, WashCare=? WHERE Id=?",
+        [name, price, type, hsncode, image, tags, description, details, size, composition, washcare, id]
     );
 
     return result;
@@ -175,22 +184,30 @@ export const getProductTotals = async (search: string | null, productId: string 
         SELECT 
             CAST(COALESCE(SUM(TotalStock), 0) AS SIGNED) AS TotalStock,
             CAST(COALESCE(SUM(SoldCount), 0) AS SIGNED) AS SoldCount,
-            CAST(COALESCE(SUM(AvailableStock), 0) AS SIGNED) AS AvailableStock
+            CAST(COALESCE(SUM(AvailableStock), 0) AS SIGNED) AS AvailableStock,
+            CAST(COALESCE(SUM(AvailableStockPrice), 0) AS SIGNED) AS AvailableStockPrice
         FROM (
             SELECT P.Id,
-                   CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) AS TotalStock,
-                   COALESCE((
-                       SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
-                       FROM invoice_details ID
-                       JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
-                       WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
-                   ), 0) AS SoldCount,
-                   CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) - COALESCE((
-                       SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
-                       FROM invoice_details ID
-                       JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
-                       WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
-                   ), 0) AS AvailableStock
+                CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) AS TotalStock,
+                COALESCE((
+                    SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
+                    FROM invoice_details ID
+                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
+                    WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
+                ), 0) AS SoldCount,
+                CAST(COALESCE(SUM(S.Quantity), 0) AS SIGNED) - COALESCE((
+                    SELECT CAST(COALESCE(SUM(ID.Quantity), 0) AS SIGNED)
+                    FROM invoice_details ID
+                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
+                    WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
+                ), 0) AS AvailableStock,
+
+                CAST(COALESCE(SUM((S.Quantity * (CASE WHEN P.Price > 0  THEN P.Price ELSE 76 END))), 0) AS SIGNED) - COALESCE((
+                    SELECT CAST(COALESCE(SUM((ID.Quantity * (CASE WHEN P.Price > 0  THEN P.Price ELSE 76 END))), 0) AS SIGNED)
+                    FROM invoice_details ID
+                    JOIN invoice I ON ID.InvoiceId = I.InvoiceId AND LOWER(I.InvoiceNumber) NOT LIKE '%ref%'
+                    WHERE ID.ItemId = P.Id AND (I.IsCancel IS NULL OR I.IsCancel = 0)
+                ), 0) AS AvailableStockPrice
             FROM products P 
             LEFT JOIN product_stocks S ON P.Id = S.ProductId      
             WHERE (P.HSNCode IS NULL OR P.HSNCode != '5206')

@@ -56,6 +56,7 @@ export const fetchProductById = async (id: string) => {
 export const createProduct = async (productData: any) => {
     const res = await createProductRepo(
         productData.Name,
+        productData.Price || null,
         productData.Type || null,
         productData.HSNCode || null,
         productData.Image || null,
@@ -73,6 +74,7 @@ export const updateProduct = async (productData: any) => {
     const res = await updateProductRepo(
         productData.Id,
         productData.Name,
+        productData.Price || null,
         productData.Type || null,
         productData.HSNCode || null,
         productData.Image || null,

@@ -293,6 +293,6 @@ export const Folders = () => {
 
 export const FoldingItems = () => {
   return [
-    'White', 'L Kavi', 'D kavi', 'White Cross', 'Cream', 'Black Cross', 'Ash', 'Black', 'VK Black', 'VK White', 'VK BC', 'VK WC', 'VK Kavi', '2/40s BC'
+    'White', 'L Kavi', 'D kavi', 'White Cross', 'Cream', 'Black Cross', 'Ash', 'Black', 'VK Black', 'VK White', 'VK BC', 'VK WC', 'VK Kavi', '2/40s VK BC', '2/40s Black'
   ]
 }
